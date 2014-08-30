@@ -3,7 +3,8 @@
 
 #include <cstdlib>
 
-class Dice {
+class Dice
+{
 public:
 	Dice() {};
 	int roll(int, int);

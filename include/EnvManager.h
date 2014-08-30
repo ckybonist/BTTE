@@ -52,10 +52,11 @@ private:
     ~EnvManager() {};
 
     Piece& makePieces();
-    void createPeers();
+    void allotTransTime(Peer_t&);
     void makeSeeds(Peer&);
     void makeLeechs(Peer&);
     Peer& selectPeers();
+    void createPeers();
 };
 
 /* Normal

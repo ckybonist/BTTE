@@ -7,12 +7,10 @@ using namespace std;
 
 int main(int argc, const char *argv[])
 {
-	int *peers;
-
-	//sleep(10);  // for testing
-
+    // Singleton init
 	(InitEnv::getInstance()).createPeers();
 
+    // Normal init
 	//InitEnv init;
 	//init.createPeers(peers, N);
 
