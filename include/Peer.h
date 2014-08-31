@@ -4,27 +4,40 @@
 #include <iostream>
 #include <string>
 
-struct Piece_t
-{
-    std::string no;
-    bool received;
-};
+#include "Piece.h"
 
 struct Peer_t
 {
     std::string id;
     std::string cid;         // cluster id
-    int time_piece;          // time that spends for each piece
+    float time_piece;          // time that spends for each piece
 
-    bool is_seeder;
+    bool seed;
     bool in_swarm;
 
     std::string *neighbors;  // peer list
     Piece_t *pieces;
 
-    int *pdelay;             // propagation delay
-    int time;                // time for getting all pieces
+    float *pdelay;             // propagation delay
+    float time;                // time for getting all pieces
     int count;               // count of being selected as other peers' candidate of its peer list
+
+    Peer_t()
+    {
+        id = "";
+        cid = "";  // not yet
+        time_piece = 0.0;
+
+        seed = false;
+        in_swarm = false;
+
+        neighbors = nullptr;
+        pieces = nullptr;
+
+        pdelay = nullptr;
+        time = 0.0;
+        count = 0;
+    }
 };
 
 extern Peer_t *peers;
