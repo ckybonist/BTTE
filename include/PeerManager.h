@@ -36,6 +36,7 @@ const float TRANS_TIME[3]  // each class' transmission time
 class PeerManager
 {
 public:
+    PeerManager(const int, const int ,const int);
     void createPeers () const;
     Peer_t& selectPeers () const;
 
@@ -44,6 +45,10 @@ private:
     void makeSeeds(Peer_t&, int) const;
     void makeLeechs(Peer_t&, int) const;
     void randSelect();
+
+    int NUM_PEER;
+    int NUM_SEED;
+    int NUM_LEECH;
 };
 
 #endif // for #ifndef _PEERMANAGER_H

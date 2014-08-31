@@ -20,6 +20,14 @@ static bool isEnough(int cls, int amount, int num_peer)
 	int limit = (float)DRATE[cls] / (float)100 * num_peer;
 	return (amount == limit) ? (true) : (false);
 }
+
+PeerManager::PeerManager(const int num_peer, const int num_seed, const int num_leech)
+{
+    NUM_PEER = num_peer;
+    NUM_SEED = num_seed;
+    NUM_LEECH = num_leech;
+}
+
 void PeerManager::allotTransTime(Peer_t &peers, int NUM_PEER) const
 {
     // Classify peers to three classes
@@ -27,7 +35,8 @@ void PeerManager::allotTransTime(Peer_t &peers, int NUM_PEER) const
 	int counts[3] = {0};
 	int size = sizeof(exSet) / sizeof(*exSet);  // exclusive set size
 
-    srand(time(0)); Dice dice;
+    srand(time(0));
+    Dice dice;
 
 	for(int i = 0; i < NUM_PEER; i++)
     {
@@ -66,9 +75,6 @@ Peer_t& PeerManager::selectPeers() const
 
 void PeerManager::createPeers () const
 {
-    Config cfg("../btte.conf");  // read config at root of project
-    int NUM_PEER = cfg.getValueOfKey<int>("NUM_PEER", 5000);  // if num_peer not being read, then set num_peer to 5000
-
     Peer_t *peers = new (std::nothrow) Peer_t[NUM_PEER];
     if(peers == nullptr) { exitWithError("Allocate memory of peers is fault!\n"); }
 
@@ -77,9 +83,7 @@ void PeerManager::createPeers () const
 
     allotTransTime(*peers, NUM_PEER);
 
-    int NUM_SEED = cfg.getValueOfKey<int>("NUM_SEED", 100);
     makeSeeds(*peers, NUM_SEED);
 
-    int NUM_LEECH = cfg.getValueOfKey<int>("NUM_LEECH", 100);
     makeLeechs(*peers, NUM_LEECH);
 }
