@@ -1,7 +1,10 @@
 #ifndef __INITENV_H__
 #define __INITENV_H__
 
-class PeerManager; // forward declaration
+#include <iostream>
+#include <string>
+
+#include "PeerManager.h"
 
 // Singleton Class
 // Tracker and Other Else Manager
@@ -10,7 +13,7 @@ class EnvManager
 public:
 	static EnvManager &getInstance();
 
-	void init(const PeerManager&) const;
+	void init(std::string, PeerManager) const;
 
     void destroy() const;
 

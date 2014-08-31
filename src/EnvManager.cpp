@@ -1,15 +1,12 @@
 #include <iostream>
 
-#include <new>
+//#include <new>
 
-#include <ctime>
-
-#include "Dice.h"
+//#include <ctime>
 
 #include "Error.h"
-
-#include "Peer.h"
-
+#include "Config.h"
+#include "PeerManager.h"
 #include "EnvManager.h"
 
 /* Class definition */
@@ -19,8 +16,16 @@ EnvManager& EnvManager::getInstance()
 	return instance;
 }
 
-void EnvManager::init(const PeerManager &pm) const
+void EnvManager::init(std::string configfile, PeerManager pm) const
 {
+    Config cfg(configfile);
+    int num_peer = cfg.getValueOfKey<int>("NUM_PEER", 5000);  // if num_peer not being read, then set num_peer to 5000
+    int num_seed = cfg.getValueOfKey<int>("NUM_SEED", 100);
+    int num_leech = cfg.getValueOfKey<int>("NUM_LEECH", 100);
+
+    pm = PeerManager(num_peer, num_seed, num_leech);
+
+
     //createPeers();
 }
 
