@@ -5,16 +5,15 @@
 
 #include <string>
 
-/* Holding the pair of key-value */
-#include <map>
+#include <map> // holding the pair of key-value
 
 #include "Convert.h"
 
-class ConfigFile
+class Config
 {
 public:
-    ConfigFile(const std::string &);
-    bool keyExists(const std::string &) const;
+    Config(const std::string&);
+    bool keyExists(const std::string&) const;
     template <typename ValueType>
     ValueType getValueOfKey(const std::string &key, ValueType const &defaultType = ValueType()) const
     {
@@ -28,13 +27,13 @@ public:
 private:
     std::map<std::string, std::string> contents;
     std::string fName;
-    void removeComment(std::string &) const;
-    bool onlyWhiteSpace(const std::string &) const;
-    bool isValidLine(const std::string &) const;
-    void extractKey(std::string &, size_t const &, const std::string &) const;
-    void extractValue(std::string &, size_t const &, const std::string &) const;
-    void extractContents(const std::string &);
-    void parseLine(const std::string &, size_t const);
+    void removeComment(std::string&) const;
+    bool onlyWhiteSpace(const std::string&) const;
+    bool isValidLine(const std::string&) const;
+    void extractKey(std::string &, size_t const&, const std::string&) const;
+    void extractValue(std::string&, size_t const&, const std::string&) const;
+    void extractContents(const std::string&);
+    void parseLine(const std::string&, size_t const);
     void readConf();
 };
 
