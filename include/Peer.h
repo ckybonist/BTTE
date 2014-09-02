@@ -18,7 +18,7 @@ struct Peer_t
     std::string *neighbors;  // peer list
     Piece_t *pieces;
 
-    float *pdelay;             // propagation delay
+    float *pgdelay;             // propagation delay
     float time;                // time for getting all pieces
     int count;               // count of being selected as other peers' candidate of its peer list
 
@@ -34,7 +34,7 @@ struct Peer_t
         neighbors = nullptr;
         pieces = nullptr;
 
-        pdelay = nullptr;
+        pgdelay = nullptr;
         time = 0.0;
         count = 0;
     }
