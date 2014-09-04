@@ -7,9 +7,9 @@ class Dice
 {
 public:
 	Dice() {};
-	int roll(int, int);
-	int excludeNum(int, int, int);
-	int excludeSet(int*, int, int, int);
+	static int roll(int, int);
+	static int excludeNum(int, int, int);
+	static int excludeSet(int*, int, int, int);
 };
 
 #endif
