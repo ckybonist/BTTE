@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "InitEnv.h"
+#include "EnvManager.h"
 
 using namespace std;
 
@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, const char *argv[])
 {
     // Singleton init
-	(InitEnv::getInstance()).createPeers();
+	//(InitEnv::getInstance()).createPeers();
 
     // Normal init
 	//InitEnv init;
