@@ -16,18 +16,18 @@ long long rand()
     return rand_num;
 }
 
+int range_rand(const int max, const int min)
+{
+	int number = (int)(((double)rand() / ((double)RAND_MAX + 1)) *
+			 (max - min + 1)) + min;
+	return number;
+}
+
 void srand(int seed)
 {
     for(int i = 0; i < seed; i++)
         rand_num = rand();
 }
-}
-
-int range_rand(const int max, const int min)
-{
-	int number = (int)((rand() / ((double)RAND_MAX + 1)) *
-			 (max - min + 1)) + min;
-	return number;
 }
 
 #endif // for #ifndef _RANDOMGENERATOR_H
