@@ -33,19 +33,4 @@ void EnvManager::init(std::string configfile) const
 
 void EnvManager::destroy() const
 {
-    int num_peer = sizeof(peers) / sizeof(*peers);
-    for(int i = 0; i < num_peer; i++)
-    {
-        delete peers[i].pdelay;
-        peers[i].pdelay = nullptr;
-
-        delete peers[i].pieces;
-        peers[i].pieces = nullptr;
-
-        delete peers[i].neighbors;
-        peers[i].neighbors = nullptr;
-    }
-
-    delete [] peers;
-    peers = nullptr;
 }
