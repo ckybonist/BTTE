@@ -1,11 +1,8 @@
 #include "Dice.h"
-
 #include "Piece.h"
-
 #include "Error.h"
-
 #include "TransTime.h"
-
+#include "Random.h"
 #include "PeerManager.h"
 
 /*
@@ -37,14 +34,17 @@ static bool isEnough(int cls, int amount, int num_peer)
  *	   without that exclusive set
  *
  * */
-static int excludeSet(int *set, int size, int min, int max) {
+static int excludeSet(int const * const set, const int size,
+        const int min, const int max) {
 	int target = 0;
 	bool flag = true;
 
-	while(flag) {
-		target = Dice::roll(min, max);
+	while(flag)
+    {
+        target = uniformdist::range_rand(min, max);
 
-		for(int i = 0; i < size; i++) {
+		for(int i = 0; i < size; i++)
+        {
 			//if(target == set[i] && set[i] != 0)
 			if(target == set[i])
 		   	{
@@ -57,10 +57,8 @@ static int excludeSet(int *set, int size, int min, int max) {
 			}
 		}
 	}
-
 	return target;
 }
-
 
 /*
  * Exclude specific number in the random number set
@@ -77,8 +75,9 @@ static int excludeSet(int *set, int size, int min, int max) {
  * Note: Currently not using this function. Being reserved.
  *
  * */
-static int excludeNum(int num, int min, int max) {
-	int target = Dice::roll(min, max);
+static int excludeNum(const int num, const int min, const int max)
+{
+    int target = uniformdist::range_rand(min, max);
 
 	if(target == num) {
 		excludeNum(num, min, max);
@@ -106,12 +105,13 @@ void PeerManager::setNeighbors(IPeerSelection &ips) const
 
 void PeerManager::allotTransTime() const
 {
+    // TODO Is this function really random, NEED TESTING
     // Classify peers to three classes
 	int exSet[3] = {0};
 	int counts[3] = {0};
 	int size = sizeof(exSet) / sizeof(*exSet);  // exclusive set size
 
-    srand(time(0));
+    //srand(time(0));
 
 	for(int i = 0; i < NUM_PEER; i++)
     {
@@ -131,43 +131,43 @@ void PeerManager::allotTransTime() const
 	}
 }
 
-void PeerManager::newSeeds() const
+void PeerManager::initSeeds() const
 {
-    // 100 seeds, 100% pieces, hisghest speed
-    srand(time(0));
+    // TODO
+    // 100 seeds, 100% pieces, probably have three different speeds
 }
 
-void PeerManager::newLeeches() const
+void PeerManager::initLeeches() const
 {
-    // 100 leechs, 50% pieces, middle speed
-    srand(time(0));
+    // TODO
+    // 100 leechs, 50% pieces, probably have three different speeds
 }
 
 void PeerManager::newPeer(Peer_t &peer, int id) const
 {
     peer.id = id;
-
-    for(int i = 0; i < NUM_PIECE; i++)
-    {
-        peer.pieces[i].no = i;
-        peer.pieces[i].is_receive = false;
-    }
     peer.in_swarm = true;
+    // TODO
 }
 
 void PeerManager::createPeers() const
 {
-    Peer_t *peers = new (std::nothrow) Peer_t[NUM_PEER];
+    Peer_t *peers = nullptr;
+    peers = new Peer_t[NUM_PEER];
     if(peers == nullptr) { exitWithError("Allocate memory of peers is fault!\n"); }
 
-    // init peer id
-    for(int i = 0; i < NUM_PEER; i++) { peers[i].id = i; }
+    // init peers
+    for(int i = 0; i < NUM_PEER; i++)
+    {
+        peers[i].id = i;
+        peers[i].pieces = makePieces(NUM_PIECE);
+    }
 
     allotTransTime();
 
-    newSeeds();
+    initSeeds();
 
-    newLeeches();
+    initLeeches();
 }
 
 void PeerManager::destroyPeers(Peer_t *peers)
