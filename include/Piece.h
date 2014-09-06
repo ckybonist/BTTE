@@ -12,6 +12,6 @@ struct Piece_t
     bool received;
 };
 
-extern Piece& makePieces() const;
+Piece_t *makePieces(const int size);
 
 #endif // for #ifndef _PIECE_H
