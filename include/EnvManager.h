@@ -4,8 +4,6 @@
 #include <iostream>
 #include <string>
 
-#include "PeerManager.h"
-
 // Singleton Class
 // Tracker and Other Else Manager
 class EnvManager
@@ -13,7 +11,7 @@ class EnvManager
 public:
 	static EnvManager &getInstance();
 
-	void init(std::string, PeerManager) const;
+	void init(std::string) const;
 
     void destroy() const;
 

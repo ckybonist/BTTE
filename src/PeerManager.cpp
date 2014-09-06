@@ -1,8 +1,7 @@
-#include "Dice.h"
 #include "Piece.h"
 #include "Error.h"
-#include "TransTime.h"
 #include "Random.h"
+#include "TransTime.h"
 #include "PeerManager.h"
 
 /*
@@ -140,7 +139,7 @@ void PeerManager::initSeeds() const
 void PeerManager::initLeeches() const
 {
     // TODO
-    // 100 leechs, 50% pieces, probably have three different speeds
+    // 100 leechs, about 50% pieces, probably have three different speeds
 }
 
 void PeerManager::newPeer(Peer_t &peer, int id) const
@@ -156,7 +155,7 @@ void PeerManager::createPeers() const
     peers = new Peer_t[NUM_PEER];
     if(peers == nullptr) { exitWithError("Allocate memory of peers is fault!\n"); }
 
-    // init peers
+    // init peers and pieces
     for(int i = 0; i < NUM_PEER; i++)
     {
         peers[i].id = i;
