@@ -8,27 +8,28 @@
 
 struct Peer_t
 {
-    std::string id;
-    std::string cid;         // cluster id
-    float time_piece;          // time that spends for each piece
+    int id;
+    int cid;          // cluster id
+    float time_per_piece; // time that spends for each piece
 
-    bool seed;
+    bool is_seed;
     bool in_swarm;
 
-    std::string *neighbors;  // peer list
     Piece_t *pieces;
 
-    float *pgdelay;             // propagation delay
-    float time;                // time for getting all pieces
-    int count;               // count of being selected as other peers' candidate of its peer list
+    int *neighbors;  // peer list
+
+    float *pgdelay;  // propagation delay
+    float time;      // time for getting all pieces
+    int counter;     // count of being selected as candidate in other peers' peer lists
 
     Peer_t()
     {
-        id = "";
-        cid = "";  // not yet
-        time_piece = 0.0;
+        id = 0;
+        cid = 0;  // not yet
+        time_per_piece = 0.0;
 
-        seed = false;
+        is_seed = false;
         in_swarm = false;
 
         neighbors = nullptr;
@@ -36,7 +37,7 @@ struct Peer_t
 
         pgdelay = nullptr;
         time = 0.0;
-        count = 0;
+        counter = 0;
     }
 };
 
