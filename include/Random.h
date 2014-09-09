@@ -1,33 +1,14 @@
-#ifndef _RANDOMGENERATOR_H
-#define _RANDOMGENERATOR_H
+#ifndef _UNIFORMRANDOM_H
+#define _UNIFORMRANDOM_H
 
-#include <cstdlib>
-
-//const long long RANDMAX = 2147483647;  // C++ RAND_MAX Macro
 const long long INIT_NUM = 1491701989;
-long long rand_num = INIT_NUM;
+long long randNum = INIT_NUM;
 
 namespace uniformdist  // uniform distribution random
 {
-long long rand()
-{
-    /* X(n-1) * 7^5 % (2^31 - 1) */
-    rand_num = 16807 * rand_num % RAND_MAX;
-    return rand_num;
-}
-
-int range_rand(const int max, const int min)
-{
-	int number = (int)(((double)rand() / ((double)RAND_MAX + 1)) *
-			 (max - min + 1)) + min;
-	return number;
-}
-
-void srand(int seed)
-{
-    for(int i = 0; i < seed; i++)
-        rand_num = rand();
-}
+long long rand();
+void srand(int);
+int range_rand(const int, const int);
 }
 
 #endif // for #ifndef _RANDOMGENERATOR_H
