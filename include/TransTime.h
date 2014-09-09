@@ -16,6 +16,8 @@
  *
  * */
 
+const int NUM_TRANSTIME = 3;
+
 /* Download speed of each class */
 const int DOWNSPEED_1 = 10 * 1024 * 1024;
 const int DOWNSPEED_2 = 128 * 1024;
@@ -24,7 +26,7 @@ const int DOWNSPEED_3 = 56 * 1024;
 /* Distributed rate(%) of each class */
 const int DRATE[3] = {30, 50, 20};
 
-const float TRANS_TIME[3]  // each class' transmission time
+const float TRANS_TIME[3] =  // each class' transmission time
 {
 	(float)PIECE_SIZE / (float)DOWNSPEED_1,
 	(float)PIECE_SIZE / (float)DOWNSPEED_2,
