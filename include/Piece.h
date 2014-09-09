@@ -18,9 +18,9 @@ struct Piece_t
         bool getStatus() { return is_receive; }
         void setNo(int val) { is_receive = val; }
         void setStatus(bool status) { is_receive = status; }
-
 };
 
-Piece_t *makePieces(const int size);
+Piece_t *makePieces(const int NUM_PIECE);
+void getPieceByProb(Piece_t*, const double&, const int);
 
 #endif // for #ifndef _PIECE_H
