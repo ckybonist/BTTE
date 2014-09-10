@@ -1,14 +1,12 @@
 #include <iostream>
+#include <cstdlib>
 
 #include "Random.h"
 #include "EnvManager.h"
 
-using namespace std;
-
-
-int main(int argc, const char *argv[])
-{
-    uniformdist::srand((unsigned)time(0));
+int main(int argc, const char *argv[]) {
+    //uniformdist::srand((unsigned) time(0));
+    uniformdist::srand(1);
 
     // Singleton init
 	(EnvManager::getInstance()).init("../btte.conf");

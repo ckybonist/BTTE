@@ -6,8 +6,7 @@
 
 #include "Piece.h"
 
-struct Peer_t
-{
+struct Peer {
     int id;
     int cid;          // cluster id
     float time_per_piece; // time that spends for each piece
@@ -15,7 +14,7 @@ struct Peer_t
     bool is_seed;
     bool in_swarm;
 
-    Piece_t *pieces;
+    Piece *pieces;
 
     int *neighbors;  // peer list
 
@@ -23,8 +22,7 @@ struct Peer_t
     float time;      // time for getting all pieces
     int counter;     // count of being selected as candidate in other peers' peer lists
 
-    Peer_t()
-    {
+    Peer() {
         id = 0;
         cid = 0;  // not yet
         time_per_piece = 0.0;
@@ -41,6 +39,6 @@ struct Peer_t
     }
 };
 
-extern Peer_t *peers;
+extern Peer *g_peers;
 
 #endif // for #ifndef _PEER_H

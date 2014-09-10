@@ -6,43 +6,43 @@
 class IPeerSelection
 {
 public:
-    virtual int& choosePeers() = 0;
+    virtual int &ChoosePeers() = 0;
 
 protected:
-    virtual float& allotPGDelay() = 0;
+    virtual float &AllotPGDelay() = 0;
 };
 
 
 class Random : protected IPeerSelection
 {
 public:
-    int& choosePeers();
+    int &ChoosePeers();
 
 protected:
-    float& allotPGDelay();
+    float &AllotPGDelay();
 };
 
 
 class LoadBalance : protected IPeerSelection
 {
 public:
-    int& choosePeers();
+    int &ChoosePeers();
 
 protected:
-    float& allotPGDelay();
+    float &AllotPGDelay();
 };
 
 
 class ClusterBased : protected IPeerSelection
 {
 public:
-    int& choosePeers();
+    int& ChoosePeers();
 
 protected:
-    float& allotPGDelay();
+    float& AllotPGDelay();
 
 private:
-    void setClusterID(Peer_t&);
+    void setClusterID(Peer&);
 };
 
 #endif // for #ifndef _PEERSELECTION_H

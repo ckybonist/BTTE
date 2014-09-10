@@ -4,8 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 
-inline void exitWithError(const std::string &error)
-{
+inline void ExitWithError(const std::string &error) {
     std::cout << error << std::endl;
     exit(EXIT_FAILURE);
 }
