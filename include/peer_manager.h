@@ -1,9 +1,8 @@
 #ifndef _PEERMANAGER_H
 #define _PEERMANAGER_H
 
-#include "Peer.h"
-#include "PeerManager.h"
-#include "algorithm/PeerSelection.h"
+#include "peer_manager.h"
+#include "algorithm/peer_selection.h"
 
 class IPeerSelection;
 
@@ -12,16 +11,16 @@ class PeerManager
 public:
     PeerManager() {};
     //PeerManager(const int, const int ,const int, const int);
-    void initArgs(const int, const int ,const int, const int);
-    void createPeers() const;  // init usage
-    void newPeer(Peer_t *const, int id) const;  // for peer_join event
-    void setNeighbors(IPeerSelection&) const;
-    void destroyPeers(Peer_t*);
+    void InitArgs(const int, const int ,const int, const int);
+    void CreatePeers() const;  // init usage
+    void NewPeer(int id) const;  // for peer_join event
+    void SetNeighbors(IPeerSelection&) const;
+    void DestroyPeers();
 
 private:
-    void allotTransTime() const;
-    void initSeeds() const;
-    void initLeeches() const;
+    void AllotTransTime() const;
+    void InitSeeds() const;
+    void InitLeeches() const;
     int NUM_PEER;
     int NUM_SEED;
     int NUM_LEECH;
