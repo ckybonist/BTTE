@@ -1,24 +1,24 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "Random.h"
-#include "EnvManager.h"
+#include "random.h"
+#include "env_manager.h"
 
 int main(int argc, const char *argv[]) {
-    //uniformdist::srand((unsigned) time(0));
-    uniformdist::srand(1);
+    //uniformdist::srand((unsigned) time(0));  // slow speed
+    uniformdist::srand(1);  // for testing
 
     // Singleton init
-	(EnvManager::getInstance()).init("../btte.conf");
+	(EnvManager::GetInstance()).Init("../btte.conf");
 
     // Do something
 
-	(EnvManager::getInstance()).destroy();
+	(EnvManager::GetInstance()).Destroy();
 
     /*
     // Normal init
-	InitEnv init;
-	init.createPeers(peers, N);
+	EnvManager em;
+	em.createPeers();
     */
 	return 0;
 }

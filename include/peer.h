@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "Piece.h"
+#include "piece.h"
 
 struct Peer {
     int id;

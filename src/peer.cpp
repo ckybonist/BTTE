@@ -1,3 +1,3 @@
-#include "Peer.h"
+#include "peer.h"
 
-Peer_t *peers = nullptr;
+Peer *g_peers = nullptr;

@@ -1,7 +1,7 @@
 #ifndef _PEERSELECTION_H
 #define _PEERSELECTION_H
 
-#include "Peer.h"
+#include "peer.h"
 
 class IPeerSelection
 {

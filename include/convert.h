@@ -5,7 +5,7 @@
 #include <sstream>
 #include <typeinfo>
 
-#include "Error.h"
+#include "error.h"
 
 class Convert
 {
@@ -23,7 +23,7 @@ public:
         T result;
         if(!(iss >> result))
         {
-            exitWithError("Not a valid " + (std::string)typeid(T).name() + " received!\n ");
+            ExitWithError("Not a valid " + (std::string)typeid(T).name() + " received!\n ");
         }
         return result;
     }

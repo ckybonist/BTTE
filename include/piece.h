@@ -21,7 +21,7 @@ struct Piece {
         bool exist_;
 };
 
-Piece *makePieces(const int NUM_PIECE);
-void getPieceByProb(Piece*, const double&, const int);
+Piece *MakePieces(const int);
+void GetPieceByProb(Piece*, const double&, const int);
 
 #endif // for #ifndef _PIECE_H

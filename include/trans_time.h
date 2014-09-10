@@ -1,7 +1,7 @@
 #ifndef _TRANSTIME_H
 #define _TRANSTIME_H
 
-#include "Piece.h"
+#include "piece.h"
 
 /**
  * Simulation arguments

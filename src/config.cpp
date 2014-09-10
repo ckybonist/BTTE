@@ -1,18 +1,18 @@
 #include <fstream>
 
-#include "Error.h"
-#include "Config.h"
+#include "error.h"
+#include "config.h"
 
-Config::Config(const std::string &fName) {
-    this->fName = fName;
-    readConf();
+Config::Config(const std::string &fname) {
+    this->fname = fname;
+    ReadConf();
 }
 
-bool Config::keyExists(const std::string &key) const {
+bool Config::KeyExists(const std::string &key) const {
     return (contents.find(key) != contents.end());
 }
 
-void Config::removeComment(std::string &line) const {
+void Config::RemoveComment(std::string &line) const {
     /*
      * find the string and remove part of sequence which leading by ';',
      * if no matches found, std::string.find() will return npos value.
@@ -23,11 +23,11 @@ void Config::removeComment(std::string &line) const {
     }
 }
 
-bool Config::onlyWhiteSpace(const std::string &line) const {
+bool Config::OnlyWhiteSpace(const std::string &line) const {
     return (line.find_first_not_of(' ') == line.npos);
 }
 
-bool Config::isValidLine(const std::string &line) const {
+bool Config::IsValidLine(const std::string &line) const {
     std::string temp = line;
     temp.erase(0, temp.find_first_not_of("\t "));  // remove all whitespaces in front of the line
 
@@ -43,7 +43,7 @@ bool Config::isValidLine(const std::string &line) const {
     return false;
 }
 
-void Config::extractKey(std::string &key, size_t const &sepPos,
+void Config::ExtractKey(std::string &key, size_t const &sepPos,
                         const std::string &line) const {
     key = line.substr(0, sepPos);
     if(key.find('\t') != line.npos || key.find(' ') != line.npos) {
@@ -51,65 +51,65 @@ void Config::extractKey(std::string &key, size_t const &sepPos,
     }
 }
 
-void Config::extractValue(std::string &value, size_t const &sepPos,
+void Config::ExtractValue(std::string &value, size_t const &sepPos,
                           const std::string &line) const {
     value = line.substr(sepPos + 1);
     value.erase(0, value.find_first_not_of("\t "));  // remove leading whitespace
     value.erase(value.find_last_not_of("\t ") + 1);  // remove trailing whitespace
 }
 
-void Config::extractContents(const std::string &line) {
+void Config::ExtractContents(const std::string &line) {
     std::string temp = line;
     temp.erase(0, temp.find_first_not_of("\t "));  // remove leading whitespace of the line
     size_t sepPos = temp.find('=');
 
     std::string key;
     std::string value;
-    extractKey(key, sepPos, temp);
-    extractValue(value, sepPos, temp);
+    ExtractKey(key, sepPos, temp);
+    ExtractValue(value, sepPos, temp);
 
-    if(!keyExists(key))
+    if(!KeyExists(key))
     {
         contents.insert(std::pair<std::string, std::string>(key, value));
     }
     else
     {
-        exitWithError("Can only have unique key!\n");
+        ExitWithError("Can only have unique key!\n");
     }
 }
 
-void Config::parseLine(const std::string &line, size_t const lineNo) {
+void Config::ParseLine(const std::string &line, size_t const line_no) {
     if(line.find('=') == line.npos) {
-        exitWithError("Couldn't find separator on line: " + Convert::T_to_str<int>(lineNo) + "\n");
+        ExitWithError("Couldn't find separator on line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
 
-    if(!isValidLine(line)) {
-        exitWithError("Wrong format for line: " + Convert::T_to_str<int>(lineNo) + "\n");
+    if(!IsValidLine(line)) {
+        ExitWithError("Wrong format for line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
 
-    extractContents(line);
+    ExtractContents(line);
 }
 
-void Config::readConf() {
+void Config::ReadConf() {
     std::ifstream file;
-    file.open(fName.c_str());
+    file.open(fname.c_str());
     if(!file) {
-        exitWithError("Couldn't read file: " + fName + "\n");
+        ExitWithError("Couldn't read file: " + fname + "\n");
     }
 
     std::string line;
-    size_t lineNo = 0;
+    size_t line_no = 0;
     while(std::getline(file, line)) {
-        lineNo++;
+        line_no++;
         std::string temp = line;
         //std::cout << line << std::endl;
 
-        if(temp.empty()) continue;
+        if(temp.empty()) { continue; }
 
-        removeComment(temp);
-        if(onlyWhiteSpace(temp)) continue;
+        RemoveComment(temp);
+        if(OnlyWhiteSpace(temp)) { continue; }
 
-        parseLine(temp, lineNo);
+        ParseLine(temp, line_no);
     }
 
     file.close();

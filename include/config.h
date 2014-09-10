@@ -7,7 +7,7 @@
 
 #include <map> // holding the pair of key-value
 
-#include "Convert.h"
+#include "convert.h"
 
 class Config {
     public:
