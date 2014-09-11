@@ -21,6 +21,8 @@ static void DebugInfo(const int NUM_PEER, const int NUM_PIECE) {
         else
             cout << "I'm still downloading" << endl;
 
+        cout << g_peers[i].time_per_piece << endl;
+
         // pieces info
         /*
         piece_count = 0;
