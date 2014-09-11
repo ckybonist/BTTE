@@ -16,8 +16,12 @@ void srand(int seed) {
 }
 
 int RangeRand(const int low, const int up) {
+    // [low, up]
 	int number = (int)(((double)uniformdist::rand() / ((double)RANDMAX + 1)) *
 			     (up - low + 1)) + low;
+    // [low, up)
+	/* int number = (int)(((double)uniformdist::rand() / ((double)RANDMAX + 1)) *
+			     (up - low)) + low; */
 	return number;
 }
 }
