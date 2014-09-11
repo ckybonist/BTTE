@@ -15,10 +15,10 @@ void srand(int seed) {
         g_rand_num = rand();
 }
 
-int RangeRand(const int max, const int min) {
-    g_rand_num = rand();
-	int number = (int)(((double)g_rand_num / ((double)RANDMAX + 1)) *
-			 (max - min + 1)) + min;
+int RangeRand(const int low, const int up) {
+	int number = (int)(((double)uniformdist::rand() / ((double)RANDMAX + 1)) *
+			     (up - low + 1)) + low;
 	return number;
 }
 }
+
