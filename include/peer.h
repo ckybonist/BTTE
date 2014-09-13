@@ -1,16 +1,12 @@
 #ifndef _PEER_H
 #define _PEER_H
 
-#include <iostream>
-#include <string>
-
 #include "piece.h"
 
 struct Peer {
     int id;
     int cid;          // cluster id
     float time_per_piece; // time that spends for each piece
-
     bool is_seed;
     bool in_swarm;
 
@@ -22,21 +18,7 @@ struct Peer {
     float time;      // time for getting all pieces
     int counter;     // count of being selected as candidate in other peers' peer lists
 
-    Peer() {
-        id = 0;
-        cid = 0;  // not yet
-        time_per_piece = 0.0;
-
-        is_seed = false;
-        in_swarm = false;
-
-        neighbors = nullptr;
-        pieces = nullptr;
-
-        pgdelay = nullptr;
-        time = 0.0;
-        counter = 0;
-    }
+    Peer();
 };
 
 extern Peer *g_peers;
