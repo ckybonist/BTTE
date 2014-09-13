@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "args.h"
+#include "error.h"
 #include "random.h"
 #include "env_manager.h"
 
