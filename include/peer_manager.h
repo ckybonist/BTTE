@@ -17,13 +17,10 @@ public:
     void DestroyPeers();
 
 private:
-    void AllotTransTime() const;
-    void InitSeeds() const;
-    void InitLeeches() const;
-    int NUM_PEER;
-    int NUM_SEED;
-    int NUM_LEECH;
-    int NUM_PIECE;
+    Args args_;
+    void AllotTransTime_() const;
+    void InitSeeds_() const;
+    void InitLeeches_() const;
 };
 
 #endif // for #ifndef _PEERMANAGER_H

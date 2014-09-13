@@ -2,7 +2,7 @@
 #define _PIECE_H
 
 #include <iostream>
-#include <string>
+//#include <string>
 
 const int PIECE_SIZE = 512 * 1024 * 8;
 

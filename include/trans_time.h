@@ -26,7 +26,7 @@ const int DOWNSPEED_3 = 56 * 1024;
 /* Distributed rate(%) of each class */
 const int DRATE[3] = {30, 50, 20};
 
-const float TRANS_TIME[3] = { // each class' transmission time
+const float TRANS_TIME[3] = { // transmission time of each class
 	(float)PIECE_SIZE / (float)DOWNSPEED_1,
 	(float)PIECE_SIZE / (float)DOWNSPEED_2,
 	(float)PIECE_SIZE / (float)DOWNSPEED_3,

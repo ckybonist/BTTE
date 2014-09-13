@@ -4,15 +4,15 @@
 #include "config.h"
 
 Config::Config(const std::string &fname) {
-    this->fname = fname;
-    ReadConf();
+    this->fname_ = fname;
+    ReadConf_();
 }
 
 bool Config::KeyExists(const std::string &key) const {
-    return (contents.find(key) != contents.end());
+    return (contents_.find(key) != contents_.end());
 }
 
-void Config::RemoveComment(std::string &line) const {
+void Config::RemoveComment_(std::string &line) const {
     /*
      * find the string and remove part of sequence which leading by ';',
      * if no matches found, std::string.find() will return npos value.
@@ -23,11 +23,11 @@ void Config::RemoveComment(std::string &line) const {
     }
 }
 
-bool Config::OnlyWhiteSpace(const std::string &line) const {
+bool Config::OnlyWhiteSpace_(const std::string &line) const {
     return (line.find_first_not_of(' ') == line.npos);
 }
 
-bool Config::IsValidLine(const std::string &line) const {
+bool Config::IsValidLine_(const std::string &line) const {
     std::string temp = line;
     temp.erase(0, temp.find_first_not_of("\t "));  // remove all whitespaces in front of the line
 
@@ -43,7 +43,7 @@ bool Config::IsValidLine(const std::string &line) const {
     return false;
 }
 
-void Config::ExtractKey(std::string &key, size_t const &sepPos,
+void Config::ExtractKey_(std::string &key, size_t const &sepPos,
                         const std::string &line) const {
     key = line.substr(0, sepPos);
     if(key.find('\t') != line.npos || key.find(' ') != line.npos) {
@@ -51,50 +51,50 @@ void Config::ExtractKey(std::string &key, size_t const &sepPos,
     }
 }
 
-void Config::ExtractValue(std::string &value, size_t const &sepPos,
+void Config::ExtractValue_(std::string &value, size_t const &sepPos,
                           const std::string &line) const {
     value = line.substr(sepPos + 1);
     value.erase(0, value.find_first_not_of("\t "));  // remove leading whitespace
     value.erase(value.find_last_not_of("\t ") + 1);  // remove trailing whitespace
 }
 
-void Config::ExtractContents(const std::string &line) {
+void Config::ExtractContents_(const std::string &line) {
     std::string temp = line;
     temp.erase(0, temp.find_first_not_of("\t "));  // remove leading whitespace of the line
     size_t sepPos = temp.find('=');
 
     std::string key;
     std::string value;
-    ExtractKey(key, sepPos, temp);
-    ExtractValue(value, sepPos, temp);
+    ExtractKey_(key, sepPos, temp);
+    ExtractValue_(value, sepPos, temp);
 
     if(!KeyExists(key))
     {
-        contents.insert(std::pair<std::string, std::string>(key, value));
+        contents_.insert(std::pair<std::string, std::string>(key, value));
     }
     else
     {
-        ExitWithError("Can only have unique key!\n");
+        ExitError("Can only have unique key!\n");
     }
 }
 
-void Config::ParseLine(const std::string &line, size_t const line_no) {
+void Config::ParseLine_(const std::string &line, size_t const line_no) {
     if(line.find('=') == line.npos) {
-        ExitWithError("Couldn't find separator on line: " + Convert::T_to_str<int>(line_no) + "\n");
+        ExitError("Couldn't find separator on line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
 
-    if(!IsValidLine(line)) {
-        ExitWithError("Wrong format for line: " + Convert::T_to_str<int>(line_no) + "\n");
+    if(!IsValidLine_(line)) {
+        ExitError("Wrong format for line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
 
-    ExtractContents(line);
+    ExtractContents_(line);
 }
 
-void Config::ReadConf() {
+void Config::ReadConf_() {
     std::ifstream file;
-    file.open(fname.c_str());
+    file.open(fname_.c_str());
     if(!file) {
-        ExitWithError("Couldn't read file: " + fname + "\n");
+        ExitError("Couldn't read file: " + fname_ + "\n");
     }
 
     std::string line;
@@ -106,10 +106,10 @@ void Config::ReadConf() {
 
         if(temp.empty()) { continue; }
 
-        RemoveComment(temp);
-        if(OnlyWhiteSpace(temp)) { continue; }
+        RemoveComment_(temp);
+        if(OnlyWhiteSpace_(temp)) { continue; }
 
-        ParseLine(temp, line_no);
+        ParseLine_(temp, line_no);
     }
 
     file.close();

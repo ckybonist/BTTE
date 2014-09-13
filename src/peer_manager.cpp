@@ -51,8 +51,7 @@ static int ExcludeSet(int *set, const int set_size,
                 break;
             } else {
                 flag = false;
-            }
-		}
+            } }
 	}
 	return target;
 }
@@ -72,51 +71,36 @@ static int ExcludeSet(int *set, const int set_size,
  * Note: Currently not using this function. Being reserved.
  *
  * */
-static int excludeNum(const int num, const int min, const int max) {
+static int ExcludeNum(const int num, const int min, const int max) {
     int target = uniformdist::RangeRand(min, max);
 
 	if (target == num) {
-		excludeNum(num, min, max);
+		ExcludeNum(num, min, max);
 	} else {
 		return num;
 	}
 }
 
-/*
-PeerManager::PeerManager(const int num_peer, const int num_seed,
-                         const int num_leech, const int num_piece) {
-    NUM_PEER = num_peer;
-    NUM_SEED = num_seed;
-    NUM_LEECH = num_leech;
-    NUM_PIECE = num_piece;
-}
-*/
-
-void PeerManager::InitArgs(const int num_peer, const int num_seed,
-                           const int num_leech, const int num_piece) {
-    NUM_PEER = num_peer;
-    NUM_SEED = num_seed;
-    NUM_LEECH = num_leech;
-    NUM_PIECE = num_piece;
+PeerManager::PeerManager(const Args &args) {
+    args_ = args;
 }
 
-void PeerManager::SetNeighbors(IPeerSelection &ips) const {
-    int *temp = nullptr;
-    temp = &(ips.ChoosePeers());
-    if(temp == nullptr) {
-        ExitWithError("Error occured when selecting neighbors.");
+void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
+    int *peer_list = nullptr;
+    peer_list = ips.ChoosePeers();
+    if(peer_list == nullptr) {
+        ExitError("Error occured when selecting neighbors.");
     }
-    g_peers[2].neighbors = temp;
+    g_peers[2].neighbors = peer_list;
 }
 
-void PeerManager::AllotTransTime() const {
+void PeerManager::AllotTransTime_() const {
     // TODO Is this function really random, STILL NEED TESTING
     // Classify peers to three classes
-    //  Error: no random
 	int ex_set[NUM_TRANSTIME] = {0};
 	int counts[NUM_TRANSTIME] = {0};
 
-	for (int i = 0; i < NUM_PEER; i++) {
+	for (int i = 0; i < args_.NUM_PEER; i++) {
 		//int idx = ExcludeSet(ex_set, NUM_TRANSTIME, 0, 2);
         int idx = uniformdist::RangeRand(0, 2);
 
@@ -126,7 +110,7 @@ void PeerManager::AllotTransTime() const {
 
 		 // Check the amount of peers' class is
 		 // fullfill our requirement
-		if (RateEnough(idx, counts[idx], NUM_PEER)) {
+		if (RateEnough(idx, counts[idx], args_.NUM_PEER)) {
 			if(ex_set[idx] == 0) {
                 ex_set[idx] = idx;
             }
@@ -134,37 +118,37 @@ void PeerManager::AllotTransTime() const {
 	}
 }
 
-void PeerManager::InitSeeds() const
-{
+void PeerManager::InitSeeds_() const {
     // TODO
     // 100 seeds, 100% pieces, probably have three different speeds
-    for (int i = 0; i < NUM_SEED; i++) {
+    for (int i = 0; i < args_.NUM_SEED; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
         g_peers[i].is_seed = true;
 
-        for (int j = 0; j < NUM_PIECE; j++) {
+        for (int j = 0; j < args_.NUM_PIECE; j++) {
             g_peers[i].pieces[j].set_exist(true);
         }
+
+        //g_peers[i].neighbors = SelectNeighbors();
     }
 }
 
-void PeerManager::InitLeeches() const
-{
+void PeerManager::InitLeeches_() const {
     // TODO
     // 100 leechs, about 50% pieces, probably have three different speeds
     /* control prob. not over TARGET_PROB
     const double AVG_TARGET_PROB = 0.5;
     double target_prob = AVG_TARGET_PROB * (double)NUM_PEER;
     */
-    const int init_idx = NUM_SEED;  // initial leech number: 0 + NUM_SEED
+    const int init_idx = args_.NUM_SEED;  // initial leech number: 0 + NUM_SEED
     std::cout.precision(2);
-    for (int i = init_idx; i < NUM_PEER; i++) {
+    for (int i = init_idx; i < args_.NUM_PEER; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
         double prob_leech = (double)g_rand_num / RANDMAX;
         g_rand_num = uniformdist::rand();
-        GetPieceByProb(g_peers[i].pieces, prob_leech, NUM_PIECE);
+        GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
     }
 }
 
@@ -174,19 +158,21 @@ void PeerManager::NewPeer(int id) const {
 }
 
 void PeerManager::CreatePeers() const {
+    const int &NUM_PEER = args_.NUM_PEER;
+
     g_peers = new Peer[NUM_PEER];
     if (g_peers == nullptr) {
-        ExitWithError("Allocate memory of peers is fault!\n");
+        ExitError("Allocate memory of peers is fault!\n");
     }
 
     // init peers and pieces
     for (int i = 0; i < NUM_PEER; i++) { g_peers[i].id = i; }
 
-    AllotTransTime();
+    AllotTransTime_();
 
-    //InitSeeds();
+    //InitSeeds_();
 
-    //InitLeeches();
+    //InitLeeches_();
 }
 
 void PeerManager::DestroyPeers() {

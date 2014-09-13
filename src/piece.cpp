@@ -6,7 +6,7 @@ static Piece *AllocPieces(const int NUM_PIECE) {
     Piece *pieces = nullptr;
     pieces = new Piece[NUM_PIECE];
     if(pieces == nullptr) {
-        ExitWithError("Memory allocation of pieces is failed!");
+        ExitError("Memory allocation of pieces is failed!");
     }
     return pieces;
 }

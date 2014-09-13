@@ -2,6 +2,7 @@
 #define _CONVERT_H
 
 #include <iostream>
+// #include <string>
 #include <sstream>
 #include <typeinfo>
 
@@ -13,7 +14,9 @@ public:
     template <typename T>
     static inline std::string T_to_str(T const &val)
     {
-        std::ostringstream oss; oss << val; return oss.str();
+        std::ostringstream oss;
+        oss << val;
+        return oss.str();
     }
 
     template <typename T>
@@ -23,7 +26,7 @@ public:
         T result;
         if(!(iss >> result))
         {
-            ExitWithError("Not a valid " + (std::string)typeid(T).name() + " received!\n ");
+            ExitError("Not a valid " + (std::string)typeid(T).name() + " received!\n ");
         }
         return result;
     }
