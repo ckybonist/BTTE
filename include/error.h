@@ -2,9 +2,10 @@
 #define _ERROR_H
 
 #include <iostream>
+// #include <string>
 #include <cstdlib>
 
-inline void ExitWithError(const std::string &error) {
+inline void ExitError(const std::string &error) {
     std::cout << error << std::endl;
     exit(EXIT_FAILURE);
 }
