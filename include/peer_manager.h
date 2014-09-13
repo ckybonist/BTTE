@@ -1,6 +1,7 @@
 #ifndef _PEERMANAGER_H
 #define _PEERMANAGER_H
 
+#include "args.h"
 #include "peer_manager.h"
 #include "algorithm/peer_selection.h"
 
@@ -9,12 +10,10 @@ class IPeerSelection;
 class PeerManager
 {
 public:
-    PeerManager() {};
-    //PeerManager(const int, const int ,const int, const int);
-    void InitArgs(const int, const int ,const int, const int);
+    PeerManager(const Args&);
     void CreatePeers() const;  // init usage
     void NewPeer(int id) const;  // for peer_join event
-    void SetNeighbors(IPeerSelection&) const;
+    void SelectNeighbors(IPeerSelection&) const;
     void DestroyPeers();
 
 private:
