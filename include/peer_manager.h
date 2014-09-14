@@ -13,12 +13,12 @@ public:
     PeerManager(const Args&);
     void CreatePeers() const;  // init usage
     void NewPeer(int id) const;  // for peer_join event
-    void SelectNeighbors(IPeerSelection&) const;
+    void SelectNeighbors(IPeerSelection&) const;  // FIXME: argument too less
     void DestroyPeers();
 
 private:
     Args args_;
-    void AllotTransTime_() const;
+    void AllotPeerLevel_() const;
     void InitSeeds_() const;
     void InitLeeches_() const;
 };
