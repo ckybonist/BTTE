@@ -3,11 +3,7 @@
 
 #include <iostream>
 // #include <string>
-#include <cstdlib>
 
-void ExitError(const std::string &error) {
-    std::cout << error << std::endl;
-    exit(EXIT_FAILURE);
-}
+void ExitError(const std::string &);
 
 #endif // for #ifndef _ERROR_H
