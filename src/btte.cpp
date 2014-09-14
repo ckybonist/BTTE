@@ -45,7 +45,7 @@ void DebugInfo(const Args &args) {
 
 int main(int argc, const char *argv[]) {
     if(argc == 1) {
-        ExitError("Type the path of config file for the fisrt argument.");
+        ExitError("First argument: path of config file");
     } else if (argc > 2) {
         ExitError("Too much arguments.");
     }
