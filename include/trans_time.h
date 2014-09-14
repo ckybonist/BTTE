@@ -16,20 +16,22 @@
  *
  * */
 
-const int NUM_TRANSTIME = 3;
+const int k_num_transtime = 3;
 
 /* Download speed of each class */
-const int DOWNSPEED_1 = 10 * 1024 * 1024;
-const int DOWNSPEED_2 = 128 * 1024;
-const int DOWNSPEED_3 = 56 * 1024;
+const int k_down_speeds[k_num_transtime] = {
+    10 * 1024 * 1024,
+    128 * 1024,
+    56 * 1024
+};
 
 /* Distributed rate(%) of each class */
-const int DRATE[3] = {30, 50, 20};
+const int k_dist_rate[3] = {30, 50, 20};
 
-const float TRANS_TIME[3] = { // transmission time of each class
-	(float)PIECE_SIZE / (float)DOWNSPEED_1,
-	(float)PIECE_SIZE / (float)DOWNSPEED_2,
-	(float)PIECE_SIZE / (float)DOWNSPEED_3,
+const float k_trans_time[k_num_transtime] = { // transmission time of each class
+	(float)k_piece_size / (float)k_down_speeds[0],
+	(float)k_piece_size / (float)k_down_speeds[1],
+	(float)k_piece_size / (float)k_down_speeds[2]
 };
 
 #endif // for #ifndef _TRANSTIME_H

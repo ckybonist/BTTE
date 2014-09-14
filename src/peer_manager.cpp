@@ -32,7 +32,7 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
  *
  * */
 static bool RateEnough(int idx, int amount, int num_peer) {
-	int limit = (float)DRATE[idx] / (float)100 * num_peer;
+	int limit = (float)k_dist_rate[idx] / (float)100 * num_peer;
 	return (amount == limit);
 }
 
@@ -95,19 +95,23 @@ static int ExcludeNum(const int num, const int min, const int max) {
 	}
 }
 
+/*
+ * Alloting all peers with three different
+ * transmission time (downlink speed)
+ *
+ * * */
 void PeerManager::AllotTransTime_() const {
-    // TODO Is this function really random, STILL NEED TESTING
-    // Classify peers to three classes
-	int ex_set[NUM_TRANSTIME] = {0};
-	int counts[NUM_TRANSTIME] = {0};
+	int ex_set[k_num_transtime] = {0};
+	int counts[k_num_transtime] = {0};
 
 	for (int i = 0; i < args_.NUM_PEER; i++) {
 		//int idx = ExcludeSet(ex_set, NUM_TRANSTIME, 0, 2);
         int idx = uniformdist::RangeRand(0, 2);
 
-		g_peers[i].time_per_piece = TRANS_TIME[idx];
+		g_peers[i].time_per_piece = k_trans_time[idx];
 
-		++counts[idx];  // count of amount of class, this must place before the rateEnough() check
+        /* counter for amount of class,  MUST PLACE ABOVE THE RateEnough() */
+		++counts[idx];
 
 		 // Check the amount of peers' class is
 		 // fullfill our requirement
@@ -119,9 +123,9 @@ void PeerManager::AllotTransTime_() const {
 	}
 }
 
+/* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds_() const {
     // TODO
-    // 100 seeds, 100% pieces, probably have three different speeds
     for (int i = 0; i < args_.NUM_SEED; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
@@ -131,23 +135,30 @@ void PeerManager::InitSeeds_() const {
             g_peers[i].pieces[j].set_exist(true);
         }
 
-        //g_peers[i].neighbors = SelectNeighbors();
+        //TODO g_peers[i].neighbors = SelectNeighbors();
     }
 }
 
+/*
+ * Peer ID: NUM_SEED ~ (NUM_SEED + NUM_LEECH - 1),
+ * About 50% pieces
+ *
+ * NOTE: Not every peer have 50% of its picces certainly, decided by prob.
+ *
+ * * */
 void PeerManager::InitLeeches_() const {
-    // TODO
-    // 100 leechs, about 50% pieces, probably have three different speeds
-    /* control prob. not over TARGET_PROB
+    /* control the prob to make it not larger than TARGET_PROB
     const double AVG_TARGET_PROB = 0.5;
     double target_prob = AVG_TARGET_PROB * (double)NUM_PEER;
     */
     const int init_idx = args_.NUM_SEED;  // initial leech number: 0 + NUM_SEED
+
     std::cout.precision(2);
+
     for (int i = init_idx; i < args_.NUM_PEER; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
-        double prob_leech = (double)g_rand_num / RANDMAX;
+        double prob_leech = (double)g_rand_num / k_randmax;
         g_rand_num = uniformdist::rand();
         GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
     }
