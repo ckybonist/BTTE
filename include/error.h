@@ -5,7 +5,7 @@
 // #include <string>
 #include <cstdlib>
 
-inline void ExitError(const std::string &error) {
+void ExitError(const std::string &error) {
     std::cout << error << std::endl;
     exit(EXIT_FAILURE);
 }

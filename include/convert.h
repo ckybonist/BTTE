@@ -12,7 +12,7 @@ class Convert
 {
 public:
     template <typename T>
-    static inline std::string T_to_str(T const &val)
+    static std::string T_to_str(T const &val)
     {
         std::ostringstream oss;
         oss << val;
@@ -20,7 +20,7 @@ public:
     }
 
     template <typename T>
-    static inline T str_to_T(std::string const &val)
+    static T str_to_T(std::string const &val)
     {
         std::istringstream iss(val);
         T result;
