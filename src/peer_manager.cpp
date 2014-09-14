@@ -9,6 +9,19 @@
 #include "trans_time.h"
 #include "peer_manager.h"
 
+PeerManager::PeerManager(const Args &args) {
+    args_ = args;
+}
+
+void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
+    int *peer_list = nullptr;
+    peer_list = ips.ChoosePeers();
+    if(peer_list == nullptr) {
+        ExitError("Error occured when selecting neighbors.");
+    }
+    g_peers[2].neighbors = peer_list;
+}
+
 /*
  * Check amount of each class' peers
  * is reach the target of distributed-rate
@@ -51,7 +64,8 @@ static int ExcludeSet(int *set, const int set_size,
                 break;
             } else {
                 flag = false;
-            } }
+            }
+        }
 	}
 	return target;
 }
@@ -79,19 +93,6 @@ static int ExcludeNum(const int num, const int min, const int max) {
 	} else {
 		return num;
 	}
-}
-
-PeerManager::PeerManager(const Args &args) {
-    args_ = args;
-}
-
-void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
-    int *peer_list = nullptr;
-    peer_list = ips.ChoosePeers();
-    if(peer_list == nullptr) {
-        ExitError("Error occured when selecting neighbors.");
-    }
-    g_peers[2].neighbors = peer_list;
 }
 
 void PeerManager::AllotTransTime_() const {
