@@ -4,7 +4,7 @@
 #include <iostream>
 //#include <string>
 
-const int k_piece_size = 512 * 1024 * 8;
+const int g_k_piece_size = 512 * 1024 * 8;  // bits
 
 struct Piece {
     public:

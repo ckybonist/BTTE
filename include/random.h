@@ -1,7 +1,7 @@
 #ifndef _RANDOM_H
 #define _RANDOM_H
 
-const long long k_randmax = 2147483647;  // C++ RAND_MAX Macro
+const long long g_k_randmax = 2147483647;  // C++ RAND_MAX Macro
 
 extern long long g_rand_num;
 
