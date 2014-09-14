@@ -8,6 +8,7 @@ struct Peer {
     int cid;          // cluster id
     float time_per_piece; // time that spends for each piece
     bool is_seed;
+    bool is_leech;
     bool in_swarm;
 
     Piece *pieces;
