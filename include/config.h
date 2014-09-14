@@ -1,5 +1,5 @@
-#ifndef _CONFIGFILE_H
-#define _CONFIGFILE_H
+#ifndef _CONFIG_H
+#define _CONFIG_H
 
 #include <iostream>
 //#include <string>
@@ -33,4 +33,4 @@ class Config {
         void ReadConf_();
 };
 
-#endif // for #ifndef _CONFIGFILE_H
+#endif // for #ifndef _CONFIG_H

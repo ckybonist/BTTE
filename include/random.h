@@ -1,5 +1,5 @@
-#ifndef _UNIFORMRANDOM_H
-#define _UNIFORMRANDOM_H
+#ifndef _RANDOM_H
+#define _RANDOM_H
 
 const long long k_randmax = 2147483647;  // C++ RAND_MAX Macro
 
@@ -11,4 +11,4 @@ void srand(int);
 int RangeRand(const int low, const int up);
 }
 
-#endif // for #ifndef _RANDOMGENERATOR_H
+#endif // for #ifndef _RANDOM_H

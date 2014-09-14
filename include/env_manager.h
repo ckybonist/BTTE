@@ -1,5 +1,5 @@
-#ifndef __INITENV_H__
-#define __INITENV_H__
+#ifndef _ENV_MANAGER_H
+#define _ENV_MANAGER_H
 
 #include <iostream>
 #include <string>
@@ -35,4 +35,4 @@ public:
 };
 */
 
-#endif
+#endif // for #ifndef _ENV_MANAGER_H
