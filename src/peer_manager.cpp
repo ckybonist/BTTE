@@ -1,25 +1,25 @@
 #ifndef _PEERMANAGER_CPP
 #define _PEERMANAGER_CPP
 
-#include <cstdlib>
+//#include <cstdlib>
 
 #include "error.h"
 #include "piece.h"
 #include "random.h"
-#include "trans_time.h"
+#include "peer_level.h"
 #include "peer_manager.h"
+
 
 PeerManager::PeerManager(const Args &args) {
     args_ = args;
 }
 
 void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
-    int *peer_list = nullptr;
-    peer_list = ips.ChoosePeers();
+    int *peer_list = ips.ChoosePeers();
     if(peer_list == nullptr) {
         ExitError("Error occured when selecting neighbors.");
     }
-    g_peers[2].neighbors = peer_list;
+    //g_peers[2].neighbors = peer_list;
 }
 
 /*
@@ -31,8 +31,9 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
  * @volume : total amount of peers
  *
  * */
-static bool RateEnough(int idx, int amount, int num_peer) {
-	int limit = (float)k_dist_rate[idx] / (float)100 * num_peer;
+//static bool RateEnough(const int level, const int amount, const int NUM_PEER) {
+static bool RateEnough(const int level, const int amount, const int NUM_PEER) {
+	const int limit = static_cast<int>(g_k_peer_level[level].dist_rate * NUM_PEER);
 	return (amount == limit);
 }
 
@@ -50,97 +51,89 @@ static bool RateEnough(int idx, int amount, int num_peer) {
  *	   without that exclusive set
  *
  * */
-static int ExcludeSet(int *set, const int set_size,
-                      const int min, const int max) {
+static int ExcludeSet(const int (&ex_set)[g_k_num_level]) {
 	int target = 0;
 	bool flag = true;
+    const int k_min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
+    const int k_max = g_k_num_level;
 
-	while (flag) {
-        target = uniformdist::RangeRand(min, max);
+	while(flag) {
+		//target = roll(k_min, k_max);
+		target = uniformdist::RangeRand(k_min, k_max);
 
-		for (int i = 0; i < set_size; i++) {
-			if (target == set[i] && set[i] != 0) {
-			//if (target == set[i]) {
-                break;
-            } else {
-                flag = false;
-            }
-        }
+		for(int i = 0; i < g_k_num_level; i++) {
+			//if(target == ex_set[i] && ex_set[i] != 0)
+			if(target == ex_set[i]) {
+				flag = true;
+				break;
+			} else {
+				flag = false;
+			}
+		}
 	}
+
 	return target;
 }
 
-/*
- * Exclude specific number in the random number set
- *
- * Args:
- *     @num : the number be excluded
- *     @min : minimum for range of numbers
- *     @max : maximum for range of numbers
- *
- * Return:
- *	   the value within the specific range but
- *	   without exclusive number
- *
- * Note: Currently not using this function. Being reserved.
- *
- * */
-static int ExcludeNum(const int num, const int min, const int max) {
-    int target = uniformdist::RangeRand(min, max);
-
-	if (target == num) {
-		ExcludeNum(num, min, max);
-	} else {
-		return num;
-	}
-}
 
 /*
  * Alloting all peers with three different
  * transmission time (downlink speed)
  *
+ * NOTE: Each level has its distribution rate (dist_rate in peer_level.h)
+ *
  * * */
-void PeerManager::AllotTransTime_() const {
-	int ex_set[k_num_transtime] = {0};
-	int counts[k_num_transtime] = {0};
+void PeerManager::AllotPeerLevel_() const {
+	int count[g_k_num_level] = { 0 };
+	int ex_set[g_k_num_level] = { 0 };
 
-	for (int i = 0; i < args_.NUM_PEER; i++) {
-		//int idx = ExcludeSet(ex_set, NUM_TRANSTIME, 0, 2);
-        int idx = uniformdist::RangeRand(0, 2);
+    const int num_peer = args_.NUM_PEER;
+	for(int i = 0; i < num_peer; i++)
+    {
+		int level = ExcludeSet(ex_set);  // create level for each peer
 
-		g_peers[i].time_per_piece = k_trans_time[idx];
+		g_peers[i].time_per_piece = g_k_peer_level[level-1].trans_time;
 
-        /* counter for amount of class,  MUST PLACE ABOVE THE RateEnough() */
-		++counts[idx];
+		++count[level-1];  // count the amount of class, place above the RateEnough()
 
-		 // Check the amount of peers' class is
-		 // fullfill our requirement
-		if (RateEnough(idx, counts[idx], args_.NUM_PEER)) {
-			if(ex_set[idx] == 0) {
-                ex_set[idx] = idx;
-            }
+		if(RateEnough(level-1, count[level-1], num_peer))
+		{
+			if(ex_set[level-1] == 0)
+				ex_set[level-1] = level;
 		}
 	}
+
+    std::cout << "\nex_set: \n";
+    for(int i = 0; i < 3; i++) {
+        std::cout << ex_set[i] << " ";
+    }
+    std::cout << "\n";
+    std::cout << "\nCounts: \n";
+    for(int i = 0; i < 3; i++) {
+        std::cout << count[i] << " ";
+    }
+    std::cout << "\n\n\n";
 }
 
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds_() const {
-    // TODO
     for (int i = 0; i < args_.NUM_SEED; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
         g_peers[i].is_seed = true;
 
+        g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
+
         for (int j = 0; j < args_.NUM_PIECE; j++) {
             g_peers[i].pieces[j].set_exist(true);
         }
 
-        //TODO g_peers[i].neighbors = SelectNeighbors();
+        //TODO : g_peers[i].neighbors = SelectNeighbors();
     }
 }
 
 /*
- * Peer ID: NUM_SEED ~ (NUM_SEED + NUM_LEECH - 1),
+ * Peer ID: NUM_SEED ~ (NUM_SEED + NUM_LEECH),
  * About 50% pieces
  *
  * NOTE: Not every peer have 50% of its picces certainly, decided by prob.
@@ -151,15 +144,23 @@ void PeerManager::InitLeeches_() const {
     const double AVG_TARGET_PROB = 0.5;
     double target_prob = AVG_TARGET_PROB * (double)NUM_PEER;
     */
-    const int init_idx = args_.NUM_SEED;  // initial leech number: 0 + NUM_SEED
+    const int start = args_.NUM_SEED;
+    const int end = start + args_.NUM_LEECH;
 
     std::cout.precision(2);
 
-    for (int i = init_idx; i < args_.NUM_PEER; i++) {
+    std::cout << "Prob of each leech: \n";
+    for (int i = start; i < end; i++) {
         g_peers[i].id = i;
         g_peers[i].in_swarm = true;
-        double prob_leech = (double)g_rand_num / k_randmax;
-        g_rand_num = uniformdist::rand();
+        g_peers[i].is_leech = true;
+
+        g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
+
+        double prob_leech = (double)(uniformdist::rand()) / g_k_randmax;
+
+        std::cout << prob_leech << "\n\n";
+
         GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
     }
 }
@@ -172,35 +173,48 @@ void PeerManager::NewPeer(int id) const {
 void PeerManager::CreatePeers() const {
     const int &NUM_PEER = args_.NUM_PEER;
 
+    // DEBUG
+    std::cout << "Transmission time of each class:\n";
+    for(int i = 0; i < g_k_num_level; i++) {
+        switch(i) {
+            case 0:
+                std::cout << "Class "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                break;
+            case 1:
+                std::cout << "Class "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                break;
+            case 2:
+                std::cout << "Class "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                break;
+        }
+    }
+    std::cout << "\n";
+
     g_peers = new Peer[NUM_PEER];
     if (g_peers == nullptr) {
         ExitError("Allocate memory of peers is fault!\n");
     }
 
-    // init peers and pieces
+    /* init seeds, leeches and their pieces */
     for (int i = 0; i < NUM_PEER; i++) { g_peers[i].id = i; }
-
-    AllotTransTime_();
-
-    //InitSeeds_();
-
-    //InitLeeches_();
+    AllotPeerLevel_();
+    InitSeeds_();
+    InitLeeches_();
 }
 
 void PeerManager::DestroyPeers() {
-    int num_peer = sizeof(g_peers) / sizeof(int);
-    /*
-    for (int i = 0; i < num_peer; i++) {
-        //delete peers[i].pgdelay;
-        //peers[i].pgdelay = nullptr;
+    for (int i = 0; i < args_.NUM_PEER; i++) {
+        //delete g_peers[i].pgdelay;
+        //g_peers[i].pgdelay = nullptr;
 
-        //delete peers[i].pieces;
-        //peers[i].pieces = nullptr;
+        if(g_peers[i].pieces != nullptr) {
+            delete g_peers[i].pieces;
+            g_peers[i].pieces = nullptr;
+        }
 
-        //delete peers[i].neighbors;
-        //peers[i].neighbors = nullptr;
+        //delete g_peers[i].neighbors;
+        //g_peers[i].neighbors = nullptr;
     }
-    */
 
     delete [] g_peers;
     g_peers = nullptr;
