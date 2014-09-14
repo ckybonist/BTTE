@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cstdlib>
+//#include <cstdlib> // if use normal srand()
 
 #include "args.h"
 #include "error.h"
@@ -13,16 +13,20 @@ void DebugInfo(const Args &args) {
 
     int piece_count;
 
+    cout.precision(6);
+    cout << "Info of each peer: \n";
     for(int i = 0; i < args.NUM_PEER; i++) {
         // id info
         cout << "Peer ID: " << g_peers[i].id << endl;
         cout << "Cluster ID: " << g_peers[i].cid << endl;
 
         // seed info
-        if(true == g_peers[i].is_seed)
+        if (true == g_peers[i].is_seed)
             cout << "I'm a seeder" << endl;
+        else if (true == g_peers[i].is_leech)
+            cout << "I'm a leecher" << endl;
         else
-            cout << "I'm still downloading" << endl;
+            cout << "I'm not ready for downloading" << endl;
 
         cout << g_peers[i].time_per_piece << endl;
 
@@ -43,14 +47,15 @@ void DebugInfo(const Args &args) {
     }
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[])
+{
     if(argc == 1) {
         ExitError("First argument: path of config file");
     } else if (argc > 2) {
         ExitError("Too much arguments.");
     }
 
-    //uniformdist::srand((unsigned) time(0));  // slow speed
+    //uniformdist::srand((unsigned) time(0));  // FIXME: slow speed
     uniformdist::srand(1);  // for testing
 
     /* read arguments */
