@@ -11,8 +11,6 @@ void DebugInfo(const Args &args) {
     using std::cout;
     using std::endl;
 
-    int piece_count;
-
     cout.precision(6);
     cout << "Info of each peer: \n";
     for(int i = 0; i < args.NUM_PEER; i++) {
@@ -30,17 +28,16 @@ void DebugInfo(const Args &args) {
 
         cout << g_peers[i].time_per_piece << endl;
 
-        // pieces info
-        /*
-        piece_count = 0;
-        for(int j = 0; j < args.NUM_PIECE; j++)
-        {
-            //if(true == g_peers[i].pieces[j].getStatus()) { ++piece_count; }
-            cout << "piece no: " << g_peers[i].pieces[j].getNo() << endl;
-            cout << "piece download status: " << g_peers[i].pieces[j].getStatus() << endl;
+        // piece info
+        if(i < (args.NUM_SEED + args.NUM_LEECH)) {
+            int piece_count = 0;
+            for(int j = 0; j < args.NUM_PIECE; j++) {
+                if(true == g_peers[i].pieces[j]) ++piece_count;
+            }
+            cout << "Number of downloaded pieces: " << piece_count << endl;
+            cout << "Number of empty pieces: " << (args.NUM_PIECE - piece_count) << endl;
         }
-        */
-        //cout << "Number of downloaded pieces: " << piece_count << endl;
+
         cout << endl;
         cout << "---------------------------";
         cout << endl;
