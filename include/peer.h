@@ -3,7 +3,7 @@
 
 #include "piece.h"
 
-struct PeerList;  // forward declaration
+struct Neighbor;  // forward declaration
 
 struct Peer {
     int id;
@@ -15,8 +15,7 @@ struct Peer {
     Piece *pieces;
     float time_per_piece; // time that spends for each piece
 
-    //int *neighbors;  // peer list
-    PeerList *neighbors;  // peer list
+    Neighbor *neighbors;  // neighbor list size is in config file, dynamic arr
 
     //float *pgdelay;  // propagation delay
     float time;      // time for getting all pieces
