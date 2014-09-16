@@ -6,16 +6,16 @@
 struct Neighbor;  // forward declaration
 
 struct Peer {
-    int id;
+    int id;           // different with index of struct array
     int cid;          // cluster id
     bool is_seed;
     bool is_leech;
     bool in_swarm;
 
-    Piece *pieces;  // size is in config file, dynamic arr
+    bool *pieces;  // size is in config file, dynamic array
     float time_per_piece; // time that spends for each piece
 
-    Neighbor *neighbors;  // neighbor list size is in config file, dynamic arr
+    Neighbor *neighbors;  // neighbor list size is in config file, dynamic array
 
     float start_time;    // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded

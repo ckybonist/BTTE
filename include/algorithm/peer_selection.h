@@ -6,7 +6,7 @@
 class IPeerSelection
 {
 public:
-    virtual int *ChoosePeers() = 0;
+    virtual Neighbor *ChoosePeers() = 0;
 
 protected:
     virtual float *AllotPGDelay() = 0;
@@ -16,7 +16,7 @@ protected:
 class Random : protected IPeerSelection
 {
 public:
-    int *ChoosePeers();
+    Neighbor *ChoosePeers();
 
 protected:
     float *AllotPGDelay();
@@ -26,7 +26,7 @@ protected:
 class LoadBalance : protected IPeerSelection
 {
 public:
-    int *ChoosePeers();
+    Neighbor *ChoosePeers();
 
 protected:
     float *AllotPGDelay();
@@ -59,7 +59,7 @@ protected:
 class ClusterBased : protected IPeerSelection
 {
 public:
-    int *ChoosePeers();
+    Neighbor *ChoosePeers();
 
 protected:
     float *AllotPGDelay();
