@@ -11,9 +11,12 @@ class PeerManager
 {
 public:
     PeerManager(const Args&);
-    void CreatePeers() const;  // init usage
-    void NewPeer(int id) const;  // for peer_join event
-    void SelectNeighbors(IPeerSelection&) const;  // FIXME: argument too less
+    void CreatePeers() const;  // 1. create peers memory-spaces  2. init seeds and leeches
+
+    void NewPeer(const int id, const float start_time) const;  // for peer_join event
+    void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
+
+    void SelectNeighbors(IPeerSelection&, const int) const;  // FIXME: argument too less
     void DestroyPeers();
 
 private:

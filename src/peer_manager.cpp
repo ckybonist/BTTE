@@ -14,12 +14,14 @@ PeerManager::PeerManager(const Args &args) {
     args_ = args;
 }
 
-void PeerManager::SelectNeighbors(IPeerSelection &ips) const {
-    int *peer_list = ips.ChoosePeers();
-    if(peer_list == nullptr) {
+void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const {
+    Neighbor *peer_list = ips.ChoosePeers();
+    if(nullptr == peer_list) {
         ExitError("Error occured when selecting neighbors.");
     }
-    //g_peers[2].neighbors = peer_list;
+
+    const int tid = Get_tid(peer_id);
+    g_peers[tid].neighbors = peer_list;
 }
 
 
@@ -28,8 +30,7 @@ static bool RateEnough(const int level, const int amount, const int NUM_PEER);
 static int ExcludeSet(const int (&ex_set)[g_k_num_level]);
 
 /*
- * Alloting all peers with three different
- * transmission time (downlink speed)
+ * Alloting all peers with three different transmission time (downlink speed)
  *
  * NOTE: Each level has its distribution rate (dist_rate in peer_level.h)
  *
@@ -112,29 +113,59 @@ void PeerManager::InitLeeches_() const {
     std::cout << "\n";
 }
 
-void PeerManager::NewPeer(int id) const {
-    g_peers[id].in_swarm = true;
+// Is the index of g_peers[] indicate the time-order ?
+void PeerManager::NewPeer(const int id, const float start_time) const {
+    // new an object and assign it, more memory space
+    Peer peer(id, start_time, args_.NUM_PIECE);
+    g_peers[g_joinable] = peer;
+
+    /* assign value step by step, less space but more instructions
+    g_peers[g_joinable].id = id;
+    g_peers[g_joinable].in_swarm = true;
+    g_peers[g_joinable].start_time = start_time;
+    g_peers[g_joinable].pieces = MakePieces(args_.NUM_PIECE);
+    */
+    // TODO
+}
+
+// cluster based
+void PeerManager::NewPeer(const int id, const int cid, const float start_time) const {
+    // create a new object and assign
+    Peer peer(id, cid, start_time, args_.NUM_PIECE);
+    g_peers[g_joinable] = peer;
+
+    /* assign value step by step
+    g_peers[g_joinable].id = id;
+    g_peers[g_joinable].cid = cid;
+    g_peers[g_joinable].in_swarm = true;
+    g_peers[g_joinable].start_time = start_time;
+    g_peers[g_joinable].pieces = MakePieces(args_.NUM_PIECE);
+    */
     // TODO
 }
 
 void PeerManager::CreatePeers() const {
-    const int &NUM_PEER = args_.NUM_PEER;
-
     // DEBUG
     for(int i = 0; i < g_k_num_level; i++) {
         switch(i) {
             case 0:
-                std::cout << "Transmission time of level "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                std::cout << "Transmission time of level "<< i << " : "
+                          << g_k_peer_level[i].trans_time << "\n";
                 break;
             case 1:
-                std::cout << "Transmission time of level "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                std::cout << "Transmission time of level "<< i << " : "
+                          << g_k_peer_level[i].trans_time << "\n";
                 break;
             case 2:
-                std::cout << "Transmission time of level "<< i << " : " << g_k_peer_level[i].trans_time << "\n";
+                std::cout << "Transmission time of level "<< i << " : "
+                          << g_k_peer_level[i].trans_time << "\n";
                 break;
         }
     }
     std::cout << "\n";
+
+    // create empty peers
+    const int NUM_PEER = args_.NUM_PEER;
 
     g_peers = new Peer[NUM_PEER];
     if (g_peers == nullptr) {
@@ -142,7 +173,6 @@ void PeerManager::CreatePeers() const {
     }
 
     /* init seeds, leeches and their pieces */
-    for (int i = 0; i < NUM_PEER; i++) { g_peers[i].id = i; }
     AllotPeerLevel_();
     InitSeeds_();
     InitLeeches_();
@@ -150,10 +180,7 @@ void PeerManager::CreatePeers() const {
 
 void PeerManager::DestroyPeers() {
     for (int i = 0; i < args_.NUM_PEER; i++) {
-        //delete g_peers[i].pgdelay;
-        //g_peers[i].pgdelay = nullptr;
-
-        if(g_peers[i].pieces != nullptr) {
+        if(nullptr != g_peers[i].pieces) {
             delete g_peers[i].pieces;
             g_peers[i].pieces = nullptr;
         }
