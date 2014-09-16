@@ -4,6 +4,16 @@
 #include "piece.h"
 #include "peer.h"
 
+Peer *g_peers = nullptr;
+int g_joinable = 1;  // important !
+
+int Get_tid(const int peer_id) {
+    int tid = 0;
+    // TODO
+    return tid;
+};
+
+// for creating empty peers
 Peer::Peer() {
     id = 0;
     cid = 0;

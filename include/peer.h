@@ -27,6 +27,10 @@ struct Peer {
     Peer(const int id, const int cid, const int NUM_PIECE, const float start_time);  // cluster-based peer
 };
 
+// tid: array-index of g_peers, which indicate time-order
 extern Peer *g_peers;
+extern int g_joinable;  // index for next new peer acceding into the swarm
+
+int Get_tid(const int);  // use peer_id to get tid  TODO: use STL <map>
 
 #endif // for #ifndef _PEER_H
