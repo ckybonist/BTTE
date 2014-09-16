@@ -3,25 +3,11 @@
 
 #include <iostream>
 //#include <string>
+//
+//                         512      byte
+const int g_k_piece_size = 512 * (1024 * 8);
 
-const int g_k_piece_size = 512 * 1024 * 8;  // bits
-
-struct Piece {
-    public:
-        Piece() {
-            no_ = 0;
-            exist_ = false;
-        }
-        inline int get_no () const { return no_; }
-        inline bool get_exist () const { return exist_; }
-        inline void set_no(int val) { exist_  = val; }
-        inline void set_exist(bool status) { exist_ = status; }
-    private:
-        int no_;
-        bool exist_;
-};
-
-Piece *MakePieces(const int);
-void GetPieceByProb(Piece*, const double&, const int);
+bool *MakePieces(const int);
+void GetPieceByProb(bool*, const double&, const int);
 
 #endif // for #ifndef _PIECE_H

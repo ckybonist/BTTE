@@ -71,7 +71,7 @@ void PeerManager::InitSeeds_() const {
         g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
 
         for (int j = 0; j < args_.NUM_PIECE; j++) {
-            g_peers[i].pieces[j].set_exist(true);
+            g_peers[i].pieces[j] = true;
         }
 
         //TODO : g_peers[i].neighbors = SelectNeighbors();
@@ -103,7 +103,7 @@ void PeerManager::InitLeeches_() const {
 
         g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
 
-        double prob_leech = (double)(uniformdist::rand()) / g_k_randmax;
+        double prob_leech = (double)(uniformdist::rand()) / g_k_rand_max;
 
         std::cout << prob_leech << "\n";
 
