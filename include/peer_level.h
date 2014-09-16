@@ -10,9 +10,9 @@
  *     @piece_size: 512 (Kbytes)
  *
  * Category of peers:
- *	   @class1 : 10 (Mbps)   seeder  30 %
- *	   @class2 : 128 (Kbps)  leecher or normal peer  50 %
- *	   @class3 : 56 (Kbps)   leecher or normal peer  20 %
+ *	   @level 1 : 10 (Mbps)   seeder  30 %
+ *	   @level 2 : 128 (Kbps)  leecher or normal peer  50 %
+ *	   @level 3 : 56 (Kbps)   leecher or normal peer  20 %
  *
  * */
 
