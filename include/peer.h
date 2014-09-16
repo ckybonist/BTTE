@@ -12,14 +12,15 @@ struct Peer {
     bool is_leech;
     bool in_swarm;
 
-    Piece *pieces;
+    Piece *pieces;  // size is in config file, dynamic arr
     float time_per_piece; // time that spends for each piece
 
     Neighbor *neighbors;  // neighbor list size is in config file, dynamic arr
 
-    //float *pgdelay;  // propagation delay
-    float time;      // time for getting all pieces
-    int counter;     // count of being selected as candidate in other peers' peer lists
+    float start_time;    // start time of peer run the routine
+    float end_time;      // end time of all pieces have been downloaded
+
+    int counts;     // counts of being selected as an candidate in other peers' neighbor lists
 
     Peer();
 };
