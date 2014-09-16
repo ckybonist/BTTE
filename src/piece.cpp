@@ -21,7 +21,7 @@ Piece *MakePieces(const int NUM_PIECE) {
 
 void GetPieceByProb(Piece *pieces, const double &prob_leech, const int NUM_PIECE) {
     for(int i = 0; i < NUM_PIECE; i++) {
-        double prob_piece = (double)uniformdist::rand() / g_k_randmax;
-        pieces[i].set_exist((prob_piece < prob_leech));
+        double prob_piece = (double)uniformdist::rand() / g_k_rand_max;
+        pieces[i] = (prob_piece < prob_leech);
     }
 }

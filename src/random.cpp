@@ -6,7 +6,7 @@ long long g_rand_num = INIT_NUM;
 namespace uniformdist {
 long long rand() {
     /* X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_num = 16807 * g_rand_num % g_k_randmax;
+    g_rand_num = 16807 * g_rand_num % g_k_rand_max;
     return g_rand_num;
 }
 
@@ -17,10 +17,10 @@ void srand(int seed) {
 
 int RangeRand(const int low, const int up) {
     // [low, up]
-	int number = (int)(((double)uniformdist::rand() / ((double)g_k_randmax + 1)) *
+	int number = (int)(((double)uniformdist::rand() / ((double)g_k_rand_max + 1)) *
 			     (up - low + 1)) + low;
     // [low, up)
-	/* int number = (int)(((double)uniformdist::rand() / ((double)g_k_randmax + 1)) *
+	/* int number = (int)(((double)uniformdist::rand() / ((double)g_k_rand_max + 1)) *
 			     (up - low)) + low; */
 	return number;
 }
