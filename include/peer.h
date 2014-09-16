@@ -22,7 +22,9 @@ struct Peer {
 
     int counts;     // counts of being selected as an candidate in other peers' neighbor lists
 
-    Peer();
+    Peer();  // empty peer
+    Peer(const int id, const int NUM_PIECE, const float start_time);  // normal peer
+    Peer(const int id, const int cid, const int NUM_PIECE, const float start_time);  // cluster-based peer
 };
 
 extern Peer *g_peers;
