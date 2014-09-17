@@ -75,6 +75,7 @@ void PeerManager::InitSeeds_() const {
             g_peers[i].pieces[j] = true;
         }
 
+        g_joinable++;
         //TODO : g_peers[i].neighbors = SelectNeighbors();
     }
 }
@@ -109,6 +110,8 @@ void PeerManager::InitLeeches_() const {
         std::cout << prob_leech << "\n";
 
         GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
+
+        g_joinable++;
     }
     std::cout << "\n";
 }

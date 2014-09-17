@@ -42,6 +42,7 @@ void DebugInfo(const Args &args) {
         cout << "---------------------------";
         cout << endl;
     }
+    cout << "\n\nJoinable: " << g_joinable;
 }
 
 int main(int argc, const char *argv[])
