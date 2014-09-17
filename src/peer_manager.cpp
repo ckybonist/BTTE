@@ -10,6 +10,11 @@
 #include "peers_dict.h"
 #include "peer_manager.h"
 
+/* forward declarations */
+static bool RateEnough(const int level, const int amount, const int NUM_PEER);
+static int ExcludeSet(const int (&ex_set)[g_k_num_level]);
+static void InitPDict(const int init_peer_amount);
+
 
 PeerManager::PeerManager(const Args &args) {
     args_ = args;
@@ -21,14 +26,10 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const 
         ExitError("Error occured when selecting neighbors.");
     }
 
-    const int tid = g_pdict.tids[peer_id];
+    const int tid = g_pdict[peer_id];
     g_peers[tid].neighbors = peer_list;
 }
 
-
-/* forward declarations */
-static bool RateEnough(const int level, const int amount, const int NUM_PEER);
-static int ExcludeSet(const int (&ex_set)[g_k_num_level]);
 
 /*
  * Alloting all peers with three different transmission time (downlink speed)
@@ -123,7 +124,7 @@ void PeerManager::NewPeer(const int id, const float start_time) const {
     if(g_last_join < args_.NUM_PEER) {
         Peer peer(id, start_time, args_.NUM_PIECE);
         g_peers[g_last_join + 1] = peer;
-        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_pdict[id] = g_last_join;  // map peer_id to tid
         g_last_join++;
     } else {
         std::cout << "Peers amount is full\n";
@@ -132,7 +133,7 @@ void PeerManager::NewPeer(const int id, const float start_time) const {
     /* assign value step by step, less space but more instructions
     if(g_last_join < args_.NUM_PEER) {
         g_peers[g_last_join + 1].id = id;
-        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_pdict[id] = g_last_join;  // map peer_id to tid
 
         g_peers[g_last_join + 1].in_swarm = true;
         g_peers[g_last_join + 1].start_time = start_time;
@@ -151,7 +152,7 @@ void PeerManager::NewPeer(const int id, const int cid, const float start_time) c
     if(g_last_join < args_.NUM_PEER) {
         Peer peer(id, cid, start_time, args_.NUM_PIECE);
         g_peers[g_last_join + 1] = peer;
-        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_pdict[id] = g_last_join;  // map peer_id to tid
         g_last_join++;
     } else {
         std::cout << "Peers amount is full\n";
@@ -160,7 +161,7 @@ void PeerManager::NewPeer(const int id, const int cid, const float start_time) c
     /* assign value step by step
     if(g_last_join < args_.NUM_PEER) {
         g_peers[g_last_join + 1].id = id;
-        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_pdict[id] = g_last_join;  // map peer_id to tid
         g_peers[g_last_join + 1].cid = cid;
 
         g_peers[g_last_join + 1].in_swarm = true;
@@ -206,7 +207,12 @@ void PeerManager::CreatePeers() const {
     AllotPeerLevel_();
     InitSeeds_();
     InitLeeches_();
-    g_pdict = PeersDict(args_.NUM_SEED, args_.NUM_LEECH);
+    InitPDict((args_.NUM_SEED + args_.NUM_LEECH));
+
+    std::cout << "Info of pdict<key: pid, val: tid> \n";
+    for(int i = 0; i < args_.NUM_SEED+args_.NUM_LEECH; i++)
+        std::cout << "tid of peer#" << i << ": " << g_pdict[i] << "\n";
+    std::cout << "\n\n";
 }
 
 void PeerManager::DestroyPeers() {
@@ -275,6 +281,12 @@ static int ExcludeSet(const int (&ex_set)[g_k_num_level]) {
 	}
 
 	return target;
+}
+
+static void InitPDict(const int init_peer_amount) {
+    for(int i = 0; i < init_peer_amount; ++i) {
+        g_pdict[i] = i;
+    }
 }
 
 #endif // for #ifndef _PEERMANAGER_CPP
