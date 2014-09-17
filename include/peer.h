@@ -1,6 +1,8 @@
 #ifndef _PEER_H
 #define _PEER_H
 
+#include <map>
+
 #include "piece.h"
 
 struct Neighbor;  // forward declaration
@@ -29,8 +31,6 @@ struct Peer {
 
 // tid: array-index of g_peers, which indicate time-order
 extern Peer *g_peers;
-extern int g_joinable;  // index for next new peer acceding into the swarm
-
-int Get_tid(const int);  // use peer_id to get tid  TODO: use STL <map>
+extern int g_last_join;  // tid for next new peer acceding into the swarm
 
 #endif // for #ifndef _PEER_H

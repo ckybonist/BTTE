@@ -42,7 +42,7 @@ void DebugInfo(const Args &args) {
         cout << "---------------------------";
         cout << endl;
     }
-    cout << "\n\nJoinable: " << g_joinable;
+    cout << "\n\ntid of the last peer which join into the swarm: " << g_last_join;
 }
 
 int main(int argc, const char *argv[])

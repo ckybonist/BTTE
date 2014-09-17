@@ -1,17 +1,9 @@
-#include <map>
-
 #include "error.h"
 #include "piece.h"
 #include "peer.h"
 
 Peer *g_peers = nullptr;
-int g_joinable = 1;  // important !
-
-int Get_tid(const int peer_id) {
-    int tid = 0;
-    // TODO
-    return tid;
-};
+int g_last_join = 0;  // important !
 
 // for creating empty peers
 Peer::Peer() {

@@ -7,6 +7,7 @@
 #include "piece.h"
 #include "random.h"
 #include "peer_level.h"
+#include "peers_dict.h"
 #include "peer_manager.h"
 
 
@@ -20,7 +21,7 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const 
         ExitError("Error occured when selecting neighbors.");
     }
 
-    const int tid = Get_tid(peer_id);
+    const int tid = g_pdict.tids[peer_id];
     g_peers[tid].neighbors = peer_list;
 }
 
@@ -40,16 +41,14 @@ void PeerManager::AllotPeerLevel_() const {
 	int ex_set[g_k_num_level] = { 0 };
 
     const int num_peer = args_.NUM_PEER;
-	for(int i = 0; i < num_peer; i++)
-    {
+	for(int i = 0; i < num_peer; i++) {
 		int level = ExcludeSet(ex_set);  // create level for each peer
 
 		g_peers[i].time_per_piece = g_k_peer_level[level-1].trans_time;
 
 		++count[level-1];  // count the amount of class, place above the RateEnough()
 
-		if(RateEnough(level-1, count[level-1], num_peer))
-		{
+		if(RateEnough(level-1, count[level-1], num_peer)) {
 			if(ex_set[level-1] == 0)
 				ex_set[level-1] = level;
 		}
@@ -66,6 +65,7 @@ void PeerManager::AllotPeerLevel_() const {
 void PeerManager::InitSeeds_() const {
     for (int i = 0; i < args_.NUM_SEED; i++) {
         g_peers[i].id = i;
+
         g_peers[i].in_swarm = true;
         g_peers[i].is_seed = true;
 
@@ -75,7 +75,7 @@ void PeerManager::InitSeeds_() const {
             g_peers[i].pieces[j] = true;
         }
 
-        g_joinable++;
+        g_last_join++;
         //TODO : g_peers[i].neighbors = SelectNeighbors();
     }
 }
@@ -95,23 +95,24 @@ void PeerManager::InitLeeches_() const {
     const int start = args_.NUM_SEED;
     const int end = start + args_.NUM_LEECH;
 
-    std::cout.precision(2);
+    std::cout.precision(3);
 
     std::cout << "Prob of each leech: \n";
     for (int i = start; i < end; i++) {
         g_peers[i].id = i;
+
         g_peers[i].in_swarm = true;
         g_peers[i].is_leech = true;
 
         g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
 
-        double prob_leech = (double)(uniformdist::rand()) / g_k_rand_max;
+        double prob_leech = (uniformdist::rand()) / (double)g_k_rand_max;
 
         std::cout << prob_leech << "\n";
 
         GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
 
-        g_joinable++;
+        g_last_join++;
     }
     std::cout << "\n";
 }
@@ -119,14 +120,27 @@ void PeerManager::InitLeeches_() const {
 // Is the index of g_peers[] indicate the time-order ?
 void PeerManager::NewPeer(const int id, const float start_time) const {
     // new an object and assign it, more memory space
-    Peer peer(id, start_time, args_.NUM_PIECE);
-    g_peers[g_joinable] = peer;
+    if(g_last_join < args_.NUM_PEER) {
+        Peer peer(id, start_time, args_.NUM_PIECE);
+        g_peers[g_last_join + 1] = peer;
+        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_last_join++;
+    } else {
+        std::cout << "Peers amount is full\n";
+    }
 
     /* assign value step by step, less space but more instructions
-    g_peers[g_joinable].id = id;
-    g_peers[g_joinable].in_swarm = true;
-    g_peers[g_joinable].start_time = start_time;
-    g_peers[g_joinable].pieces = MakePieces(args_.NUM_PIECE);
+    if(g_last_join < args_.NUM_PEER) {
+        g_peers[g_last_join + 1].id = id;
+        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+
+        g_peers[g_last_join + 1].in_swarm = true;
+        g_peers[g_last_join + 1].start_time = start_time;
+
+        g_peers[g_last_join + 1].pieces = MakePieces(args_.NUM_PIECE);
+
+        g_last_join++;
+    }
     */
     // TODO
 }
@@ -134,15 +148,28 @@ void PeerManager::NewPeer(const int id, const float start_time) const {
 // cluster based
 void PeerManager::NewPeer(const int id, const int cid, const float start_time) const {
     // create a new object and assign
-    Peer peer(id, cid, start_time, args_.NUM_PIECE);
-    g_peers[g_joinable] = peer;
+    if(g_last_join < args_.NUM_PEER) {
+        Peer peer(id, cid, start_time, args_.NUM_PIECE);
+        g_peers[g_last_join + 1] = peer;
+        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_last_join++;
+    } else {
+        std::cout << "Peers amount is full\n";
+    }
 
     /* assign value step by step
-    g_peers[g_joinable].id = id;
-    g_peers[g_joinable].cid = cid;
-    g_peers[g_joinable].in_swarm = true;
-    g_peers[g_joinable].start_time = start_time;
-    g_peers[g_joinable].pieces = MakePieces(args_.NUM_PIECE);
+    if(g_last_join < args_.NUM_PEER) {
+        g_peers[g_last_join + 1].id = id;
+        g_pdict.tids[id] = g_last_join;  // map peer_id to tid
+        g_peers[g_last_join + 1].cid = cid;
+
+        g_peers[g_last_join + 1].in_swarm = true;
+        g_peers[g_last_join + 1].start_time = start_time;
+
+        g_peers[g_last_join + 1].pieces = MakePieces(args_.NUM_PIECE);
+
+        g_last_join++;
+    }
     */
     // TODO
 }
@@ -179,6 +206,7 @@ void PeerManager::CreatePeers() const {
     AllotPeerLevel_();
     InitSeeds_();
     InitLeeches_();
+    g_pdict = PeersDict(args_.NUM_SEED, args_.NUM_LEECH);
 }
 
 void PeerManager::DestroyPeers() {
