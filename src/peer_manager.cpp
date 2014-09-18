@@ -96,7 +96,7 @@ void PeerManager::InitLeeches_() const {
     const int start = args_.NUM_SEED;
     const int end = start + args_.NUM_LEECH;
 
-    std::cout.precision(3);
+    std::cout.precision(2);
 
     std::cout << "Prob of each leech: \n";
     for (int i = start; i < end; i++) {
@@ -107,7 +107,11 @@ void PeerManager::InitLeeches_() const {
 
         g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
 
-        double prob_leech = (uniformdist::rand()) / (double)g_k_rand_max;
+        double prob_leech = 0;
+        while(1) {
+            prob_leech = (uniformdist::rand()) / (double)g_k_rand_max;
+            if(prob_leech >= 0.1) break;
+        }
 
         std::cout << prob_leech << "\n";
 
