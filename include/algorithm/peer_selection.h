@@ -1,7 +1,8 @@
 #ifndef _PEER_SELECTION_H
 #define _PEER_SELECTION_H
 
-#include "peer.h"
+struct Peer;
+struct Neighbor;
 
 class IPeerSelection
 {
@@ -65,7 +66,7 @@ protected:
     float *AllotPGDelay();
 
 private:
-    void setClusterID_(Peer&);
+    void setClusterID_(Peer &peers);
 };
 
 #endif // for #ifndef _PEER_SELECTION_H
