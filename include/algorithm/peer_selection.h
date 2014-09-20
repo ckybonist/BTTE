@@ -1,5 +1,5 @@
-#ifndef _PEERSELECTION_H
-#define _PEERSELECTION_H
+#ifndef _PEER_SELECTION_H
+#define _PEER_SELECTION_H
 
 #include "peer.h"
 
@@ -68,4 +68,4 @@ private:
     void setClusterID_(Peer&);
 };
 
-#endif // for #ifndef _PEERSELECTION_H
+#endif // for #ifndef _PEER_SELECTION_H
