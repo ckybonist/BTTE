@@ -1,19 +1,15 @@
-#ifndef _PEERMANAGER_CPP
-#define _PEERMANAGER_CPP
-
 //#include <cstdlib>
 
 #include "error.h"
 #include "piece.h"
 #include "random.h"
 #include "peer_level.h"
-#include "peers_dict.h"
 #include "peer_manager.h"
 
 /* forward declarations */
-static bool RateEnough(const int level, const int amount, const int NUM_PEER);
+static bool PeerEnough(const int NUM_PEER, const int k_cur);
+static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER);
 static int ExcludeSet(const int (&ex_set)[g_k_num_level]);
-static void InitPDict(const int init_peer_amount);
 
 
 PeerManager::PeerManager(const Args &args) {
@@ -26,10 +22,8 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const 
         ExitError("Error occured when selecting neighbors.");
     }
 
-    const int tid = g_pdict[peer_id];
-    g_peers[tid].neighbors = peer_list;
+    g_peers[peer_id].neighbors = peer_list;
 }
-
 
 /*
  * Alloting all peers with three different transmission time (downlink speed)
@@ -37,6 +31,7 @@ void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const 
  * NOTE: Each level has its distribution rate (dist_rate in peer_level.h)
  *
  * * */
+/*
 void PeerManager::AllotPeerLevel_() const {
 	int count[g_k_num_level] = { 0 };
 	int ex_set[g_k_num_level] = { 0 };
@@ -61,23 +56,46 @@ void PeerManager::AllotPeerLevel_() const {
     }
     std::cout << "\n\n";
 }
+*/
+void PeerManager::AllotPeerLevel_() {
+    const int NUM_PEER = args_.NUM_PEER;
+
+    peers_bandwidth = new float[NUM_PEER];
+    if(nullptr == peers_bandwidth) {
+        ExitError("Memory Allocation Fault");
+    }
+
+	int count[g_k_num_level] = { 0 };
+	int ex_set[g_k_num_level] = { 0 };
+
+	for(int i = 0; i < NUM_PEER; i++) {
+		int level = ExcludeSet(ex_set);  // create level for each peer
+
+		peers_bandwidth[i] = g_k_peer_level[level-1].trans_time;
+
+		++count[level-1];  // count the amount of class, place above the RateEnough()
+
+		if(RateEnough(level-1, count[level-1], args_.NUM_PEER)) {
+			if(ex_set[level-1] == 0)
+				ex_set[level-1] = level;
+		}
+	}
+
+    for(int i = 0; i < 3; i++) {
+        std::cout << "Amount of level " << i + 1 << " peers: "
+                  << count[i] << "\n";
+    }
+    std::cout << "\n\n";
+}
 
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds_() const {
     for (int i = 0; i < args_.NUM_SEED; i++) {
-        g_peers[i].id = i;
 
-        g_peers[i].in_swarm = true;
-        g_peers[i].is_seed = true;
-
-        g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
-
-        for (int j = 0; j < args_.NUM_PIECE; j++) {
-            g_peers[i].pieces[j] = true;
-        }
-
-        g_last_join++;
-        //TODO : g_peers[i].neighbors = SelectNeighbors();
+        // third arg was nullptr because peer selection not implement yet
+        //TODO : Neighbor *neighbors = SelectNeighbors();
+        Neighbor *neighbors = nullptr;
+        g_peers[i] = Peer(i, peers_bandwidth[i], nullptr, args_.NUM_PIECE);  // 3rd was nullptr until peer selection have completed
     }
 }
 
@@ -89,97 +107,45 @@ void PeerManager::InitSeeds_() const {
  *
  * * */
 void PeerManager::InitLeeches_() const {
-    /* control the prob to make it not larger than TARGET_PROB
-    const double AVG_TARGET_PROB = 0.5;
-    double target_prob = AVG_TARGET_PROB * (double)NUM_PEER;
-    */
-    const int start = args_.NUM_SEED;
-    const int end = start + args_.NUM_LEECH;
+    const int k_start = args_.NUM_SEED;
+    const int k_end = k_start + args_.NUM_LEECH;
 
-    std::cout.precision(2);
+    std::cout.precision(3);
 
     std::cout << "Prob of each leech: \n";
-    for (int i = start; i < end; i++) {
-        g_peers[i].id = i;
-
-        g_peers[i].in_swarm = true;
-        g_peers[i].is_leech = true;
-
-        g_peers[i].pieces = MakePieces(args_.NUM_PIECE);
+    for (int i = k_start; i < k_end; i++) {
 
         double prob_leech = 0;
         while(1) {
             prob_leech = (uniformdist::rand()) / (double)g_k_rand_max;
-            if(prob_leech >= 0.1) break;
+            if(prob_leech >= 0.1 && prob_leech <= 0.9) {
+                break;
+            } else {
+                continue;
+            }
         }
 
+        // third arg was nullptr because peer selection not implement yet
+        //TODO : Neighbor *neighbors = SelectNeighbors();
+        Neighbor *neighbors = nullptr;
+        g_peers[i] = Peer(i, peers_bandwidth[i], neighbors, args_.NUM_PIECE, prob_leech);
+
         std::cout << prob_leech << "\n";
-
-        GetPieceByProb(g_peers[i].pieces, prob_leech, args_.NUM_PIECE);
-
-        g_last_join++;
     }
     std::cout << "\n";
 }
 
-// Is the index of g_peers[] indicate the time-order ?
-void PeerManager::NewPeer(const int id, const float start_time) const {
-    // new an object and assign it, more memory space
-    if(g_last_join < args_.NUM_PEER) {
-        Peer peer(id, start_time, args_.NUM_PIECE);
-        g_peers[g_last_join + 1] = peer;
-        g_pdict[id] = g_last_join;  // map peer_id to tid
-        g_last_join++;
-    } else {
-        std::cout << "Peers amount is full\n";
-    }
-
-    /* assign value step by step, less space but more instructions
-    if(g_last_join < args_.NUM_PEER) {
-        g_peers[g_last_join + 1].id = id;
-        g_pdict[id] = g_last_join;  // map peer_id to tid
-
-        g_peers[g_last_join + 1].in_swarm = true;
-        g_peers[g_last_join + 1].start_time = start_time;
-
-        g_peers[g_last_join + 1].pieces = MakePieces(args_.NUM_PIECE);
-
-        g_last_join++;
-    }
-    */
-    // TODO
-}
-
-// cluster based
 void PeerManager::NewPeer(const int id, const int cid, const float start_time) const {
-    // create a new object and assign
-    if(g_last_join < args_.NUM_PEER) {
-        Peer peer(id, cid, start_time, args_.NUM_PIECE);
-        g_peers[g_last_join + 1] = peer;
-        g_pdict[id] = g_last_join;  // map peer_id to tid
-        g_last_join++;
-    } else {
-        std::cout << "Peers amount is full\n";
-    }
-
-    /* assign value step by step
-    if(g_last_join < args_.NUM_PEER) {
-        g_peers[g_last_join + 1].id = id;
-        g_pdict[id] = g_last_join;  // map peer_id to tid
-        g_peers[g_last_join + 1].cid = cid;
-
-        g_peers[g_last_join + 1].in_swarm = true;
-        g_peers[g_last_join + 1].start_time = start_time;
-
-        g_peers[g_last_join + 1].pieces = MakePieces(args_.NUM_PIECE);
-
-        g_last_join++;
-    }
-    */
-    // TODO
+    // third arg was nullptr because peer selection not implement yet
+    //TODO : Neighbor *neighbors = SelectNeighbors();
+    Neighbor *neighbors = nullptr;
+    g_peers[id] = Peer(id, cid,
+                       peers_bandwidth[id], start_time,
+                       neighbors,
+                       args_.NUM_PIECE);
 }
 
-void PeerManager::CreatePeers() const {
+void PeerManager::CreatePeers() {
     // DEBUG
     for(int i = 0; i < g_k_num_level; i++) {
         switch(i) {
@@ -208,30 +174,37 @@ void PeerManager::CreatePeers() const {
     }
 
     /* init seeds, leeches and their pieces */
+    const int k_aborigine = args_.NUM_SEED + args_.NUM_LEECH;
     AllotPeerLevel_();
     InitSeeds_();
     InitLeeches_();
-    InitPDict((args_.NUM_SEED + args_.NUM_LEECH));
 
-    std::cout << "Info of pdict<key: pid, val: tid> \n";
-    for(int i = 0; i < args_.NUM_SEED+args_.NUM_LEECH; i++)
-        std::cout << "tid of peer#" << i << ": " << g_pdict[i] << "\n";
-    std::cout << "\n\n";
+    //int cur_peer_id = k_aborigine;
+
+    /* test joining of normal peers*/
+    for(int i = k_aborigine; i < NUM_PEER; ++i) {
+        float time = i / static_cast<float>(100);
+        int cid = uniformdist::RangeRand(1, 4);
+        NewPeer(i, cid, time);
+    }
 }
 
 void PeerManager::DestroyPeers() {
     for (int i = 0; i < args_.NUM_PEER; i++) {
         if(nullptr != g_peers[i].pieces) {
             delete g_peers[i].pieces;
-            g_peers[i].pieces = nullptr;
         }
-
         //delete g_peers[i].neighbors;
         //g_peers[i].neighbors = nullptr;
     }
 
+    delete [] peers_bandwidth;
+
     delete [] g_peers;
-    g_peers = nullptr;
+}
+
+static bool PeerEnough(const int NUM_PEER, const int k_cur) {
+    return (NUM_PEER == k_cur);
 }
 
 /*
@@ -244,9 +217,9 @@ void PeerManager::DestroyPeers() {
  *
  * */
 //static bool RateEnough(const int level, const int amount, const int NUM_PEER) {
-static bool RateEnough(const int level, const int amount, const int NUM_PEER) {
-	const int limit = static_cast<int>(g_k_peer_level[level].dist_rate * NUM_PEER);
-	return (amount == limit);
+static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER) {
+	const int k_limit = static_cast<int>(g_k_peer_level[k_level].dist_rate * NUM_PEER);
+	return (k_amount == k_limit);
 }
 
 /*
@@ -287,10 +260,4 @@ static int ExcludeSet(const int (&ex_set)[g_k_num_level]) {
 	return target;
 }
 
-static void InitPDict(const int init_peer_amount) {
-    for(int i = 0; i < init_peer_amount; ++i) {
-        g_pdict[i] = i;
-    }
-}
-
-#endif // for #ifndef _PEERMANAGER_CPP
+// peer_manager
