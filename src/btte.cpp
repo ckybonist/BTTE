@@ -1,9 +1,11 @@
 #include <iostream>
 //#include <cstdlib> // if use normal srand()
 
-#include "args.h"
 #include "error.h"
 #include "random.h"
+
+#include "args.h"
+#include "peer.h"
 #include "peer_manager.h"
 //#include "env_manager.h"
 
@@ -12,31 +14,31 @@ void DebugInfo(const Args &args) {
     using std::endl;
 
     cout.precision(3);
-    cout << "\nPeer Infos: \n\n";
+    cout << "\n@ Peer Infos: \n\n";
     for(int i = 0; i < args.NUM_PEER; i++) {
         // id info
-        cout << "Peer ID: " << g_peers[i].id << endl;
-        cout << "Cluster ID: " << g_peers[i].cid << endl;
+        cout << " 1. Peer ID: " << g_peers[i].id << endl;
+        cout << " 2. Cluster ID: " << g_peers[i].cid << endl;
 
         if (true == g_peers[i].is_seed)
-            cout << "Peer catagory: Seed" << endl;
+            cout << " 3. Peer catagory: Seed" << endl;
         else if (true == g_peers[i].is_leech)
-            cout << "Peer catagory: Leech" << endl;
+            cout << " 3. Peer catagory: Leech" << endl;
         else
-            cout << "Peer catagory: Average" << endl;
+            cout << " 3. Peer catagory: Average" << endl;
 
-        cout << "\nTime for downloading one piece: " << g_peers[i].time_per_piece << endl;
+        cout << "\n 4. Time for downloading one piece: " << g_peers[i].time_per_piece << endl;
 
         // piece info
         int piece_count = 0;
         for(int j = 0; j < args.NUM_PIECE; j++) {
             if(true == g_peers[i].pieces[j]) ++piece_count;
         }
-        cout << "\nPieces status:\n";
-        cout << "Downloaded: " << piece_count << endl;
-        cout << "Not yet: " << (args.NUM_PIECE - piece_count) << endl;
+        cout << "\n 5. Pieces status:\n";
+        cout << "    * Downloaded: " << piece_count << endl;
+        cout << "    * Not yet: " << (args.NUM_PIECE - piece_count) << endl;
 
-        cout << "\nJoin time: " << g_peers[i].start_time << endl;
+        cout << "\n 6. Join time: " << g_peers[i].start_time << endl;
 
         cout << endl;
         cout << "---------------------------";
