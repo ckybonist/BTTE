@@ -11,38 +11,37 @@ void DebugInfo(const Args &args) {
     using std::cout;
     using std::endl;
 
-    cout.precision(6);
-    cout << "Info of each peer: \n";
+    cout.precision(3);
+    cout << "\nPeer Infos: \n\n";
     for(int i = 0; i < args.NUM_PEER; i++) {
         // id info
         cout << "Peer ID: " << g_peers[i].id << endl;
         cout << "Cluster ID: " << g_peers[i].cid << endl;
 
-        // seed info
         if (true == g_peers[i].is_seed)
-            cout << "I'm a seeder" << endl;
+            cout << "Peer catagory: Seed" << endl;
         else if (true == g_peers[i].is_leech)
-            cout << "I'm a leecher" << endl;
+            cout << "Peer catagory: Leech" << endl;
         else
-            cout << "I'm not ready for downloading" << endl;
+            cout << "Peer catagory: Average" << endl;
 
-        cout << g_peers[i].time_per_piece << endl;
+        cout << "\nTime for downloading one piece: " << g_peers[i].time_per_piece << endl;
 
         // piece info
-        if(i < (args.NUM_SEED + args.NUM_LEECH)) {
-            int piece_count = 0;
-            for(int j = 0; j < args.NUM_PIECE; j++) {
-                if(true == g_peers[i].pieces[j]) ++piece_count;
-            }
-            cout << "Number of downloaded pieces: " << piece_count << endl;
-            cout << "Number of empty pieces: " << (args.NUM_PIECE - piece_count) << endl;
+        int piece_count = 0;
+        for(int j = 0; j < args.NUM_PIECE; j++) {
+            if(true == g_peers[i].pieces[j]) ++piece_count;
         }
+        cout << "\nPieces status:\n";
+        cout << "Downloaded: " << piece_count << endl;
+        cout << "Not yet: " << (args.NUM_PIECE - piece_count) << endl;
+
+        cout << "\nJoin time: " << g_peers[i].start_time << endl;
 
         cout << endl;
         cout << "---------------------------";
         cout << endl;
     }
-    cout << "\n\ntid of the last peer which join into the swarm: " << g_last_join;
 }
 
 int main(int argc, const char *argv[])
