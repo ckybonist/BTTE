@@ -57,7 +57,6 @@ Peer::Peer(const int id, const float time_per_piece,
 // for normal peer joining
 Peer::Peer(const int id, const int cid,
            const float time_per_piece, const float start_time,
-           Neighbor *neighbors,
            const int NUM_PIECE) {
     in_swarm = true;
 
@@ -69,8 +68,6 @@ Peer::Peer(const int id, const int cid,
 
     this->time_per_piece = time_per_piece;
     this->pieces = MakePieces(NUM_PIECE);
-
-    this->neighbors = neighbors;
 
     this->start_time = start_time;
     end_time = 0.0;

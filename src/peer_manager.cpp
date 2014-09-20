@@ -16,47 +16,18 @@ PeerManager::PeerManager(const Args &args) {
     args_ = args;
 }
 
+PeerManager::~PeerManager() {
+    delete [] peers_bandwidth;
+}
+
 void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const {
-    Neighbor *peer_list = ips.ChoosePeers();
-    if(nullptr == peer_list) {
+    Neighbor *neighbors = ips.ChoosePeers();
+    if(nullptr == neighbors) {
         ExitError("Error occured when selecting neighbors.");
     }
-
-    g_peers[peer_id].neighbors = peer_list;
+    g_peers[peer_id].neighbors = neighbors;
 }
 
-/*
- * Alloting all peers with three different transmission time (downlink speed)
- *
- * NOTE: Each level has its distribution rate (dist_rate in peer_level.h)
- *
- * * */
-/*
-void PeerManager::AllotPeerLevel_() const {
-	int count[g_k_num_level] = { 0 };
-	int ex_set[g_k_num_level] = { 0 };
-
-    const int num_peer = args_.NUM_PEER;
-	for(int i = 0; i < num_peer; i++) {
-		int level = ExcludeSet(ex_set);  // create level for each peer
-
-		g_peers[i].time_per_piece = g_k_peer_level[level-1].trans_time;
-
-		++count[level-1];  // count the amount of class, place above the RateEnough()
-
-		if(RateEnough(level-1, count[level-1], num_peer)) {
-			if(ex_set[level-1] == 0)
-				ex_set[level-1] = level;
-		}
-	}
-
-    for(int i = 0; i < 3; i++) {
-        std::cout << "Amount of level " << i + 1 << " peers: "
-                  << count[i] << "\n";
-    }
-    std::cout << "\n\n";
-}
-*/
 void PeerManager::AllotPeerLevel_() {
     const int NUM_PEER = args_.NUM_PEER;
 
@@ -136,12 +107,8 @@ void PeerManager::InitLeeches_() const {
 }
 
 void PeerManager::NewPeer(const int id, const int cid, const float start_time) const {
-    // third arg was nullptr because peer selection not implement yet
-    //TODO : Neighbor *neighbors = SelectNeighbors();
-    Neighbor *neighbors = nullptr;
     g_peers[id] = Peer(id, cid,
                        peers_bandwidth[id], start_time,
-                       neighbors,
                        args_.NUM_PIECE);
 }
 
@@ -186,22 +153,21 @@ void PeerManager::CreatePeers() {
         float time = i / static_cast<float>(100);
         int cid = uniformdist::RangeRand(1, 4);
         NewPeer(i, cid, time);
+        g_peers[i].neighbors = nullptr;  // temp, until peer selection have been implemented
     }
 }
 
 void PeerManager::DestroyPeers() {
     for (int i = 0; i < args_.NUM_PEER; i++) {
         if(nullptr != g_peers[i].pieces) {
-            delete g_peers[i].pieces;
+            delete [] g_peers[i].pieces;
         }
-        //delete g_peers[i].neighbors;
-        //g_peers[i].neighbors = nullptr;
     }
-
-    delete [] peers_bandwidth;
 
     delete [] g_peers;
 }
+
+
 
 static bool PeerEnough(const int NUM_PEER, const int k_cur) {
     return (NUM_PEER == k_cur);

@@ -16,7 +16,6 @@ struct Peer {
 
     Peer(const int id, const int cid,
          const float time_per_piece, const float start_time,
-         Neighbor *neighbors,
          const int NUM_PIECE);  // average peer
 
 
@@ -29,6 +28,7 @@ struct Peer {
     bool *pieces;         // size is in config file, dynamic array
     float time_per_piece; // time that spends for each piece
 
+    //TODO: must be destroyed somewhere
     Neighbor *neighbors;  // neighbor list size is in config file, dynamic array
 
     float start_time;     // start time of peer run the routine
