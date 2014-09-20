@@ -1,8 +1,10 @@
 //#include <cstdlib>
 
-#include "error.h"
-#include "piece.h"
 #include "random.h"
+#include "error.h"
+
+#include "peer.h"
+#include "piece.h"
 #include "peer_level.h"
 #include "peer_manager.h"
 
@@ -161,6 +163,10 @@ void PeerManager::DestroyPeers() {
     for (int i = 0; i < args_.NUM_PEER; i++) {
         if(nullptr != g_peers[i].pieces) {
             delete [] g_peers[i].pieces;
+        }
+
+        if(nullptr != g_peers[i].neighbors) {
+            delete [] g_peers[i].neighbors;
         }
     }
 

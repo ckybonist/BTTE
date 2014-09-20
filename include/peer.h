@@ -4,8 +4,8 @@
 #include <map>
 
 #include "piece.h"
+#include "neighbor.h"
 
-struct Neighbor;  // forward declaration
 
 struct Peer {
     Peer() {};
