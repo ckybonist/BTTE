@@ -18,9 +18,12 @@ bool *MakePieces(const int NUM_PIECE) {
     return pieces;
 }
 
+/*
 void GetPieceByProb(bool *pieces, const double &prob_leech, const int NUM_PIECE) {
+    using uniformdist::Random;
     for(int i = 0; i < NUM_PIECE; i++) {
-        double prob_piece = uniformdist::rand() / (double)g_k_rand_max;
+        //double prob_piece = uniformdist::rand(rsc_prob_piece) / (double)g_k_rand_max;
         pieces[i] = (prob_piece < prob_leech);
     }
 }
+*/

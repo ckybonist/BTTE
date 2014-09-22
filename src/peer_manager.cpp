@@ -11,7 +11,8 @@
 /* forward declarations */
 static bool PeerEnough(const int NUM_PEER, const int k_cur);
 static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER);
-static int ExcludeSet(const int (&ex_set)[g_k_num_level]);
+static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id);
+//static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id);
 
 
 PeerManager::PeerManager(const Args &args) {
@@ -42,7 +43,8 @@ void PeerManager::AllotPeerLevel_() {
 	int ex_set[g_k_num_level] = { 0 };
 
 	for(int i = 0; i < NUM_PEER; i++) {
-		int level = ExcludeSet(ex_set);  // create level for each peer
+		int level = ExcludeSet(ex_set, rsc_peer_level);  // create level for each peer
+		//int level = ExcludeSet(ex_set, 0);  // create level for each peer
 
 		peers_bandwidth[i] = g_k_peer_level[level-1].trans_time;
 
@@ -74,7 +76,14 @@ void PeerManager::InitSeeds_() const {
 
 /*
  * Peer ID: NUM_SEED ~ (NUM_SEED + NUM_LEECH),
- * About 50% pieces
+ *
+ * Important var:
+ *      @ prob_leech : prob. of each leech (0.1 ~ 0.9)
+ *      @ prob_piece : prob. of each piece (in peer.cpp)
+ *
+ * Decision method of whether each leech will get each piece or not:
+ *      if (prob_piece < prob_leech)
+ *          Get piece
  *
  * NOTE: Not every peer have 50% of its picces certainly, decided by prob.
  *
@@ -90,7 +99,9 @@ void PeerManager::InitLeeches_() const {
 
         double prob_leech = 0;
         while(1) {
-            prob_leech = (uniformdist::rand()) / (double)g_k_rand_max;
+            prob_leech = (uniformdist::rand(rsc_prob_leech)) / (double)g_k_rand_max;
+            //prob_leech = (uniformdist::rand(1)) / (double)g_k_rand_max;
+
             if(prob_leech >= 0.1 && prob_leech <= 0.9) {
                 break;
             } else {
@@ -153,7 +164,10 @@ void PeerManager::CreatePeers() {
     /* test joining of normal peers*/
     for(int i = k_aborigine; i < NUM_PEER; ++i) {
         float time = i / static_cast<float>(100);
-        int cid = uniformdist::RangeRand(1, 4);
+
+        int cid = uniformdist::Roll(rsc_free_5, 1, 4);
+        //int cid = uniformdist::Roll(14, 1, 4);
+
         NewPeer(i, cid, time);
         g_peers[i].neighbors = nullptr;  // temp, until peer selection have been implemented
     }
@@ -208,15 +222,15 @@ static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER
  *	   without that exclusive set
  *
  * */
-static int ExcludeSet(const int (&ex_set)[g_k_num_level]) {
+static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id) {
+//static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id) {
 	int target = 0;
 	bool flag = true;
     const int k_min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
     const int k_max = g_k_num_level;
 
 	while(flag) {
-		//target = roll(k_min, k_max);
-		target = uniformdist::RangeRand(k_min, k_max);
+		target = uniformdist::Roll(k_seed_id, k_min, k_max);
 
 		for(int i = 0; i < g_k_num_level; i++) {
 			//if(target == ex_set[i] && ex_set[i] != 0)
