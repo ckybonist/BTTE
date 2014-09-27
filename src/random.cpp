@@ -54,16 +54,13 @@ void Srand(const int k_seed_id, const int k_seed) {
 }
 
 void InitRandSeeds() {
-    const int k_interval = 10000;
-    int seed = k_interval;  // ordinal of seed
-
-    for(int i = 0; i < k_num_rseeds; i++) {
-        g_rand_grp[i] = k_init_seed;
-    }
+    int interval = 200000;
+    int seed = interval;  // ordinal of seed
 
     for(int seed_id = 0; seed_id < k_num_rseeds; seed_id++) {
         Srand(seed_id, seed);
-        seed += k_interval;
+        interval *= seed_id + 1;
+        seed += interval;
     }
 }
 
@@ -87,9 +84,6 @@ float Roll(const RSC& k_seed_rsc_id,
     // [low, up]
 	float number = (((float)Rand(k_seed_rsc_id) / ((float)g_k_rand_max + 1)) *
 			     (k_up - k_low + 0.02)) + k_low;
-    // [low, up)
-	/* int number = (int)(((double)uniformdist::rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
-			     (k_up - k_low)) + k_low; */
 	return number;
 }
 
