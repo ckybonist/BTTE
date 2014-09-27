@@ -11,7 +11,7 @@
 /* forward declarations */
 static bool PeerEnough(const int NUM_PEER, const int k_cur);
 static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER);
-static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC& k_seed_rsc_id);
+static int NewPeerLevel(const int (&exclude_set)[g_k_num_level], const RSC& k_seed_rsc_id);
 //static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id);
 
 
@@ -40,10 +40,10 @@ void PeerManager::AllotPeerLevel_() {
     }
 
 	int count[g_k_num_level] = { 0 };
-	int ex_set[g_k_num_level] = { 0 };
+	int exclude_set[g_k_num_level] = { 0 };
 
 	for(int i = 0; i < NUM_PEER; i++) {
-		int level = ExcludeSet(ex_set, rsc_peer_level);  // create level for each peer
+		int level = NewPeerLevel(exclude_set, rsc_peer_level);  // create level for each peer
 		//int level = ExcludeSet(ex_set, 0);  // create level for each peer
 
 		peers_bandwidth[i] = g_k_peer_level[level-1].trans_time;
@@ -51,8 +51,8 @@ void PeerManager::AllotPeerLevel_() {
 		++count[level-1];  // count the amount of class, place above the RateEnough()
 
 		if(RateEnough(level-1, count[level-1], args_.NUM_PEER)) {
-			if(ex_set[level-1] == 0)
-				ex_set[level-1] = level;
+			if(exclude_set[level-1] == 0)
+				exclude_set[level-1] = level;
 		}
 	}
 
@@ -219,7 +219,7 @@ static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER
  *	   without that exclusive set
  *
  * */
-static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC& k_seed_rsc_id) {
+static int NewPeerLevel(const int (&exclude_set)[g_k_num_level], const RSC& k_seed_rsc_id) {
 //static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id) {
 	int target = 0;
 	bool flag = true;
@@ -231,7 +231,7 @@ static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC& k_seed_rsc_
 
 		for(int i = 0; i < g_k_num_level; i++) {
 			//if(target == ex_set[i] && ex_set[i] != 0)
-			if(target == ex_set[i]) {
+			if(target == exclude_set[i]) {
 				flag = true;
 				break;
 			} else {
