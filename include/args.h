@@ -12,7 +12,7 @@ struct Args {
     int TYPE_PIECESELECT;
 
     Args() {};
-    Args(const std::string);
+    Args(const std::string filename);
 };
 
 #endif // for #ifndef _ARGS_H

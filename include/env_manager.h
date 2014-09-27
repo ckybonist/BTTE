@@ -10,9 +10,9 @@
 // Singleton
 class EnvManager {
 public:
-	static EnvManager &GetInstance();
+	static EnvManager& GetInstance();
 
-	void Init(const std::string);
+	void Init(const std::string filename);
 
      //void RunEvents();
 
@@ -24,15 +24,5 @@ private:
 	void operator=(const EnvManager&);
     ~EnvManager() {};
 };
-
-/* Normal
-class EnvManager
-{
-public:
-	EnvManager() {};
-	void createPeers(int*, int);
-
-};
-*/
 
 #endif // for #ifndef _ENV_MANAGER_H

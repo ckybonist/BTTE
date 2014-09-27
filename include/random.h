@@ -51,9 +51,9 @@ extern long long g_rand_grp[k_num_rseeds];
 
 namespace uniformrand {  // uniform distribution random
 
-long long rand(const RSC& k_seed_rsc_id);
+long long Rand(const RSC& k_seed_rsc_id);
 
-void srand(const int k_seed_id, const int k_seed);
+void Srand(const int k_seed_id, const int k_seed);
 
 void InitRandSeeds();
 

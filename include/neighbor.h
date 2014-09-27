@@ -11,7 +11,7 @@
  * * */
 struct Neighbor {
     Neighbor() {};
-    Neighbor(const int, const int);
+    Neighbor(const int k_id, const int k_pg_delay);
 
     int id;
     int pg_delay;

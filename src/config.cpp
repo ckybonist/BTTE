@@ -4,7 +4,7 @@
 #include "config.h"
 
 Config::Config(const std::string &fname) {
-    this->fname_ = fname;
+    this->filename_ = fname;
     ReadConf_();
 }
 
@@ -92,9 +92,9 @@ void Config::ParseLine_(const std::string &line, size_t const line_no) {
 
 void Config::ReadConf_() {
     std::ifstream file;
-    file.open(fname_.c_str());
+    file.open(filename_.c_str());
     if(!file) {
-        ExitError("Couldn't read file: " + fname_ + "\n");
+        ExitError("Couldn't read file: " + filename_ + "\n");
     }
 
     std::string line;

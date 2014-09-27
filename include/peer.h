@@ -9,13 +9,21 @@
 
 struct Peer {
     Peer() {};
-    Peer(const int id, float time_per_piece, Neighbor *neighbors, const int NUM_PIECE);  // seed
+    Peer(const int k_id,
+         const float k_time_per_piece,
+         Neighbor *neighbors,
+         const int NUM_PIECE);  // seed
 
-    Peer(const int id, float time_per_piece, Neighbor *neighbors,
-         const int NUM_PIECE, double prob_leech);  // leech
+    Peer(const int k_id,
+         const float k_time_per_piece,
+         Neighbor *neighbors,
+         const int NUM_PIECE,
+         const double k_prob_leech);  // leech
 
-    Peer(const int id, const int cid,
-         const float time_per_piece, const float start_time,
+    Peer(const int k_id,
+         const int k_cid,
+         const float k_time_per_piece,
+         const float k_start_time,
          const int NUM_PIECE);  // average peer
 
 
@@ -25,11 +33,11 @@ struct Peer {
     bool is_leech;
     bool in_swarm;
 
-    bool *pieces;         // size is in config file, dynamic array
+    bool* pieces;         // size is in config file, dynamic array
     float time_per_piece; // time that spends for each piece
 
     //TODO: must be destroyed somewhere
-    Neighbor *neighbors;  // neighbor list size is in config file, dynamic array
+    Neighbor* neighbors;  // neighbor list size is in config file, dynamic array
 
     float start_time;     // start time of peer run the routine
     float end_time;       // end time of all pieces have been downloaded
@@ -38,7 +46,6 @@ struct Peer {
 
 };
 
-extern Peer *g_peers;     // sort by time-order
-//extern int g_last_join; // index for acceding next peer into the swarm
+extern Peer* g_peers;     // sort by time-order
 
 #endif // for #ifndef _PEER_H

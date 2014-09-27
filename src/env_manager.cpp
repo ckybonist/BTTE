@@ -10,7 +10,7 @@ EnvManager& EnvManager::GetInstance() {
 	return instance;
 }
 
-void EnvManager::Init(const std::string fname) {
+void EnvManager::Init(const std::string filename) {
     /*
     Config cfg(fname);
 

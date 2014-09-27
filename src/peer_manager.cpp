@@ -11,11 +11,11 @@
 /* forward declarations */
 static bool PeerEnough(const int NUM_PEER, const int k_cur);
 static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER);
-static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id);
+static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC& k_seed_rsc_id);
 //static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id);
 
 
-PeerManager::PeerManager(const Args &args) {
+PeerManager::PeerManager(const Args& args) {
     args_ = args;
 }
 
@@ -23,12 +23,12 @@ PeerManager::~PeerManager() {
     delete [] peers_bandwidth;
 }
 
-void PeerManager::SelectNeighbors(IPeerSelection &ips, const int peer_id) const {
-    Neighbor *neighbors = ips.ChoosePeers();
+void PeerManager::SelectNeighbors(IPeerSelection& ips, const int k_peer_id) const {
+    Neighbor* neighbors = ips.ChoosePeers();
     if(nullptr == neighbors) {
         ExitError("Error occured when selecting neighbors.");
     }
-    g_peers[peer_id].neighbors = neighbors;
+    g_peers[k_peer_id].neighbors = neighbors;
 }
 
 void PeerManager::AllotPeerLevel_() {
@@ -68,8 +68,8 @@ void PeerManager::InitSeeds_() const {
     for (int i = 0; i < args_.NUM_SEED; i++) {
 
         // third arg was nullptr because peer selection not implement yet
-        //TODO : Neighbor *neighbors = SelectNeighbors();
-        Neighbor *neighbors = nullptr;
+        //TODO : Neighbor* neighbors = SelectNeighbors();
+        Neighbor* neighbors = nullptr;
         g_peers[i] = Peer(i, peers_bandwidth[i], nullptr, args_.NUM_PIECE);  // 3rd was nullptr until peer selection have completed
     }
 }
@@ -99,8 +99,8 @@ void PeerManager::InitLeeches_() const {
 
         double prob_leech = 0;
         while(1) {
-            prob_leech = (uniformrand::rand(rsc_prob_leech)) / (double)g_k_rand_max;
-            //prob_leech = (uniformrand::rand(1)) / (double)g_k_rand_max;
+            prob_leech = (uniformrand::Rand(rsc_prob_leech)) / (double)g_k_rand_max;
+            //prob_leech = (uniformrand::Rand(1)) / (double)g_k_rand_max;
 
             if(prob_leech >= 0.1 && prob_leech <= 0.9) {
                 break;
@@ -111,7 +111,7 @@ void PeerManager::InitLeeches_() const {
 
         // third arg was nullptr because peer selection not implement yet
         //TODO : Neighbor *neighbors = SelectNeighbors();
-        Neighbor *neighbors = nullptr;
+        Neighbor* neighbors = nullptr;
         g_peers[i] = Peer(i, peers_bandwidth[i], neighbors, args_.NUM_PIECE, prob_leech);
 
         std::cout << prob_leech << "\n";
@@ -119,9 +119,11 @@ void PeerManager::InitLeeches_() const {
     std::cout << "\n";
 }
 
-void PeerManager::NewPeer(const int id, const int cid, const float start_time) const {
-    g_peers[id] = Peer(id, cid,
-                       peers_bandwidth[id], start_time,
+void PeerManager::NewPeer(const int k_id,
+                          const int k_cid,
+                          const float k_start_time) const {
+    g_peers[k_id] = Peer(k_id, k_cid,
+                       peers_bandwidth[k_id], k_start_time,
                        args_.NUM_PIECE);
 }
 
@@ -222,7 +224,7 @@ static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER
  *	   without that exclusive set
  *
  * */
-static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id) {
+static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC& k_seed_rsc_id) {
 //static int ExcludeSet(const int (&ex_set)[g_k_num_level], const int k_seed_id) {
 	int target = 0;
 	bool flag = true;
@@ -230,7 +232,7 @@ static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id) 
     const int k_max = g_k_num_level;
 
 	while(flag) {
-		target = uniformrand::Roll(k_seed_id, k_min, k_max);
+		target = uniformrand::Roll(k_seed_rsc_id, k_min, k_max);
 
 		for(int i = 0; i < g_k_num_level; i++) {
 			//if(target == ex_set[i] && ex_set[i] != 0)

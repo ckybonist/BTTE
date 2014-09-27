@@ -2,15 +2,16 @@
 #define _CONFIG_H
 
 #include <iostream>
-//#include <string>
 #include <map> // holding the pair of key-value
+//#include <string>
 
 #include "convert.h"
 
 class Config {
     public:
-      Config(const std::string&);
-      bool KeyExists(const std::string&) const;
+      Config(const std::string& filename);
+      bool KeyExists(const std::string& key) const;
+
       template <typename ValueType>
       ValueType GetValueOfKey(const std::string &key,
                 ValueType const &defaultType = ValueType()) const {
@@ -21,16 +22,17 @@ class Config {
       }
 
     private:
-        std::map<std::string, std::string> contents_;
-        std::string fname_;
-        void RemoveComment_(std::string&) const;
-        bool OnlyWhiteSpace_(const std::string&) const;
-        bool IsValidLine_(const std::string&) const;
-        void ExtractKey_(std::string &, size_t const&, const std::string&) const;
-        void ExtractValue_(std::string&, size_t const&, const std::string&) const;
-        void ExtractContents_(const std::string&);
-        void ParseLine_(const std::string&, size_t const);
+        void RemoveComment_(std::string& line) const;
+        bool OnlyWhiteSpace_(const std::string& line) const;
+        bool IsValidLine_(const std::string& line) const;
+        void ExtractKey_(std::string& key, size_t const& sepPos, const std::string& line) const;
+        void ExtractValue_(std::string& value, size_t const& sepPos, const std::string& line) const;
+        void ExtractContents_(const std::string& line);
+        void ParseLine_(const std::string& line, size_t const line_no);
         void ReadConf_();
+
+        std::map<std::string, std::string> contents_;
+        std::string filename_;
 };
 
 #endif // for #ifndef _CONFIG_H

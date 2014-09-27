@@ -9,11 +9,11 @@ class IPeerSelection;
 class PeerManager
 {
 public:
-    PeerManager(const Args&);
+    PeerManager(const Args& args);
     ~PeerManager();
     void CreatePeers();  // 1. create peers memory-spaces  2. init seeds, leeches and allot each peer a level
-    void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
-    void SelectNeighbors(IPeerSelection&, const int) const;  // FIXME: argument too less
+    void NewPeer(const int k_id, const int k_cid, const float k_start_time) const;  // for peer_join event
+    void SelectNeighbors(IPeerSelection& ips, const int k_peer_id) const;
     void DestroyPeers();
 
 private:
