@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "iostream"
 #include "random.h"
 
@@ -53,26 +55,38 @@ void Srand(const int k_seed_id, const int k_seed) {
 
 void InitRandSeeds() {
     const int k_interval = 10000;
-    int ordinal = k_interval;  // ordinal of seed
+    int seed = k_interval;  // ordinal of seed
 
-    /*
     for(int i = 0; i < k_num_rseeds; i++) {
         g_rand_grp[i] = k_init_seed;
     }
-    */
 
     for(int seed_id = 0; seed_id < k_num_rseeds; seed_id++) {
-        Srand(seed_id, ordinal);
-        ordinal += k_interval;
+        Srand(seed_id, seed);
+        seed += k_interval;
     }
 }
 
 int Roll(const RSC& k_seed_rsc_id,
          const int k_low,
          const int k_up) {
+    assert(k_up > k_low);
     // [low, up]
 	int number = (int)(((double)Rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
 			     (k_up - k_low + 1)) + k_low;
+    // [low, up)
+	/* int number = (int)(((double)uniformdist::rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
+			     (k_up - k_low)) + k_low; */
+	return number;
+}
+
+float Roll(const RSC& k_seed_rsc_id,
+           const float k_low,
+           const float k_up) {
+    assert(k_up > k_low);
+    // [low, up]
+	float number = (((float)Rand(k_seed_rsc_id) / ((float)g_k_rand_max + 1)) *
+			     (k_up - k_low + 0.02)) + k_low;
     // [low, up)
 	/* int number = (int)(((double)uniformdist::rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
 			     (k_up - k_low)) + k_low; */

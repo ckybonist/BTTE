@@ -98,16 +98,11 @@ void PeerManager::InitLeeches_() const {
     for (int i = k_start; i < k_end; i++) {
 
         double prob_leech = 0;
-        while(1) {
-            prob_leech = (uniformrand::Rand(rsc_prob_leech)) / (double)g_k_rand_max;
-            //prob_leech = (uniformrand::Rand(1)) / (double)g_k_rand_max;
+        prob_leech = uniformrand::Roll(
+                     rsc_prob_leech,
+                     (float)0.1,
+                     (float)0.9);
 
-            if(prob_leech >= 0.1 && prob_leech <= 0.9) {
-                break;
-            } else {
-                continue;
-            }
-        }
 
         // third arg was nullptr because peer selection not implement yet
         //TODO : Neighbor *neighbors = SelectNeighbors();

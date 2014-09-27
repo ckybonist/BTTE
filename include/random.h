@@ -57,7 +57,13 @@ void Srand(const int k_seed_id, const int k_seed);
 
 void InitRandSeeds();
 
-int Roll(const RSC& k_seed_rsc_id, const int k_low, const int k_up);
+int Roll(const RSC& k_seed_rsc_id,
+        const int k_low,
+        const int k_up);
+
+float Roll(const RSC& k_seed_rsc_id,
+        const float k_low,
+        const float k_up);
 }
 
 #endif // for #ifndef _RANDOM_H
