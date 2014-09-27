@@ -30,6 +30,7 @@ typedef enum RandSeedCases {
     rsc_prob_piece,
     rsc_event_time,
     rsc_peer_leave,
+    rsc_pgdelay,
     rsc_rand_peerselect,
     rsc_cb_peerselect,
     rsc_lb_peerselect,
@@ -37,7 +38,6 @@ typedef enum RandSeedCases {
     rsc_choking,
 
     // Free usage below
-    rsc_free_1,
     rsc_free_2,
     rsc_free_3,
     rsc_free_4,
@@ -58,12 +58,16 @@ void Srand(const int k_seed_id, const int k_seed);
 void InitRandSeeds();
 
 int Roll(const RSC& k_seed_rsc_id,
-        const int k_low,
-        const int k_up);
+         const int k_low,
+         const int k_up);
 
 float Roll(const RSC& k_seed_rsc_id,
-        const float k_low,
-        const float k_up);
-}
+           const float k_low,
+           const float k_up);
+
+int* DistinctRandNumbers(const RSC& k_seed_rsc_id,
+                         const int k_size,
+                         const int k_rand_limit);
+} // namespace uniformrand
 
 #endif // for #ifndef _RANDOM_H

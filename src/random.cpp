@@ -1,6 +1,5 @@
 #include <cassert>
 
-#include "iostream"
 #include "random.h"
 
 const long long k_init_seed = 377003613;
@@ -87,5 +86,39 @@ float Roll(const RSC& k_seed_rsc_id,
 	return number;
 }
 
-} // namespace uniformdist
+int* DistinctRandNumbers(const RSC& k_seed_rsc_id,
+                         const int k_size,
+                         const int k_rand_limit) {
+    int *arr = new int[k_size];
+
+    for(int m = 0; m < k_size; m++)
+    {
+        int rand_num = Rand(k_seed_rsc_id) % k_rand_limit + 1;
+
+        int s = m;
+
+        bool duplicate = true;
+
+        while(duplicate && s > 0)
+        {
+            --s;
+            if(rand_num == arr[s])  // rand_num is duplicate
+            {
+                rand_num = Rand(k_seed_rsc_id) % 50 + 1;
+                s = m;
+                continue;
+            }
+
+            if(rand_num != arr[s] && s == 0)  // rand_num is distinct
+            {
+                duplicate = false;
+            }
+        }
+
+        arr[m] = rand_num;
+    }
+    return arr;
+}
+
+} // namespace uniformrand
 
