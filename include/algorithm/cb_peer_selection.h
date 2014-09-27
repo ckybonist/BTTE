@@ -1,38 +1,9 @@
-#ifndef _PEER_SELECTION_H
-#define _PEER_SELECTION_H
+#ifndef _CB_PEER_SELECTION_H
+#define _CB_PEER_SELECTION_H
+
+#include "abs_peer_selection.h"
 
 struct Peer;
-struct Neighbor;
-
-class IPeerSelection
-{
-public:
-    virtual Neighbor *ChoosePeers() = 0;
-
-protected:
-    virtual float *AllotPGDelay() = 0;
-};
-
-
-class Random : protected IPeerSelection
-{
-public:
-    Neighbor *ChoosePeers();
-
-protected:
-    float *AllotPGDelay();
-};
-
-
-class LoadBalance : protected IPeerSelection
-{
-public:
-    Neighbor *ChoosePeers();
-
-protected:
-    float *AllotPGDelay();
-};
-
 
 /*
  * TODO:
@@ -60,13 +31,10 @@ protected:
 class ClusterBased : protected IPeerSelection
 {
 public:
-    Neighbor *ChoosePeers();
-
-protected:
-    float *AllotPGDelay();
+    Neighbor* ChoosePeers() override;
 
 private:
-    void setClusterID_(Peer &peers);
+    void setCluster_(Peer &peers);
 };
 
-#endif // for #ifndef _PEER_SELECTION_H
+#endif // for #ifndef _CB_PEER_SELECTION_H

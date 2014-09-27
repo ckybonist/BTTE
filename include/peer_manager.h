@@ -2,7 +2,7 @@
 #define _PEERMANAGER_H
 
 #include "args.h"
-#include "algorithm/peer_selection.h"
+#include "algorithm/abs_peer_selection.h"
 
 class IPeerSelection;
 
