@@ -22,7 +22,6 @@ const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
  *       14 : free
  *
  * * * * * * * * */
-
 const int k_num_rseeds = 15;
 
 typedef enum RandSeedCases {
@@ -50,15 +49,15 @@ extern long long g_rand_grp[k_num_rseeds];
 //extern long long g_rand_num;
 
 
-namespace uniformdist {  // uniform distribution random
+namespace uniformrand {  // uniform distribution random
 
-long long rand(const RSC&);
+long long rand(const RSC& k_seed_rsc_id);
 
-void srand(const int, const int);
+void srand(const int k_seed_id, const int k_seed);
 
 void InitRandSeeds();
 
-int Roll(const RSC&, const int, const int);
+int Roll(const RSC& k_seed_rsc_id, const int k_low, const int k_up);
 }
 
 #endif // for #ifndef _RANDOM_H

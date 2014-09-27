@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
         ExitError("Too much arguments.");
     }
 
-    uniformdist::InitRandSeeds();  // init group of random seeds
+    uniformrand::InitRandSeeds();  // init group of random seeds
 
     std::cout << "Group of Initial Rand-Seeds:\n";
     for(int i = 0; i < k_num_rseeds; i++) {

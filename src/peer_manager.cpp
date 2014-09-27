@@ -99,8 +99,8 @@ void PeerManager::InitLeeches_() const {
 
         double prob_leech = 0;
         while(1) {
-            prob_leech = (uniformdist::rand(rsc_prob_leech)) / (double)g_k_rand_max;
-            //prob_leech = (uniformdist::rand(1)) / (double)g_k_rand_max;
+            prob_leech = (uniformrand::rand(rsc_prob_leech)) / (double)g_k_rand_max;
+            //prob_leech = (uniformrand::rand(1)) / (double)g_k_rand_max;
 
             if(prob_leech >= 0.1 && prob_leech <= 0.9) {
                 break;
@@ -165,8 +165,8 @@ void PeerManager::CreatePeers() {
     for(int i = k_aborigine; i < NUM_PEER; ++i) {
         float time = i / static_cast<float>(100);
 
-        int cid = uniformdist::Roll(rsc_free_5, 1, 4);
-        //int cid = uniformdist::Roll(14, 1, 4);
+        int cid = uniformrand::Roll(rsc_free_5, 1, 4);
+        //int cid = uniformrand::Roll(14, 1, 4);
 
         NewPeer(i, cid, time);
         g_peers[i].neighbors = nullptr;  // temp, until peer selection have been implemented
@@ -230,7 +230,7 @@ static int ExcludeSet(const int (&ex_set)[g_k_num_level], const RSC &k_seed_id) 
     const int k_max = g_k_num_level;
 
 	while(flag) {
-		target = uniformdist::Roll(k_seed_id, k_min, k_max);
+		target = uniformrand::Roll(k_seed_id, k_min, k_max);
 
 		for(int i = 0; i < g_k_num_level; i++) {
 			//if(target == ex_set[i] && ex_set[i] != 0)

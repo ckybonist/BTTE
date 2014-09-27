@@ -41,8 +41,8 @@ Peer::Peer(const int id, const float time_per_piece,
     pieces = MakePieces(NUM_PIECE);
 
     for(int i = 0; i < NUM_PIECE; i++) {
-        double prob_piece = uniformdist::rand(rsc_prob_piece) / (double)g_k_rand_max;
-        //double prob_piece = uniformdist::rand(2) / (double)g_k_rand_max;
+        double prob_piece = uniformrand::rand(rsc_prob_piece) / (double)g_k_rand_max;
+        //double prob_piece = uniformrand::rand(2) / (double)g_k_rand_max;
         pieces[i] = (prob_piece < prob_leech);
     }
     this->time_per_piece = time_per_piece;
