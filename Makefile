@@ -1,14 +1,16 @@
 REL=$(notdir $(CURDIR))
 BETA=$(REL)g
 
-SRC=src
-INC=include
-OBJ=obj/bin
-DBG=obj/dbg
-LIB=lib
-OUT=bin
+SRC = src
+INC = include
+ALGORITHM = algorithm
 
-INCLUDES=-I. -I$(INC)
+OBJ = obj/bin
+DBG = obj/dbg
+LIB = lib
+OUT = bin
+
+INCLUDES=-I. -I$(INC) -I$(ALGORITHM)
 LIBS=
 #LIBS=-lstdc++
 
@@ -20,8 +22,8 @@ CDEBUG = -std=c++11 -g -Wall -Wextra $(3RD_CFLAGS)
 
 LDFLAG = -L$(LIB)
 
-SOURCES = $(wildcard $(SRC)/*.cpp)
-OBJS = $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
+SOURCES = $(wildcard $(SRC)/*.cpp $(ALGORITHM)/*.cpp)
+OBJS = $(notdir $(patsubst %.cpp,%.o,*.$(SOURCES)))
 REL_OBJS = $(addprefix $(OBJ)/,$(OBJS))
 DBG_OBJS = $(addprefix $(DBG)/,$(OBJS))
 
@@ -36,7 +38,7 @@ DBG_OBJS = $(addprefix $(DBG)/,$(OBJS))
 # delete the default suffixes
 .SUFFIXES:
 # define our suffix list
-.SUFFIXES: .o .cpp
+.SUFFIXES: .o .cpp .tpp
 
 # Create object files
 $(OBJ)/%.o: $(SRC)/%.cpp $(INC)/%.h
