@@ -43,10 +43,10 @@ Neighbor* Standard::SelectNeighbors()
     if(nullptr == _ids && nullptr == _pg_delays)  // create array of random numbers first time
     {
         _ids = DistinctRandNumbers<int>(rsc_std_peerselect,
-                                  _NUM_PEERLIST,
-                                  _NUM_PEER);
+                                        _NUM_PEER,  // size
+                                        _NUM_PEER); // max number
 
-        _pg_delays = new int[_NUM_PEERLIST];
+        _pg_delays = new int[g_k_max_pgdelay];
 
         if(_ids == nullptr || _pg_delays == nullptr)
         {
@@ -54,16 +54,17 @@ Neighbor* Standard::SelectNeighbors()
                        peerselection::Standard::SelectNeighbors()");
         }
 
-        for(int i = 0; i < _NUM_PEERLIST; i++)
+        for(int i = 0; i < g_k_max_pgdelay; i++)
         {
-            _pg_delays[i] = Roll<int>(rsc_pgdelay, 1, 100);
+            _pg_delays[i] = Roll<int>(rsc_pgdelay,
+                                      1, g_k_max_pgdelay);
         }
     }
     else  // shuffle array if it had ever been created
     {
-        Shuffle<int>(rsc_std_peerselect, _ids, _NUM_PEERLIST);
+        Shuffle<int>(rsc_std_peerselect, _ids, _NUM_PEER);
 
-        Shuffle<int>(rsc_std_peerselect, _pg_delays, _NUM_PEERLIST);
+        Shuffle<int>(rsc_std_peerselect, _pg_delays, g_k_max_pgdelay);
     }
 
     for(int i = 0; i < _NUM_PEERLIST; i++)

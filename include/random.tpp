@@ -40,7 +40,7 @@ T* DistinctRandNumbers(const RSC& k_seed_rsc_id,
             --s;
             if(rand_num == arr[s])  // rand_num is duplicate
             {
-                rand_num = Rand(k_seed_rsc_id) % k_rand_limit + 1;
+                rand_num = Rand(k_seed_rsc_id) % k_rand_limit;
                 s = m;
                 continue;
             }
