@@ -50,10 +50,13 @@ PeerManager::~PeerManager()
     {
         delete [] g_peers[i].pieces;
     }
+
+    // also call the destructor to delete neighbors
+    delete _type_peerselect; // MUST BEFORE THE DELETION OF G_PEERS
+
     delete [] g_peers;
 
     delete [] _peers_bandwidth;
-    delete _type_peerselect;
 }
 
 // for average peers
