@@ -18,12 +18,14 @@
 
 const int g_k_num_level = 3;
 
-struct PeerLevel {
+struct PeerLevel
+{
     float dist_rate;
     float trans_time;
 };
 
-extern const PeerLevel g_k_peer_level[g_k_num_level] = {
+extern const PeerLevel g_k_peer_level[g_k_num_level] =
+{
     // Level 0, fatest
     {
         0.3,

@@ -3,7 +3,8 @@
 
 #include <string>
 
-struct Args {
+struct Args
+{
     int NUM_PEER;
     int NUM_SEED;
     int NUM_LEECH;

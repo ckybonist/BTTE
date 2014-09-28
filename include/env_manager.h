@@ -8,7 +8,8 @@
 #include "peer_manager.h"
 
 // Singleton
-class EnvManager {
+class EnvManager
+{
 public:
 	static EnvManager& GetInstance();
 

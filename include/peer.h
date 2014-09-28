@@ -7,7 +7,8 @@
 #include "neighbor.h"
 
 
-struct Peer {
+struct Peer
+{
     Peer() {};
     Peer(const int k_id,
          const float k_time_per_piece,
@@ -33,11 +34,10 @@ struct Peer {
     bool is_leech;
     bool in_swarm;
 
-    bool* pieces;         // size is in config file, dynamic array
-    float time_per_piece; // time that spends for each piece
+    bool* pieces;
+    float time_per_piece; // download time of each piece
 
-    //TODO: must be destroyed somewhere
-    Neighbor* neighbors;  // neighbor list size is in config file, dynamic array
+    Neighbor* neighbors;
 
     float start_time;     // start time of peer run the routine
     float end_time;       // end time of all pieces have been downloaded

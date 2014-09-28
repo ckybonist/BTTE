@@ -8,7 +8,8 @@ Peer *g_peers = nullptr;
 Peer::Peer(const int k_id,
            const float k_time_per_piece,
            Neighbor* neighbors,
-           const int NUM_PIECE) {
+           const int NUM_PIECE)
+{
     in_swarm = true;
     is_seed = true;
     is_leech = false;
@@ -34,7 +35,8 @@ Peer::Peer(const int k_id,
            const float k_time_per_piece,
            Neighbor* neighbors,
            const int NUM_PIECE,
-           const double k_prob_leech) {
+           const double k_prob_leech)
+{
     in_swarm = true;
     is_leech = true;
     is_seed = false;
@@ -65,7 +67,8 @@ Peer::Peer(const int k_id,
            const int k_cid,
            const float k_time_per_piece,
            const float k_start_time,
-           const int NUM_PIECE) {
+           const int NUM_PIECE)
+{
     in_swarm = true;
 
     this->id = k_id;

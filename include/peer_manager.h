@@ -2,26 +2,35 @@
 #define _PEERMANAGER_H
 
 #include "args.h"
-#include "algorithm/abs_peer_selection.h"
+#include "peer_selection.h"
 
-class IPeerSelection;
+
+using namespace peerselection;
+
 
 class PeerManager
 {
 public:
     PeerManager(const Args& args);
     ~PeerManager();
-    void CreatePeers();  // 1. create peers memory-spaces  2. init seeds, leeches and allot each peer a level
+
+    // CreatePeers() does two things
+    //   1. allocate memory-spaces of all peers
+    //   2. allot each peer one level(see peer_level.h) and
+    //      init some peers as seeds and leeches
+    void CreatePeers();
     void NewPeer(const int k_id, const int k_cid, const float k_start_time) const;  // for peer_join event
-    void SelectNeighbors(IPeerSelection& ips, const int k_peer_id) const;
-    void DestroyPeers();
+    void AllotNeighbors(const int k_peer_id) const;  // for average peers
 
 private:
-    Args args_;
-    float *peers_bandwidth;
-    void AllotPeerLevel_();
-    void InitSeeds_() const;
-    void InitLeeches_() const;
+    void _AllocAllPeersSpaces();
+    void _AllotPeerLevel();
+    void _InitSeeds() const;
+    void _InitLeeches() const;
+
+    Args _args;  // don't use pointer
+    float* _peers_bandwidth;
+    IPeerSelect* _type_peerselect;
 };
 
 #endif // for #ifndef _PEERMANAGER_H

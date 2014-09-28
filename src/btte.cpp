@@ -12,38 +12,52 @@
 
 int main(int argc, const char *argv[])
 {
-    if(argc == 1) {
-        ExitError("First argument: path of config file");
-    } else if (argc > 2) {
-        ExitError("Too much arguments.");
-    }
-
-    uniformrand::InitRandSeeds();  // init group of random seeds
+    /////////////////////////////
+    // 1. init group of random seeds
+    //
+    uniformrand::InitRandSeeds();
 
     std::cout << "Group of Initial Rand-Seeds:\n";
-    for(int i = 0; i < k_num_rseeds; i++) {
+    for(int i = 0; i < k_num_rseeds; i++)
+    {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";
     }
     std::cout << "\n\n";
 
 
-    /* read arguments */
+    ////////////////////
+    // 2. read arguments
+    //
+    if(argc == 1)
+    {
+        ExitError("First argument: path of config file");
+    }
+    else if (argc > 2)
+    {
+        ExitError("Too much arguments.");
+    }
+
     Args args(argv[1]);
 
+
+    /////////////////////
+    // 3. start simulating
+    //
     PeerManager pm(args);
 
-    /* start simulating */
     pm.CreatePeers();
 
     ShowDbgInfo(args);
-
-    pm.DestroyPeers();
-    /* stop simulating */
+    // end simluating
 
 
+    //////////////////////////////////
+    // 4. check seeds was being used or not
+    //
     std::cout << "\n\nGroup of Final Rand-Seeds:\n";
-    for(int i = 0; i < k_num_rseeds; i++) {
+    for(int i = 0; i < k_num_rseeds; i++)
+    {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";
     }
