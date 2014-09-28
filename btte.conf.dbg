@@ -1,0 +1,19 @@
+NUM_PEER = 10
+
+NUM_SEED = 2
+
+NUM_LEECH = 3
+
+NUM_PEERLIST = 5  ; number of peers which in peer list
+
+NUM_CHOKING = 4
+
+NUM_OU = 1  ; number of optimistic unchoked peers
+
+NUM_PIECE = 10
+
+TYPE_PEERSELECT = 0  ; type of peer selection, default is 0
+
+TYPE_PIECESELECT = 0  ; type of piece selection, default is 0
+
+ARRIVAL_RATE = 1  ; time of each new peer arriving
