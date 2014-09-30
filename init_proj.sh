@@ -12,6 +12,6 @@ if [ ! -d $LIB ]; then
     mkdir ./lib
 fi
 
-if [ ! -d $obj ]; then
+if [ ! -d $OBJ ]; then
     mkdir -p ./obj/dbg ./obj/bin
 fi
