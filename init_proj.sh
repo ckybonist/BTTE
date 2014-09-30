@@ -1,8 +1,8 @@
 #!/bin/sh
 
-BIN = "bin"
-LIB = "lib"
-OBJ = "obj"
+BIN="bin"
+LIB="lib"
+OBJ="obj"
 
 if [ ! -d $BIN ]; then
     mkdir ./bin
