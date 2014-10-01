@@ -22,10 +22,11 @@ long long g_rand_grp[] =
     k_init_seed
 };
 
-static void RandForInternal(const RSC& k_seed_rsc_id)
+static void RandForInternal(const RSC& k_seed_id)
 {
+    const int k_sid = static_cast<int>(k_seed_id);
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_grp[k_seed_rsc_id] = 16807 * g_rand_grp[k_seed_rsc_id] % g_k_rand_max;
+    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % g_k_rand_max;
 }
 
 namespace uniformrand {
@@ -33,11 +34,14 @@ namespace uniformrand {
 const int k_interval = 1000000;
 
 
-long long Rand(const RSC& k_seed_rsc_id)
+long long Rand(const RSC& k_seed_id)
 {
+    const int k_sid = static_cast<int>(k_seed_id);
+
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_grp[k_seed_rsc_id] = 16807 * g_rand_grp[k_seed_rsc_id] % g_k_rand_max;
-    return g_rand_grp[k_seed_rsc_id];
+    //g_rand_grp[k_seed_rsc_id] = 16807 * g_rand_grp[k_seed_rsc_id] % g_k_rand_max;
+    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % g_k_rand_max;
+    return g_rand_grp[k_sid];
 }
 
 
@@ -45,9 +49,10 @@ void Srand(const int k_seed_id, const int k_seed)
 {
     for(int i = 0; i < k_seed; i++)
     {
-        //g_rand_grp[k_seed_id] = Rand(static_cast<RSC>(k_seed_id));  // force int cast to struct: RSC
-        //Rand(static_cast<RSC>(k_seed_id));
         RandForInternal(static_cast<RSC>(k_seed_id));
+
+        //g_rand_grp[k_seed_id] = Rand(static_cast<RSC>(k_seed_id));
+        //Rand(static_cast<RSC>(k_seed_id));
         //g_rand_num = rand();
     }
 }

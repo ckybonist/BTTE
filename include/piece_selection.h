@@ -1,11 +1,11 @@
 #ifndef _PIECE_SELECTION_H
 #define _PIECE_SELECTION_H
 
-typedef enum
+typedef enum class TypePieceSelect
 {
     RANDOM_FIRST_PIECE = 0,
     RAREST_FIRST
-} TypePieceSelect;
+} PieceSelect_T;
 
 // TODO : algorithm
 

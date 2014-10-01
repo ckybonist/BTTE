@@ -23,17 +23,17 @@ PeerManager::PeerManager(const Args& args)
 
     switch (_args.TYPE_PEERSELECT)
     {
-        case TypePeerSelect::STANDARD :
+        case static_cast<int>(PeerSelect_T::STANDARD) :
             _type_peerselect =
                 static_cast<IPeerSelect*>(new Standard(NUM_PEERLIST, NUM_PEER));
             break;
 
-        case TypePeerSelect::LOAD_BALANCING :
+        case static_cast<int>(PeerSelect_T::LOAD_BALANCING) :
             _type_peerselect =
                 static_cast<IPeerSelect*>(new LoadBalancing(NUM_PEERLIST, NUM_PEER));
             break;
 
-        case TypePeerSelect::CLUSTER_BASED :
+        case static_cast<int>(PeerSelect_T::CLUSTER_BASED) :
             _type_peerselect =
                 static_cast<IPeerSelect*>(new ClusterBased(NUM_PEERLIST, NUM_PEER));
             break;
@@ -116,7 +116,7 @@ void PeerManager::CreatePeers()
     {
         float time = pid / static_cast<float>(100);
 
-        int cid = uniformrand::Roll<int>(rsc_free_5, 1, 4);
+        int cid = uniformrand::Roll<int>(RSC::free_5, 1, 4);
         //int cid = uniformrand::Roll(14, 1, 4);
 
         NewPeer(pid, cid, time);
@@ -141,7 +141,7 @@ void PeerManager::_AllotPeerLevel()
 
 	for(int pid = 0; pid < NUM_PEER; pid++)
     {
-		int level = NewPeerLevel(exclude_set, rsc_peer_level);
+		int level = NewPeerLevel(exclude_set, RSC::peer_level);
 
 		_peers_bandwidth[pid] = g_k_peer_level[level-1].trans_time;
 
@@ -209,7 +209,7 @@ void PeerManager::_InitLeeches() const
 
         double prob_leech = 0;
         prob_leech = uniformrand::Roll<float>(
-                     rsc_prob_leech,
+                     RSC::prob_leech,
                      (float)0.1,
                      (float)0.9);
 

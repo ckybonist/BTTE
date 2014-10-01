@@ -28,6 +28,7 @@ const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
  * * * * * * * * */
 const int k_num_rseeds = 15;
 
+/*
 typedef enum RandSeedCases
 {
     rsc_peer_level = 0,
@@ -48,16 +49,38 @@ typedef enum RandSeedCases
     rsc_free_4,
     rsc_free_5,
 } RSC;
+*/
+
+typedef enum class RandSeedCases
+{
+    peer_level = 0,
+    prob_leech,
+    prob_piece,
+    event_time,
+    peer_leave,
+    pgdelay,
+    std_peerselect,
+    cb_peerselect,
+    lb_peerselect,
+    pieceselect,
+    choking,
+
+    // Free usage below
+    free_2,
+    free_3,
+    free_4,
+    free_5,
+} RSC;
+
 
 extern long long g_rand_grp[k_num_rseeds];
-
 //extern long long g_rand_num;
 
 
 namespace uniformrand
 {
 
-long long Rand(const RSC& k_seed_rsc_id);
+long long Rand(const RSC& k_seed_id);
 
 void Srand(const int k_seed_id, const int k_seed);
 
@@ -69,7 +92,7 @@ T Roll(const RSC& k_seed_rsc_id,
        const T k_up);
 
 template <typename T>
-T* DistinctRandNumbers(const RSC& k_seed_rsc_id,
+T* DistinctRandNumbers(const RSC& k_seed_id,
                        const size_t k_size,
                        const T k_rand_limit);
 

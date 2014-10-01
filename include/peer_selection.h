@@ -9,12 +9,12 @@ struct Peer;
 namespace peerselection
 {
 
-typedef enum
+typedef enum class TypePeerSelect
 {
     STANDARD = 0,
     LOAD_BALANCING,
     CLUSTER_BASED
-} TypePeerSelect;
+} PeerSelect_T;
 
 
 class IPeerSelect
