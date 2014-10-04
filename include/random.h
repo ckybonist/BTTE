@@ -28,48 +28,25 @@ const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
  * * * * * * * * */
 const int k_num_rseeds = 15;
 
-/*
-typedef enum RandSeedCases
-{
-    rsc_peer_level = 0,
-    rsc_prob_leech,
-    rsc_prob_piece,
-    rsc_event_time,
-    rsc_peer_leave,
-    rsc_pgdelay,
-    rsc_std_peerselect,
-    rsc_cb_peerselect,
-    rsc_lb_peerselect,
-    rsc_pieceselect,
-    rsc_choking,
-
-    // Free usage below
-    rsc_free_2,
-    rsc_free_3,
-    rsc_free_4,
-    rsc_free_5,
-} RSC;
-*/
-
 typedef enum class RandSeedCases
 {
-    peer_level = 0,
-    prob_leech,
-    prob_piece,
-    event_time,
-    peer_leave,
-    pgdelay,
-    std_peerselect,
-    cb_peerselect,
-    lb_peerselect,
-    pieceselect,
-    choking,
+    PEER_LEVEL = 0,
+    PROB_LEECH,
+    PROB_PIECE,
+    EVENT_TIME,
+    PEER_LEAVE,
+    PGDELAY,
+    STD_PEERSELECT,
+    CB_PEERSELECT,
+    LB_PEERSELECT,
+    PIECESELECT,
+    CHOKING,
 
     // Free usage below
-    free_2,
-    free_3,
-    free_4,
-    free_5,
+    FREE_2,
+    FREE_3,
+    FREE_4,
+    FREE_5,
 } RSC;
 
 
@@ -85,6 +62,8 @@ long long Rand(const RSC& k_seed_id);
 void Srand(const int k_seed_id, const int k_seed);
 
 void InitRandSeeds();
+
+float ExpRand(float rate, long long rand_num);
 
 template<typename T>
 T Roll(const RSC& k_seed_rsc_id,

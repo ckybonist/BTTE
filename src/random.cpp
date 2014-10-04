@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "random.h"
 
 static const long long k_init_seed = 377003613;
@@ -5,21 +7,11 @@ static const long long k_init_seed = 377003613;
 
 long long g_rand_grp[] =
 {
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed,
-    k_init_seed
+    k_init_seed, k_init_seed, k_init_seed,
+    k_init_seed, k_init_seed, k_init_seed,
+    k_init_seed, k_init_seed, k_init_seed,
+    k_init_seed, k_init_seed, k_init_seed,
+    k_init_seed, k_init_seed, k_init_seed
 };
 
 static void RandForInternal(const RSC& k_seed_id)
@@ -66,6 +58,13 @@ void InitRandSeeds()
         Srand(seed_id, seed);
         seed += k_interval * (seed_id + 1);
     }
+}
+
+float ExpRand(float rate, long long rand_num)
+{
+    float rand_exp = 0 - (1.0 / rate) *
+                       log(1.0 - (double)rand_num / 2147483647.0);
+    return rand_exp;
 }
 
 } // namespace uniformrand
