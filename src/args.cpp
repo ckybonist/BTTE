@@ -21,10 +21,10 @@ Args::Args(const std::string filename)
     NUM_OU = cfg.GetValueOfKey<int>("NUM_OU", 1);
 
     TYPE_PEERSELECT = cfg.GetValueOfKey<int>("TYPE_PEERSELECT",
-                                             static_cast<int>(PeerSelect_T::STANDARD)
-                                            );
+                                             static_cast<int>(PeerSelect_T::STANDARD));
 
     TYPE_PIECESELECT = cfg.GetValueOfKey<int>("TYPE_PIECESELECT",
-                                              static_cast<int>(PieceSelect_T::RANDOM_FIRST_PIECE)
-                                             );
+                                              static_cast<int>(PieceSelect_T::RANDOM_FIRST_PIECE));
+
+    ARRIVAL_RATE = cfg.GetValueOfKey<int>("ARRIVAL_RATE", 1);
 }

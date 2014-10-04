@@ -116,7 +116,7 @@ void PeerManager::CreatePeers()
     {
         float time = pid / static_cast<float>(100);
 
-        int cid = uniformrand::Roll<int>(RSC::free_5, 1, 4);
+        int cid = uniformrand::Roll<int>(RSC::FREE_5, 1, 4);
         //int cid = uniformrand::Roll(14, 1, 4);
 
         NewPeer(pid, cid, time);
@@ -141,7 +141,7 @@ void PeerManager::_AllotPeerLevel()
 
 	for(int pid = 0; pid < NUM_PEER; pid++)
     {
-		int level = NewPeerLevel(exclude_set, RSC::peer_level);
+		int level = NewPeerLevel(exclude_set, RSC::PEER_LEVEL);
 
 		_peers_bandwidth[pid] = g_k_peer_level[level-1].trans_time;
 
@@ -209,7 +209,7 @@ void PeerManager::_InitLeeches() const
 
         double prob_leech = 0;
         prob_leech = uniformrand::Roll<float>(
-                     RSC::prob_leech,
+                     RSC::PROB_LEECH,
                      (float)0.1,
                      (float)0.9);
 
