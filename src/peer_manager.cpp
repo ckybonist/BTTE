@@ -76,7 +76,7 @@ void PeerManager::NewPeer(const int k_id,
                        _args.NUM_PIECE);
 }
 
-void PeerManager::_AllocAllPeersSpaces()
+void PeerManager::AllocAllPeersSpaces()
 {
     g_peers  = new Peer[_args.NUM_PEER];
     if (g_peers == nullptr)
@@ -98,35 +98,39 @@ void PeerManager::CreatePeers()
     // create empty peers
     const int NUM_PEER = _args.NUM_PEER;
 
-    _AllocAllPeersSpaces();
+    AllocAllPeersSpaces();
 
-    /* init seeds, leeches and their pieces */
+    // init seeds, leeches and their pieces
     const int k_aborigine = _args.NUM_SEED + _args.NUM_LEECH;
 
-    _AllotPeerLevel();
+    AllotPeerLevel();
 
-    _InitSeeds();
+    InitSeeds();
 
-    _InitLeeches();
+    InitLeeches();
 
-    //int cur_peer_id = k_aborigine;
+    for(int pid = _args.NUM_SEED; pid < _args.NUM_LEECH; pid++)
+    {
+        for(int c = 0; c < _args.NUM_PIECE; c++)
+            g_all_pieces_get &= g_peers[pid].pieces[c];
+    }
 
     // test of peer join
-    for(int pid = k_aborigine; pid < NUM_PEER; ++pid)
-    {
-        float time = pid / static_cast<float>(100);
+    //for(int pid = k_aborigine; pid < NUM_PEER; ++pid)
+    //{
+    //    float time = pid / static_cast<float>(100);
 
-        int cid = uniformrand::Roll<int>(RSC::FREE_5, 1, 4);
-        //int cid = uniformrand::Roll(14, 1, 4);
+    //    int cid = uniformrand::Roll<int>(RSC::FREE_5, 1, 4);
+    //    //int cid = uniformrand::Roll(14, 1, 4);
 
-        NewPeer(pid, cid, time);
+    //    NewPeer(pid, cid, time);
 
-        AllotNeighbors(pid);
-    }
+    //    AllotNeighbors(pid);
+    //}
 
 }
 
-void PeerManager::_AllotPeerLevel()
+void PeerManager::AllotPeerLevel()
 {
     const int NUM_PEER = _args.NUM_PEER;
 
@@ -166,7 +170,7 @@ void PeerManager::_AllotPeerLevel()
 }
 
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
-void PeerManager::_InitSeeds() const
+void PeerManager::InitSeeds() const
 {
     for (int pid = 0; pid < _args.NUM_SEED; pid++)
     {
@@ -193,7 +197,7 @@ void PeerManager::_InitSeeds() const
  * NOTE: Not every peer have 50% of its picces certainly, decided by prob.
  *
  * * */
-void PeerManager::_InitLeeches() const
+void PeerManager::InitLeeches() const
 {
     const int k_start = _args.NUM_SEED;
     const int k_end = k_start + _args.NUM_LEECH;

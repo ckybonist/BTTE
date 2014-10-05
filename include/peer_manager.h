@@ -23,10 +23,10 @@ public:
     void AllotNeighbors(const int k_peer_id) const;  // for average peers
 
 private:
-    void _AllocAllPeersSpaces();
-    void _AllotPeerLevel();
-    void _InitSeeds() const;
-    void _InitLeeches() const;
+    void AllocAllPeersSpaces();
+    void AllotPeerLevel();
+    void InitSeeds() const;
+    void InitLeeches() const;
 
     Args _args;  // don't use pointer
     float* _peers_bandwidth;

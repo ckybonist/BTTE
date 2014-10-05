@@ -4,54 +4,61 @@
 #include <list>
 
 #include "args.h"
+#include "peer_manager.h"
 #include "event.h"
 
-namespace {
+
 
 class EventHandler
 {
 public:
-    EventHandler(Args args, int idx, float l, float m);
-    ~EventHandler();
+    EventHandler(Args args, const PeerManager* pm, float l, float m);
+    ~EventHandler() {};
 
     void PushInitEvent();
-    void PushNextEvent(Event& e, Event::Type type, Event::Type4BT);
-    void ProcessEvent(const Event& e);
+    void GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt);
+    void ProcessArrival(Event& e);
+    void ProcessDeparture(Event& e);
+    void ProcessBTEvent(Event& e);
+    void ProcessEvent(Event& e);
     void StartRoutine();
 
-    float get_lambda() { return lambda; };
-    float get_mu() { return mu; };
+    float get_lambda() { return _lambda; };
+    float get_mu() { return _mu; };
+
+    static int num_arrival;
 
 protected:
-    //Event::Type GetDeriveEventType(Event::Type e);
-    void ProcessEventPeerJoin(const Event& e);
+    Event::Type4BT GetDeriveBTEventType(Event::Type4BT t_bt);
+    void ProcessEventPeerJoin(Event& e);
 
-    void ProcessEventPeerListReqRecv(const Event& e);
+    void ProcessEventPeerListReqRecv(Event& e);
 
-    void ProcessEventPeerListGet(const Event& e);
+    void ProcessEventPeerListGet(Event& e);
 
-    void ProcessEventReqPiece(const Event& e);
+    void ProcessEventReqPiece(Event& e);
 
-    void ProcessEventPieceAdmit(const Event& e);
+    void ProcessEventPieceAdmit(Event& e);
 
-    void ProcessEventPieceGet(const Event& e);
+    void ProcessEventPieceGet(Event& e);
 
-    void ProcessEventCompleted(const Event& e);
+    void ProcessEventCompleted(Event& e);
 
     void ProcessEventPeerLeave(const Event& e);
 
-    std::list<Event> event_list;
-    std::list<Event> system;
+    std::list<Event> _event_list;
+    std::list<Event> _system;
 
-    Args args;
-    int init_idx;  // NUM_SEED + NUM_LEECH
+    Args _args;
 
-    float lambda;
-    float mu;
-    float current_time;
-    float waiting_time;
+    const PeerManager* _pm;
+
+    float _lambda;
+    float _mu;
+
+    float _total_sys_size;
+    float _current_time;
+    float _waiting_time;
 };
-
-}
 
 #endif // for #ifndef _EVENT_HANDLER_H

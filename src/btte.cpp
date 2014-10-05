@@ -7,6 +7,7 @@
 #include "args.h"
 #include "peer.h"
 #include "peer_manager.h"
+#include "event_handler.h"
 //#include "env_manager.h"
 
 
@@ -46,7 +47,11 @@ int main(int argc, const char *argv[])
     //
     PeerManager pm(args);
 
+    EventHandler evh(args, &pm, 1, 0.5);
+
     pm.CreatePeers();
+
+    evh.StartRoutine();
 
     ShowDbgInfo(args);
     // end simluating
