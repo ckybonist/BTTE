@@ -10,4 +10,6 @@ bool* MakePieces(const int NUM_PIECE);
 //                    const double& prob_leech,
 //                    const int NUM_PIECE);
 
+extern bool g_all_pieces_get;
+
 #endif // for #ifndef _PIECE_H
