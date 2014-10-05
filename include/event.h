@@ -22,16 +22,15 @@ public:
         PEER_LEAVE,
     };
 
-    Event (Type t, Type4BT t_bt, int idx, float ti);
+    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
 
     Type type;  // arrival or departure
     Type4BT type_bt;
     int index;
     float time;
 
-    friend class EventHandler;
+    int pid;
 
-protected:
     bool operator< (const Event& e);
 };
 
