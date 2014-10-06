@@ -1,11 +1,13 @@
 #include <iostream>
+
 #include "random.h"
+#include "peer.h"
 #include "piece.h"
 #include "event_handler.h"
 
 using namespace uniformrand;
 
-int EventHandler::num_arrival = 1000;
+int EventHandler::num_arrival = 10000;
 
 EventHandler::EventHandler(Args args, const PeerManager* pm, float l, float m) { _args = args;
     _args = args;
@@ -61,9 +63,9 @@ void EventHandler::ProcessArrival(Event& e)
     ProcessBTEvent(e);
 
     // 產生下一個衍生事件, 中止條件為所有 pieces 拿到
-    //if (!g_all_pieces_get)
-    if(e.index < num_arrival &&
-       e.type_bt != Event::Type4BT::PEER_LEAVE)
+    //if(e.index < num_arrival &&
+    //   e.type_bt != Event::Type4BT::PEER_LEAVE)
+    if (!g_all_pieces_get)
     {
         Event::Type4BT derived_type = GetDeriveBTEventType(e.type_bt);
         GetNextEvent(e, Event::Type::ARRIVAL, derived_type);
@@ -98,11 +100,12 @@ void EventHandler::ProcessDeparture(Event& e)
 void EventHandler::ProcessEventPeerJoin(Event& e)
 {
     const int cid = 0;  // not implemnet yet
-    _pm->NewPeer(e.index, cid, _current_time);
+    _pm->NewPeer(e.pid, cid, _current_time);
 }
 
 void EventHandler::ProcessEventPeerListReqRecv(Event& e)
 {
+    std::cout << "PID for selecting neighbors: " << e.pid << std::endl;
     _pm->AllotNeighbors(e.pid);
 }
 
@@ -113,7 +116,11 @@ void EventHandler::ProcessEventPeerListGet(Event& e)
 
 void EventHandler::ProcessEventReqPiece(Event& e)
 {
-
+    // for debug usage
+    for(int c = 0; c < _args.NUM_PIECE; c++)
+    {
+        g_peers[e.pid].pieces[c] = true;
+    }
 }
 
 void EventHandler::ProcessEventPieceAdmit(Event& e)
@@ -191,6 +198,7 @@ void EventHandler::ProcessBTEvent(Event &e)
             break;
 
         case Event::Type4BT::PEER_LIST_GET: //        ProcessEventPeerListGet(e);
+            ProcessEventPeerListGet(e);
             break;
 
         case Event::Type4BT::REQ_PIECE:
@@ -224,12 +232,12 @@ void EventHandler::ProcessEvent(Event& e)
     {
         ProcessArrival(e);
     }
-    else
+    else if(e.type == Event::Type::DEPARTURE)
     {
         ProcessDeparture(e);
     }
 
-    if(e.pid < _args.NUM_PEER)
+    if(e.pid < (_args.NUM_PEER - 1) - 1)
         GetNextEvent(e, Event::Type::ARRIVAL, Event::Type4BT::PEER_JOIN);
 
     _event_list.sort();
