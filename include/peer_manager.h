@@ -28,9 +28,9 @@ private:
     void InitSeeds() const;
     void InitLeeches() const;
 
-    Args _args;  // don't use pointer
-    float* _peers_bandwidth;
-    IPeerSelect* _type_peerselect;
+    Args args_;  // don't use pointer
+    float* peers_bandwidth_;
+    IPeerSelect* type_peerselect_;
 };
 
 #endif // for #ifndef _PEERMANAGER_H

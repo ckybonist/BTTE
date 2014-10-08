@@ -47,17 +47,16 @@ int main(int argc, const char *argv[])
     //
     PeerManager pm(args);
 
-    EventHandler evh(args, &pm, 1, 0.5);
+    //EventHandler evh(args, &pm, 0.5, 0.2);
 
     pm.CreatePeers();
 
-    evh.StartRoutine();
+    //evh.StartRoutine();
 
     ShowDbgInfo(args);
-    // end simluating
 
 
-    //////////////////////////////////
+    ///////////////////////////////////////
     // 4. check seeds was being used or not
     //
     std::cout << "\n\nGroup of Final Rand-Seeds:\n";

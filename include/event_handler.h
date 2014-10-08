@@ -23,12 +23,12 @@ public:
     void ProcessEvent(Event& e);
     void StartRoutine();
 
-    float get_lambda() { return _lambda; };
-    float get_mu() { return _mu; };
+    float get_lambda() { return lambda_; };
+    float get_mu() { return mu_; };
 
     static int num_arrival;
 
-protected:
+private:
     Event::Type4BT GetDeriveBTEventType(Event::Type4BT t_bt);
     void ProcessEventPeerJoin(Event& e);
 
@@ -46,19 +46,19 @@ protected:
 
     void ProcessEventPeerLeave(const Event& e);
 
-    std::list<Event> _event_list;
-    std::list<Event> _system;
+    std::list<Event> event_list_;
+    std::list<Event> system_;
 
-    Args _args;
+    Args args_;
 
-    const PeerManager* _pm;
+    const PeerManager* pm_;
 
-    float _lambda;
-    float _mu;
+    float lambda_;
+    float mu_;
 
-    float _total_sys_size;
-    float _current_time;
-    float _waiting_time;
+    float total_sys_size_;
+    float current_time_;
+    float waiting_time_;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

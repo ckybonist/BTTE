@@ -25,10 +25,10 @@ public:
     virtual Neighbor* SelectNeighbors() = 0;
 
 protected:
-    int _NUM_PEERLIST;
-    int _NUM_PEER;
-    int* _ids;
-    int* _pg_delays;
+    int NUM_PEERLIST_;
+    int NUM_PEER_;
+    int* ids_;
+    int* pg_delays_;
 };
 
 class Standard : public IPeerSelect
@@ -86,7 +86,7 @@ public:
 
 private:
     Neighbor* SelectNeighbors() override;
-    void _setCluster(Peer &peers);
+    void setCluster(Peer &peers);
 };
 
 }
