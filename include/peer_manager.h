@@ -29,7 +29,7 @@ private:
     void InitLeeches() const;
 
     Args args_;  // don't use pointer
-    float* peers_bandwidth_;
+    float* time_per_pieces_;
     IPeerSelect* type_peerselect_;
 };
 

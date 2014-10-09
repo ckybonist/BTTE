@@ -21,7 +21,7 @@ const int g_k_num_level = 3;
 struct PeerLevel
 {
     float dist_rate;
-    float trans_time;
+    float bandwidth;
 };
 
 extern const PeerLevel g_k_peer_level[g_k_num_level] =
@@ -29,19 +29,19 @@ extern const PeerLevel g_k_peer_level[g_k_num_level] =
     // Level 0, fatest
     {
         0.3,
-        (g_k_piece_size / static_cast<float>(10 * 1024 * 1024))
+        10 * 1024 * 1024
     },
 
     // Level 1, average
     {
         0.5,
-        (g_k_piece_size / static_cast<float>(128 * 1024))
+        128 * 1024
     },
 
     // Level 2, slowest
     {
         0.2,
-        (g_k_piece_size / static_cast<float>(56 * 1024))
+        56 * 1024
     },
 };
 
