@@ -10,21 +10,21 @@
 struct Peer
 {
     Peer() {};
-    Peer(const int k_id,
-         const float k_time_per_piece,
+    Peer(const int id,
+         const float time_per_piece,
          Neighbor *neighbors,
          const int NUM_PIECE);  // seed
 
-    Peer(const int k_id,
-         const float k_time_per_piece,
+    Peer(const int id,
+         const float time_per_piece,
          Neighbor *neighbors,
          const int NUM_PIECE,
-         const double k_prob_leech);  // leech
+         const double prob_leech);  // leech
 
-    Peer(const int k_id,
-         const int k_cid,
-         const float k_time_per_piece,
-         const float k_start_time,
+    Peer(const int id,
+         const int cid,
+         const float time_per_piece,
+         const float start_time,
          const int NUM_PIECE);  // average peer
 
 
@@ -43,7 +43,6 @@ struct Peer
     float end_time;       // end time of all pieces have been downloaded
 
     int counts;           // counts of being selected as an candidate in other peers' neighbor lists
-
 };
 
 extern Peer* g_peers;     // sort by time-order

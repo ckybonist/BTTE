@@ -4,6 +4,12 @@
 class Event
 {
 public:
+    enum class Type;
+    enum class Type4BT;
+
+    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
+    bool operator< (const Event& e);
+
     enum class Type
     {
         DEPARTURE,
@@ -22,16 +28,12 @@ public:
         PEER_LEAVE,
     };
 
-    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
-
     Type type;  // arrival or departure
     Type4BT type_bt;
+
     int index;
-    float time;
-
     int pid;
-
-    bool operator< (const Event& e);
+    float time;
 };
 
 

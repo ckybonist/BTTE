@@ -9,9 +9,9 @@
 #include "peer_manager.h"
 
 
-static bool PeerEnough(const int NUM_PEER, const int k_cur);
-static bool RateEnough(const int k_level, const int k_amount, const int NUM_PEER);
-static int NewPeerLevel(const int (&exclude_set)[g_k_num_level], const RSC& k_seed_rsc_id);
+static bool PeerEnough(const int NUM_PEER, const int cur);
+static bool RateEnough(const int level, const int amount, const int NUM_PEER);
+static int NewPeerLevel(const int (&exclude_set)[g_k_num_level], const RSC& seed_rsc_id);
 
 
 PeerManager::PeerManager(const Args& args)
@@ -49,6 +49,7 @@ PeerManager::~PeerManager()
     for (int i = 0; i < args_.NUM_PEER; i++)
     {
         delete [] g_peers[i].pieces;
+        g_peers[i].pieces = nullptr;
     }
 
     // also call the destructor to delete neighbors
@@ -56,23 +57,28 @@ PeerManager::~PeerManager()
 
     delete [] g_peers;
 
-    delete [] peers_bandwidth_;
+    delete [] time_per_pieces_;
+
+    type_peerselect_ = nullptr;
+    g_peers = nullptr;
+    time_per_pieces_ = nullptr;
 }
 
 // for average peers
-void PeerManager::AllotNeighbors(const int k_peer_id) const
+void PeerManager::AllotNeighbors(const int peer_id) const
 {
     Neighbor* neighbors = type_peerselect_->SelectNeighbors();
-    g_peers[k_peer_id].neighbors = neighbors;
+    g_peers[peer_id].neighbors = neighbors;
 }
 
-void PeerManager::NewPeer(const int k_id,
-                          const int k_cid,
-                          const float k_start_time) const
+void PeerManager::NewPeer(const int id,
+                          const int cid,
+                          const float start_time) const
 {
-    g_peers[k_id] = Peer(k_id, k_cid,
-                       peers_bandwidth_[k_id],
-                       k_start_time,
+    g_peers[id] = Peer(id,
+                       cid,
+                       time_per_pieces_[id],
+                       start_time,
                        args_.NUM_PIECE);
 }
 
@@ -90,18 +96,16 @@ void PeerManager::CreatePeers()
     // DEBUG
     for(int i = 0; i < g_k_num_level; i++)
     {
-        std::cout << "Transmission time of level "<< i << " : "
-                  << g_k_peer_level[i].trans_time << "\n";
+        std::cout << "Bandwidth of level "<< i << " : "
+                  << g_k_peer_level[i].bandwidth << "\n";
     }
     std::cout << "\n";
 
     // create empty peers
-    const int NUM_PEER = args_.NUM_PEER;
-
     AllocAllPeersSpaces();
 
     // init seeds, leeches and their pieces
-    const int k_aborigine = args_.NUM_SEED + args_.NUM_LEECH;
+    const int aborigine = args_.NUM_SEED + args_.NUM_LEECH;
 
     AllotPeerLevel();
 
@@ -116,7 +120,7 @@ void PeerManager::CreatePeers()
     }
 
     // test of peer join
-    for(int pid = k_aborigine; pid < NUM_PEER; ++pid)
+    for(int pid = aborigine; pid < args_.NUM_PEER; ++pid)
     {
         float time = pid / static_cast<float>(100);
 
@@ -134,20 +138,27 @@ void PeerManager::AllotPeerLevel()
 {
     const int NUM_PEER = args_.NUM_PEER;
 
-    peers_bandwidth_ = new float[NUM_PEER];
+    time_per_pieces_ = new float[NUM_PEER];
 
-    if(nullptr == peers_bandwidth_) {
+    if(nullptr == time_per_pieces_) {
         ExitError("Memory Allocation Fault");
     }
 
+
 	int count[g_k_num_level] = { 0 };
 	int exclude_set[g_k_num_level] = { 0 };
+
+    float time_piece[g_k_num_level] = { 0 };
+    for(int i = 0; i < g_k_num_level; i++)
+    {
+        time_piece[i] = g_k_piece_size / g_k_peer_level[i].bandwidth;
+    }
 
 	for(int pid = 0; pid < NUM_PEER; pid++)
     {
 		int level = NewPeerLevel(exclude_set, RSC::PEER_LEVEL);
 
-		peers_bandwidth_[pid] = g_k_peer_level[level-1].trans_time;
+        time_per_pieces_[pid] = time_piece[level-1];
 
 		++count[level-1];
 
@@ -159,6 +170,12 @@ void PeerManager::AllotPeerLevel()
 				exclude_set[level-1] = level;
 		}
 	}
+
+    for(int i = 0; i < args_.NUM_PEER; i++)
+    {
+        std::cout << time_per_pieces_[i] << "\n";
+    }
+    std::cout << "\n\n";
 
     for(int i = 0; i < 3; i++)
     {
@@ -177,9 +194,9 @@ void PeerManager::InitSeeds() const
         Neighbor* neighbors = type_peerselect_->SelectNeighbors();
 
         g_peers[pid] = Peer(pid,
-                peers_bandwidth_[pid],
-                neighbors,
-                args_.NUM_PIECE);
+                            time_per_pieces_[pid],
+                            neighbors,
+                            args_.NUM_PIECE);
     }
 }
 
@@ -199,8 +216,8 @@ void PeerManager::InitSeeds() const
  * * */
 void PeerManager::InitLeeches() const
 {
-    const int k_start = args_.NUM_SEED;
-    const int k_end = k_start + args_.NUM_LEECH;
+    const int start = args_.NUM_SEED;
+    const int end = start + args_.NUM_LEECH;
 
     std::cout.precision(3);
 
@@ -208,7 +225,7 @@ void PeerManager::InitLeeches() const
 
     using std::cout;
     using std::endl;
-    for (int pid = k_start; pid < k_end; pid++)
+    for (int pid = start; pid < end; pid++)
     {
 
         double prob_leech = 0;
@@ -219,12 +236,11 @@ void PeerManager::InitLeeches() const
 
         Neighbor* neighbors = type_peerselect_->SelectNeighbors();
 
-        g_peers[pid] = Peer(
-                      pid,
-                      peers_bandwidth_[pid],
-                      neighbors,
-                      args_.NUM_PIECE,
-                      prob_leech);
+        g_peers[pid] = Peer(pid,
+                            time_per_pieces_[pid],
+                            neighbors,
+                            args_.NUM_PIECE,
+                            prob_leech);
 
         std::cout << prob_leech << "\n";
     }
@@ -234,9 +250,9 @@ void PeerManager::InitLeeches() const
 
 
 
-static bool PeerEnough(const int NUM_PEER, const int k_cur)
+static bool PeerEnough(const int NUM_PEER, const int cur)
 {
-    return (NUM_PEER == k_cur);
+    return (NUM_PEER == cur);
 }
 
 /*
@@ -249,13 +265,13 @@ static bool PeerEnough(const int NUM_PEER, const int k_cur)
  *
  * */
 //static bool RateEnough(const int level, const int amount, const int NUM_PEER) {
-static bool RateEnough(const int k_level,
-                       const int k_amount,
+static bool RateEnough(const int level,
+                       const int amount,
                        const int NUM_PEER)
 {
-	const int k_limit = static_cast<int>(g_k_peer_level[k_level].dist_rate *
+	const int limit = static_cast<int>(g_k_peer_level[level].dist_rate *
                                          NUM_PEER);
-	return (k_amount == k_limit);
+	return (amount == limit);
 }
 
 /*
@@ -273,16 +289,16 @@ static bool RateEnough(const int k_level,
  *
  * */
 static int NewPeerLevel(const int (&exclude_set)[g_k_num_level],
-                        const RSC& k_seed_rsc_id)
+                        const RSC& seed_rsc_id)
 {
 	int target = 0;
 	bool flag = true;
-    const int k_min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
-    const int k_max = g_k_num_level;
+    const int min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
+    const int max = g_k_num_level;
 
 	while(flag)
     {
-		target = uniformrand::Roll<int>(k_seed_rsc_id, k_min, k_max);
+		target = uniformrand::Roll<int>(seed_rsc_id, min, max);
 
 		for(int i = 0; i < g_k_num_level; i++)
         {

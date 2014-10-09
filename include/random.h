@@ -27,7 +27,7 @@
  *       14 : free
  *
  * * * * * * * * */
-const int k_num_rseeds = 15;
+const int g_k_num_rseeds = 15;
 
 typedef enum class RandSeedCases
 {
@@ -51,7 +51,7 @@ typedef enum class RandSeedCases
 } RSC;
 
 
-extern long long g_rand_grp[k_num_rseeds];
+extern long long g_rand_grp[g_k_num_rseeds];
 //extern long long g_rand_num;
 
 

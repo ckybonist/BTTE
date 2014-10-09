@@ -34,7 +34,17 @@ void EventHandler::GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt)
 {
     if (Event::Type::ARRIVAL == t)
     {
-        float time = e.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+        float time = 0.0;
+        if(Event::Type4BT::PEER_JOIN == t_bt ||
+           Event::Type4BT::PEER_LEAVE == t_bt)
+        {
+            time = e.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+        }
+        else if(Event::Type4BT::REQ_PIECE == t_bt)
+        {
+        }
+
+
         Event new_event(t, t_bt, e.index + 1, e.pid + 1, time);
         event_list_.push_back(new_event);
     }

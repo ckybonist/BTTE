@@ -53,7 +53,7 @@ void InitRandSeeds()
 {
     int seed = k_interval;  // ordinal of seed
 
-    for(int seed_id = 0; seed_id < k_num_rseeds; seed_id++)
+    for(int seed_id = 0; seed_id < g_k_num_rseeds; seed_id++)
     {
         Srand(seed_id, seed);
         seed += k_interval * (seed_id + 1);
