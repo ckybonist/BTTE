@@ -9,9 +9,8 @@
 #include "peer_manager.h"
 
 
-static bool PeerEnough(const int NUM_PEER, const int cur);
 static bool RateEnough(const int level, const int amount, const int NUM_PEER);
-static int NewPeerLevel(const int (&exclude_set)[g_k_num_level], const RSC& seed_rsc_id);
+static int NewPeerLevel(const int (&exclude_set)[g_kNumLevel], const RSC& rsc);
 
 
 PeerManager::PeerManager(const Args& args)
@@ -71,15 +70,15 @@ void PeerManager::AllotNeighbors(const int peer_id) const
     g_peers[peer_id].neighbors = neighbors;
 }
 
-void PeerManager::NewPeer(const int id,
+void PeerManager::NewPeer(const int pid,
                           const int cid,
-                          const float start_time) const
+                          const float join_time) const
 {
-    g_peers[id] = Peer(id,
-                       cid,
-                       time_per_pieces_[id],
-                       start_time,
-                       args_.NUM_PIECE);
+    g_peers[pid] = Peer(pid,
+                        cid,
+                        time_per_pieces_[pid],
+                        join_time,
+                        args_.NUM_PIECE);
 }
 
 void PeerManager::AllocAllPeersSpaces()
@@ -94,10 +93,10 @@ void PeerManager::AllocAllPeersSpaces()
 void PeerManager::CreatePeers()
 {
     // DEBUG
-    for(int i = 0; i < g_k_num_level; i++)
+    for(int i = 0; i < g_kNumLevel; i++)
     {
         std::cout << "Bandwidth of level "<< i << " : "
-                  << g_k_peer_level[i].bandwidth << "\n";
+                  << g_kPeerLevel[i].bandwidth << "\n";
     }
     std::cout << "\n";
 
@@ -145,13 +144,13 @@ void PeerManager::AllotPeerLevel()
     }
 
 
-	int count[g_k_num_level] = { 0 };
-	int exclude_set[g_k_num_level] = { 0 };
+	int count[g_kNumLevel] = { 0 };
+	int exclude_set[g_kNumLevel] = { 0 };
 
-    float time_piece[g_k_num_level] = { 0 };
-    for(int i = 0; i < g_k_num_level; i++)
+    float time_piece[g_kNumLevel] = { 0 };
+    for(int i = 0; i < g_kNumLevel; i++)
     {
-        time_piece[i] = g_k_piece_size / g_k_peer_level[i].bandwidth;
+        time_piece[i] = g_kPieceSize / g_kPeerLevel[i].bandwidth;
     }
 
 	for(int pid = 0; pid < NUM_PEER; pid++)
@@ -216,16 +215,17 @@ void PeerManager::InitSeeds() const
  * * */
 void PeerManager::InitLeeches() const
 {
-    const int start = args_.NUM_SEED;
-    const int end = start + args_.NUM_LEECH;
-
     std::cout.precision(3);
 
     std::cout << "Prob. of each leech: \n";
 
     using std::cout;
     using std::endl;
-    for (int pid = start; pid < end; pid++)
+
+    const int kStart = args_.NUM_SEED;
+    const int kEnd = kStart + args_.NUM_LEECH;
+
+    for (int pid = kStart; pid < kEnd; pid++)
     {
 
         double prob_leech = 0;
@@ -249,12 +249,6 @@ void PeerManager::InitLeeches() const
 }
 
 
-
-static bool PeerEnough(const int NUM_PEER, const int cur)
-{
-    return (NUM_PEER == cur);
-}
-
 /*
  * Check amount of each class' peers
  * is reach the target of distributed-rate
@@ -269,7 +263,7 @@ static bool RateEnough(const int level,
                        const int amount,
                        const int NUM_PEER)
 {
-	const int limit = static_cast<int>(g_k_peer_level[level].dist_rate *
+	const int limit = static_cast<int>(g_kPeerLevel[level].dist_rate *
                                          NUM_PEER);
 	return (amount == limit);
 }
@@ -288,19 +282,19 @@ static bool RateEnough(const int level,
  *	   without that exclusive set
  *
  * */
-static int NewPeerLevel(const int (&exclude_set)[g_k_num_level],
-                        const RSC& seed_rsc_id)
+static int NewPeerLevel(const int (&exclude_set)[g_kNumLevel],
+                        const RSC& rsc)
 {
 	int target = 0;
 	bool flag = true;
     const int min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
-    const int max = g_k_num_level;
+    const int max = g_kNumLevel;
 
 	while(flag)
     {
-		target = uniformrand::Roll<int>(seed_rsc_id, min, max);
+		target = uniformrand::Roll<int>(rsc, min, max);
 
-		for(int i = 0; i < g_k_num_level; i++)
+		for(int i = 0; i < g_kNumLevel; i++)
         {
 			//if(target == ex_set[i] && ex_set[i] != 0)
 			if(target == exclude_set[i])

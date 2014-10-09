@@ -19,7 +19,7 @@ int main(int argc, const char *argv[])
     uniformrand::InitRandSeeds();
 
     std::cout << "Group of Initial Rand-Seeds:\n";
-    for(int i = 0; i < g_k_num_rseeds; i++)
+    for(int i = 0; i < g_kNumRSeeds; i++)
     {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";
@@ -60,7 +60,7 @@ int main(int argc, const char *argv[])
     // 4. check seeds was being used or not
     //
     std::cout << "\n\nGroup of Final Rand-Seeds:\n";
-    for(int i = 0; i < g_k_num_rseeds; i++)
+    for(int i = 0; i < g_kNumRSeeds; i++)
     {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";

@@ -2,7 +2,7 @@
 #define _PIECE_H
 
 //                         512      byte
-const int g_k_piece_size = 512 * (1024 * 8);
+const int g_kPieceSize = 512 * (1024 * 8);
 
 bool* MakePieces(const int NUM_PIECE);
 

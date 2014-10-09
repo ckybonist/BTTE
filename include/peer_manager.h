@@ -19,8 +19,8 @@ public:
     //   2. allot each peer one level(see peer_level.h) and
     //      init some peers as seeds and leeches
     void CreatePeers();
-    void NewPeer(const int k_id, const int k_cid, const float k_start_time) const;  // for peer_join event
-    void AllotNeighbors(const int k_peer_id) const;  // for average peers
+    void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
+    void AllotNeighbors(const int peer_id) const;  // for average peers
 
 private:
     void AllocAllPeersSpaces();

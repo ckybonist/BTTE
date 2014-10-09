@@ -2,46 +2,45 @@
 
 #include "random.h"
 
-static const long long k_init_seed = 377003613;
+static const long long kInitSeed = 377003613;
 //long long g_rand_num = k_init_seed;
 
 long long g_rand_grp[] =
 {
-    k_init_seed, k_init_seed, k_init_seed,
-    k_init_seed, k_init_seed, k_init_seed,
-    k_init_seed, k_init_seed, k_init_seed,
-    k_init_seed, k_init_seed, k_init_seed,
-    k_init_seed, k_init_seed, k_init_seed
+    kInitSeed, kInitSeed, kInitSeed,
+    kInitSeed, kInitSeed, kInitSeed,
+    kInitSeed, kInitSeed, kInitSeed,
+    kInitSeed, kInitSeed, kInitSeed,
+    kInitSeed, kInitSeed, kInitSeed
 };
 
-static void RandForInternal(const RSC& k_seed_id)
+static void RandForInternal(const RSC& rsc)
 {
-    const int k_sid = static_cast<int>(k_seed_id);
+    const int iRSC = static_cast<int>(rsc);
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % RAND_MAX;
+    g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
 }
 
 namespace uniformrand {
 
-const int k_interval = 1000000;
+const int kInterval = 1000000;
 
 
-long long Rand(const RSC& k_seed_id)
+long long Rand(const RSC& rsc)
 {
-    const int k_sid = static_cast<int>(k_seed_id);
+    const int iRSC = static_cast<int>(rsc);
 
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    //g_rand_grp[k_seed_rsc_id] = 16807 * g_rand_grp[k_seed_rsc_id] % g_k_rand_max;
-    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % RAND_MAX;
-    return g_rand_grp[k_sid];
+    g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
+    return g_rand_grp[iRSC];
 }
 
 
-void Srand(const int k_seed_id, const int k_seed)
+void Srand(const int iRSC, const int seed)
 {
-    for(int i = 0; i < k_seed; i++)
+    for(int i = 0; i < seed; i++)
     {
-        RandForInternal(static_cast<RSC>(k_seed_id));
+        RandForInternal(static_cast<RSC>(iRSC));
 
         //g_rand_grp[k_seed_id] = Rand(static_cast<RSC>(k_seed_id));
         //Rand(static_cast<RSC>(k_seed_id));
@@ -51,12 +50,12 @@ void Srand(const int k_seed_id, const int k_seed)
 
 void InitRandSeeds()
 {
-    int seed = k_interval;  // ordinal of seed
+    int seed = kInterval;  // ordinal of seed
 
-    for(int seed_id = 0; seed_id < g_k_num_rseeds; seed_id++)
+    for(int seed_id = 0; seed_id < g_kNumRSeeds; seed_id++)
     {
         Srand(seed_id, seed);
-        seed += k_interval * (seed_id + 1);
+        seed += kInterval * (seed_id + 1);
     }
 }
 

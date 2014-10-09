@@ -16,7 +16,7 @@
  *
  * */
 
-const int g_k_num_level = 3;
+const int g_kNumLevel = 3;
 
 struct PeerLevel
 {
@@ -24,7 +24,7 @@ struct PeerLevel
     float bandwidth;
 };
 
-extern const PeerLevel g_k_peer_level[g_k_num_level] =
+extern const PeerLevel g_kPeerLevel[g_kNumLevel] =
 {
     // Level 0, fatest
     {
