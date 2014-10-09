@@ -25,9 +25,13 @@ Standard::~Standard()
     delete [] ids_;
     delete [] pg_delays_;
 
+    ids_ = nullptr;
+    pg_delays_ = nullptr;
+
     for(int pid = 0; pid < NUM_PEER_; pid++)
     {
         delete [] g_peers[pid].neighbors;
+        g_peers[pid].neighbors = nullptr;
     }
 }
 
