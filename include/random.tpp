@@ -12,10 +12,10 @@ T Roll(const RSC& k_seed_rsc_id,
 {
     assert(k_up > k_low);
     // [low, up]
-	T number = static_cast<T>((((double)uniformrand::Rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
+	T number = static_cast<T>((((double)uniformrand::Rand(k_seed_rsc_id) / ((double)RAND_MAX + 1)) *
 			     (k_up - k_low + 1)) + k_low);
     // [low, up)
-	/* int number = (int)(((double)uniformdist::rand(k_seed_rsc_id) / ((double)g_k_rand_max + 1)) *
+	/* int number = (int)(((double)uniformdist::rand(k_seed_rsc_id) / ((double)RAND_MAX + 1)) *
 			     (k_up - k_low)) + k_low; */
 	return number;
 }
@@ -43,8 +43,7 @@ T* DistinctRandNumbers(const RSC& k_seed_rsc_id,
                 rand_num = Rand(k_seed_rsc_id) % k_rand_limit;
                 s = m;
                 continue;
-            }
-
+            } 
             if(rand_num != arr[s] && s == 0)  // rand_num is distinct
             {
                 duplicate = false;

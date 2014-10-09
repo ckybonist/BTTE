@@ -1,11 +1,12 @@
 #ifndef _RANDOM_H
 #define _RANDOM_H
 
+#include <cstdlib>
 #include <cstring>
 
 #include "error.h"
 
-const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
+//const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
 
 /*
  * Group of Rand Seeds (size 15) :

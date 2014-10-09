@@ -18,7 +18,7 @@ static void RandForInternal(const RSC& k_seed_id)
 {
     const int k_sid = static_cast<int>(k_seed_id);
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % g_k_rand_max;
+    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % RAND_MAX;
 }
 
 namespace uniformrand {
@@ -32,7 +32,7 @@ long long Rand(const RSC& k_seed_id)
 
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
     //g_rand_grp[k_seed_rsc_id] = 16807 * g_rand_grp[k_seed_rsc_id] % g_k_rand_max;
-    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % g_k_rand_max;
+    g_rand_grp[k_sid] = 16807 * g_rand_grp[k_sid] % RAND_MAX;
     return g_rand_grp[k_sid];
 }
 
@@ -63,7 +63,7 @@ void InitRandSeeds()
 float ExpRand(float rate, long long rand_num)
 {
     float rand_exp = 0 - (1.0 / rate) *
-                       log(1.0 - (double)rand_num / 2147483647.0);
+                       log(1.0 - (double)rand_num / RAND_MAX);
     return rand_exp;
 }
 
