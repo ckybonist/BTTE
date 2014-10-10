@@ -6,7 +6,7 @@
 Peer *g_peers = nullptr;
 
 Peer::Peer(const int id,
-           const float time_per_piece,
+           const float time_packet,
            Neighbor* neighbors,
            const int NUM_PIECE)
 {
@@ -22,18 +22,18 @@ Peer::Peer(const int id,
         pieces[i] = true;
     }
 
-    this->time_per_piece = time_per_piece;
+    this->time_packet = time_packet;
 
     this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
 
-    start_time = 0.0;
+    join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
 }
 
 Peer::Peer(const int id,
-           const float time_per_piece,
+           const float time_packet,
            Neighbor* neighbors,
            const int NUM_PIECE,
            const double prob_leech)
@@ -52,11 +52,11 @@ Peer::Peer(const int id,
         pieces[i] = (prob_piece < prob_leech);
     }
 
-    this->time_per_piece = time_per_piece;
+    this->time_packet = time_packet;
 
     this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
 
-    start_time = 0.0;
+    join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
@@ -66,8 +66,8 @@ Peer::Peer(const int id,
 // for normal peer joining
 Peer::Peer(const int id,
            const int cid,
-           const float time_per_piece,
-           const float start_time,
+           const float time_packet,
+           const float join_time,
            const int NUM_PIECE)
 {
     in_swarm = true;
@@ -78,10 +78,10 @@ Peer::Peer(const int id,
     is_seed = false;
     is_leech = false;
 
-    this->time_per_piece = time_per_piece;
+    this->time_packet = time_packet;
     this->pieces = MakePieces(NUM_PIECE);
 
-    this->start_time = start_time;
+    this->join_time = join_time;
     end_time = 0.0;
 
     counts = 0.0;

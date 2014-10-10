@@ -11,19 +11,19 @@ struct Peer
 {
     Peer() {};
     Peer(const int id,
-         const float time_per_piece,
+         const float time_packet,
          Neighbor *neighbors,
          const int NUM_PIECE);  // seed
 
     Peer(const int id,
-         const float time_per_piece,
+         const float time_packet,
          Neighbor *neighbors,
          const int NUM_PIECE,
          const double prob_leech);  // leech
 
     Peer(const int id,
          const int cid,
-         const float time_per_piece,
+         const float time_packet,
          const float start_time,
          const int NUM_PIECE);  // average peer
 
@@ -35,11 +35,11 @@ struct Peer
     bool in_swarm;
 
     bool* pieces;
-    float time_per_piece; // download time of each piece
+    float time_packet; // download time of each piece
 
     Neighbor* neighbors;
 
-    float start_time;     // start time of peer run the routine
+    float join_time;     // start time of peer run the routine
     float end_time;       // end time of all pieces have been downloaded
 
     int counts;           // counts of being selected as an candidate in other peers' neighbor lists

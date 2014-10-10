@@ -29,7 +29,7 @@ private:
     void InitLeeches() const;
 
     Args args_;  // don't use pointer
-    float* time_per_pieces_;
+    float* packet_tt_4_peers;  // tt : transmission time
     IPeerSelect* type_peerselect_;
 };
 

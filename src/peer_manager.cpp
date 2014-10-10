@@ -56,11 +56,11 @@ PeerManager::~PeerManager()
 
     delete [] g_peers;
 
-    delete [] time_per_pieces_;
+    delete [] packet_tt_4_peers;
 
     type_peerselect_ = nullptr;
     g_peers = nullptr;
-    time_per_pieces_ = nullptr;
+    packet_tt_4_peers = nullptr;
 }
 
 // for average peers
@@ -76,7 +76,7 @@ void PeerManager::NewPeer(const int pid,
 {
     g_peers[pid] = Peer(pid,
                         cid,
-                        time_per_pieces_[pid],
+                        packet_tt_4_peers[pid],
                         join_time,
                         args_.NUM_PIECE);
 }
@@ -137,9 +137,9 @@ void PeerManager::AllotPeerLevel()
 {
     const int NUM_PEER = args_.NUM_PEER;
 
-    time_per_pieces_ = new float[NUM_PEER];
+    packet_tt_4_peers = new float[NUM_PEER];
 
-    if(nullptr == time_per_pieces_) {
+    if(nullptr == packet_tt_4_peers) {
         ExitError("Memory Allocation Fault");
     }
 
@@ -157,7 +157,7 @@ void PeerManager::AllotPeerLevel()
     {
 		int level = NewPeerLevel(exclude_set, RSC::PEER_LEVEL);
 
-        time_per_pieces_[pid] = time_piece[level-1];
+        packet_tt_4_peers[pid] = time_piece[level-1];
 
 		++count[level-1];
 
@@ -172,7 +172,7 @@ void PeerManager::AllotPeerLevel()
 
     for(int i = 0; i < args_.NUM_PEER; i++)
     {
-        std::cout << time_per_pieces_[i] << "\n";
+        std::cout << packet_tt_4_peers[i] << "\n";
     }
     std::cout << "\n\n";
 
@@ -193,7 +193,7 @@ void PeerManager::InitSeeds() const
         Neighbor* neighbors = type_peerselect_->SelectNeighbors();
 
         g_peers[pid] = Peer(pid,
-                            time_per_pieces_[pid],
+                            packet_tt_4_peers[pid],
                             neighbors,
                             args_.NUM_PIECE);
     }
@@ -237,7 +237,7 @@ void PeerManager::InitLeeches() const
         Neighbor* neighbors = type_peerselect_->SelectNeighbors();
 
         g_peers[pid] = Peer(pid,
-                            time_per_pieces_[pid],
+                            packet_tt_4_peers[pid],
                             neighbors,
                             args_.NUM_PIECE,
                             prob_leech);
