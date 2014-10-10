@@ -59,6 +59,8 @@ private:
     float total_sys_size_;
     float current_time_;
     float waiting_time_;
+
+    static int peer_join_counts;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H
