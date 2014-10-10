@@ -10,13 +10,41 @@ using namespace uniformrand;
 int EventHandler::num_arrival = 10000;
 int EventHandler::peer_join_counts = 0;
 
-EventHandler::EventHandler(Args args, const PeerManager* pm, float l, float m) {
+EventHandler::EventHandler(Args args, const PeerManager* pm, float l, float m)
+{
     args_ = args;
     pm_ = pm;
     lambda_ = l;
     mu_ = m;
     current_time_ = 0.0;
     waiting_time_ = 0.0;
+
+    MapEvent();
+    MapEventDeps();
+}
+
+void EventHandler::MapEvent()
+{
+    event_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
+    event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
+    event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
+    event_map_[Event::REQ_PIECE] = &EventHandler::ReqPieceEvent;
+    event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
+    event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
+    event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
+    event_map_[Event::PEER_LEAVE] = &EventHandler::PeerLeaveEvent;
+}
+
+void EventHandler::MapEventDeps()
+{
+    event_deps_map_[Event::PEER_JOIN] = Event::PEER_JOIN;
+    event_deps_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
+    event_deps_map_[Event::PEERLIST_GET] = Event::REQ_PIECE;
+    event_deps_map_[Event::REQ_PIECE] = Event::PIECE_ADMIT;
+    event_deps_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
+    event_deps_map_[Event::PIECE_GET] = Event::COMPLETED;
+    event_deps_map_[Event::COMPLETED] = Event::PEER_LEAVE;
+    event_deps_map_[Event::PEER_LEAVE] = Event::PEER_LEAVE;
 }
 
 void EventHandler::PushInitEvent()
@@ -24,7 +52,7 @@ void EventHandler::PushInitEvent()
     float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
     const int pid = args_.NUM_SEED + args_.NUM_LEECH;
     Event first_event(Event::Type::ARRIVAL,
-                      Event::Type4BT::PEER_JOIN,
+                      Event::PEER_JOIN,
                       0,
                       pid,
                       time);
@@ -36,9 +64,10 @@ void EventHandler::GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt)
     if (Event::Type::ARRIVAL == t)
     {
         float time = 0.0;
-        if (Event::Type4BT::PEER_JOIN == t_bt)
+        if (Event::PEER_JOIN == t_bt)
         {
             time = e.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+            ++peer_join_counts;
         }
         else
         {
@@ -51,7 +80,7 @@ void EventHandler::GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt)
     else if (Event::Type::DEPARTURE == t)
     {
         float time = 0.0;
-        if (Event::Type4BT::PEER_LEAVE == t_bt)
+        if (Event::PEER_LEAVE == t_bt)
         {
             time = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));
         }
@@ -62,9 +91,6 @@ void EventHandler::GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt)
 
         Event depart_event(t, t_bt, e.index, e.pid, time);
         event_list_.push_back(depart_event);
-
-        if (Event::Type4BT::PEER_JOIN == t_bt)
-            ++peer_join_counts;
     }
 }
 
@@ -81,10 +107,10 @@ void EventHandler::ProcessArrival(Event& e)
 
     // 處理 system 裡第一個 BT 事件的函式
     // TODO : 執行相對應的事件處理函式
-    ProcessBTEvent(e);
+    (this->*event_map_[e.type_bt])(e);
 
-    Event::Type4BT derived_type = GetDeriveBTEventType(e.type_bt);
-    GetNextEvent(e, Event::Type::ARRIVAL, derived_type);
+    if (e.type_bt != Event::PEER_JOIN || e.type_bt != Event::PEER_LEAVE)
+        GetNextEvent(e, Event::Type::ARRIVAL, event_deps_map_[e.type_bt]);
 
     if (system_.size() == 1)
     {
@@ -95,7 +121,7 @@ void EventHandler::ProcessArrival(Event& e)
 
     event_list_.sort();
 
-    GetNextEvent(e, Event::Type::ARRIVAL, Event::Type4BT::PEER_JOIN);
+    GetNextEvent(e, Event::Type::ARRIVAL, Event::PEER_JOIN);
     event_list_.sort();
 }
 
@@ -115,24 +141,24 @@ void EventHandler::ProcessDeparture(Event& e)
     event_list_.sort();
 }
 
-void EventHandler::ProcessEventPeerJoin(Event& e)
+void EventHandler::PeerJoinEvent(Event& e)
 {
     const int cid = 0;  // not implemnet yet
     pm_->NewPeer(e.pid, cid, current_time_);
 }
 
-void EventHandler::ProcessEventPeerListReqRecv(Event& e)
+void EventHandler::PeerListReqRecvEvent(Event& e)
 {
     std::cout << "PID for selecting neighbors: " << e.pid << std::endl;
     pm_->AllotNeighbors(e.pid);
 }
 
-void EventHandler::ProcessEventPeerListGet(Event& e)
+void EventHandler::PeerListGetEvent(Event& e)
 {
 
 }
 
-void EventHandler::ProcessEventReqPiece(Event& e)
+void EventHandler::ReqPieceEvent(Event& e)
 {
     // for debug usage
     for (int c = 0; c < args_.NUM_PIECE; c++)
@@ -141,107 +167,24 @@ void EventHandler::ProcessEventReqPiece(Event& e)
     }
 }
 
-void EventHandler::ProcessEventPieceAdmit(Event& e)
+void EventHandler::PieceAdmitEvent(Event& e)
 {
 
 }
 
-void EventHandler::ProcessEventPieceGet(Event& e)
+void EventHandler::PieceGetEvent(Event& e)
 {
 
 }
 
-void EventHandler::ProcessEventCompleted(Event& e)
+void EventHandler::CompletedEvent(Event& e)
 {
 
 }
 
-void EventHandler::ProcessEventPeerLeave(const Event& e)
+void EventHandler::PeerLeaveEvent(Event& e)
 {
 
-}
-
-Event::Type4BT EventHandler::GetDeriveBTEventType(Event::Type4BT t_bt)
-{
-    // Event Dependencies
-    switch (t_bt)
-    {
-        case Event::Type4BT::PEER_JOIN:
-            return Event::Type4BT::PEER_LIST_REQ_RECV;
-            break;
-
-        case Event::Type4BT::PEER_LIST_REQ_RECV:
-            return Event::Type4BT::PEER_LIST_GET;
-            break;
-
-        case Event::Type4BT::PEER_LIST_GET: //        ProcessEventPeerListGet(e);
-            return Event::Type4BT::REQ_PIECE;
-            break;
-
-        case Event::Type4BT::REQ_PIECE:
-            return Event::Type4BT::PIECE_ADMIT;
-            break;
-
-        case Event::Type4BT::PIECE_ADMIT:
-            return Event::Type4BT::PIECE_GET;
-            break;
-
-        case Event::Type4BT::PIECE_GET:
-            return Event::Type4BT::COMPLETED;
-            break;
-
-        case Event::Type4BT::COMPLETED:
-            return Event::Type4BT::PEER_LEAVE;
-            break;
-
-        case Event::Type4BT::PEER_LEAVE:
-            break;
-
-        default:
-            break;
-    }
-}
-
-void EventHandler::ProcessBTEvent(Event &e)
-{
-    // Event Dependencies
-    switch (e.type_bt)
-    {
-        case Event::Type4BT::PEER_JOIN:
-            ProcessEventPeerJoin(e);
-            break;
-
-        case Event::Type4BT::PEER_LIST_REQ_RECV:
-            ProcessEventPeerListReqRecv(e);
-            break;
-
-        case Event::Type4BT::PEER_LIST_GET: //        ProcessEventPeerListGet(e);
-            ProcessEventPeerListGet(e);
-            break;
-
-        case Event::Type4BT::REQ_PIECE:
-            ProcessEventReqPiece(e);
-            break;
-
-        case Event::Type4BT::PIECE_ADMIT:
-            ProcessEventPieceAdmit(e);
-            break;
-
-        case Event::Type4BT::PIECE_GET:
-            ProcessEventPieceGet(e);
-            break;
-
-        case Event::Type4BT::COMPLETED:
-            ProcessEventCompleted(e);
-            break;
-
-        case Event::Type4BT::PEER_LEAVE:
-            ProcessEventPeerLeave(e);
-            break;
-
-        default:
-            break;
-    }
 }
 
 void EventHandler::ProcessEvent(Event& e)

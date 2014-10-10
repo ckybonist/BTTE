@@ -1,13 +1,20 @@
 #ifndef _EVENT_HANDLER_H
 #define _EVENT_HANDLER_H
 
+#include <map>
 #include <list>
+#include <functional>
 
 #include "args.h"
 #include "peer_manager.h"
 #include "event.h"
 
 
+class EventHandler;
+
+typedef void (EventHandler::*Fptr)(Event&);
+typedef std::map<Event::Type4BT, Fptr> FuncMap;
+typedef std::map<Event::Type4BT, Event::Type4BT> DepMap;  // map for event dependencies
 
 class EventHandler
 {
@@ -19,7 +26,6 @@ public:
     void GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt);
     void ProcessArrival(Event& e);
     void ProcessDeparture(Event& e);
-    void ProcessBTEvent(Event& e);
     void ProcessEvent(Event& e);
     void StartRoutine();
 
@@ -29,22 +35,27 @@ public:
     static int num_arrival;
 
 private:
-    Event::Type4BT GetDeriveBTEventType(Event::Type4BT t_bt);
-    void ProcessEventPeerJoin(Event& e);
+    void PeerJoinEvent(Event& e);
 
-    void ProcessEventPeerListReqRecv(Event& e);
+    void PeerListReqRecvEvent(Event& e);
 
-    void ProcessEventPeerListGet(Event& e);
+    void PeerListGetEvent(Event& e);
 
-    void ProcessEventReqPiece(Event& e);
+    void ReqPieceEvent(Event& e);
 
-    void ProcessEventPieceAdmit(Event& e);
+    void PieceAdmitEvent(Event& e);
 
-    void ProcessEventPieceGet(Event& e);
+    void PieceGetEvent(Event& e);
 
-    void ProcessEventCompleted(Event& e);
+    void CompletedEvent(Event& e);
 
-    void ProcessEventPeerLeave(const Event& e);
+    void PeerLeaveEvent(Event& e);
+
+    void MapEvent();
+    void MapEventDeps();
+
+    FuncMap event_map_;
+    DepMap event_deps_map_;
 
     std::list<Event> event_list_;
     std::list<Event> system_;

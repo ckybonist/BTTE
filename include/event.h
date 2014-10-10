@@ -1,32 +1,30 @@
 #ifndef _EVENT_H
 #define _EVENT_H
 
+
 class Event
 {
 public:
-    enum class Type;
-    enum class Type4BT;
-
-    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
-    bool operator< (const Event& e);
-
     enum class Type
     {
         DEPARTURE,
         ARRIVAL
     };
 
-    enum class Type4BT
+    enum Type4BT
     {
-        PEER_JOIN = 0,
-        PEER_LIST_REQ_RECV,
-        PEER_LIST_GET,
+        PEER_JOIN,
+        PEERLIST_REQ_RECV,
+        PEERLIST_GET,
         REQ_PIECE,
         PIECE_ADMIT,
         PIECE_GET,
         COMPLETED,
         PEER_LEAVE,
     };
+
+    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
+    bool operator< (const Event& e);
 
     Type type;  // arrival or departure
     Type4BT type_bt;
