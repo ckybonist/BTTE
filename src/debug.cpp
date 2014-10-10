@@ -21,7 +21,7 @@ void ShowDbgInfo(const Args &args)
 {
     //int* piece_own_counter = new int[args.NUM_PIECE];
     int piece_own_counter[10] = {0};
-    if(nullptr == piece_own_counter)
+    if (nullptr == piece_own_counter)
     {
         ExitError("\nMemory Allocation Fault\n");
     }
@@ -30,7 +30,7 @@ void ShowDbgInfo(const Args &args)
 
     cout << "\n@ Peer Infos: \n\n";
 
-    for(int pid = 0; pid < args.NUM_PEER; pid++)
+    for (int pid = 0; pid < args.NUM_PEER; pid++)
     {
         PeerInfo(pid);
 
@@ -54,7 +54,7 @@ void ShowDbgInfo(const Args &args)
     }
 
     cout << "\nNumber of peers own each piece:\n";
-    for(int i = 0; i < args.NUM_PIECE; ++i)
+    for (int i = 0; i < args.NUM_PIECE; ++i)
     {
         cout << "Piece #" << i << " : "
              << piece_own_counter[i] << endl;
@@ -99,13 +99,13 @@ static void PieceInfo(const int pid,
     // pieces info
     int piece_count = 0;
 
-    for(int c = 0; c < NUM_PIECE; c++)
+    for (int c = 0; c < NUM_PIECE; c++)
     {
-        if(g_peers[pid].pieces[c])
+        if (g_peers[pid].pieces[c])
         {
             ++piece_count;
 
-            if(pid > NUM_SEED - 1)
+            if (pid > NUM_SEED - 1)
                 ++counter[c];
         }
     }

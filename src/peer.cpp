@@ -18,7 +18,8 @@ Peer::Peer(const int id,
     cid = 0;
 
     pieces = MakePieces(NUM_PIECE);
-    for(int i = 0; i < NUM_PIECE; i++) {
+    for (int i = 0; i < NUM_PIECE; i++)
+    {
         pieces[i] = true;
     }
 
@@ -47,7 +48,8 @@ Peer::Peer(const int id,
 
     pieces = MakePieces(NUM_PIECE);
 
-    for(int i = 0; i < NUM_PIECE; i++) {
+    for (int i = 0; i < NUM_PIECE; i++)
+    {
         double prob_piece = uniformrand::Rand(RSC::PROB_PIECE) / (double)RAND_MAX;
         pieces[i] = (prob_piece < prob_leech);
     }

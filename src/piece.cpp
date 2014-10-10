@@ -7,7 +7,8 @@ bool g_all_pieces_get = false;
 static bool* AllocPieces(const int NUM_PIECE)
 {
     bool* pieces = new bool[NUM_PIECE];
-    if(pieces == nullptr) {
+    if (pieces == nullptr)
+    {
         ExitError("Memory allocation of pieces is failed!");
     }
     return pieces;
@@ -16,8 +17,9 @@ static bool* AllocPieces(const int NUM_PIECE)
 bool* MakePieces(const int NUM_PIECE)
 {
     bool* pieces = AllocPieces(NUM_PIECE);
-    for(int i = 0; i < NUM_PIECE; i++) {
-        pieces[i] = false;
+    for (int c = 0; c < NUM_PIECE; c++)
+    {
+        pieces[c] = false;
     }
     return pieces;
 }

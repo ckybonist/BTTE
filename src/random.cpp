@@ -17,6 +17,7 @@ long long g_rand_grp[] =
 static void RandForInternal(const RSC& rsc)
 {
     const int iRSC = static_cast<int>(rsc);
+
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
     g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
 }
@@ -32,13 +33,14 @@ long long Rand(const RSC& rsc)
 
     /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
     g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
+
     return g_rand_grp[iRSC];
 }
 
 
 void Srand(const int iRSC, const int seed)
 {
-    for(int i = 0; i < seed; i++)
+    for (int i = 0; i < seed; i++)
     {
         RandForInternal(static_cast<RSC>(iRSC));
 
@@ -52,7 +54,7 @@ void InitRandSeeds()
 {
     int seed = kInterval;  // ordinal of seed
 
-    for(int seed_id = 0; seed_id < g_kNumRSeeds; seed_id++)
+    for (int seed_id = 0; seed_id < g_kNumRSeeds; seed_id++)
     {
         Srand(seed_id, seed);
         seed += kInterval * (seed_id + 1);
@@ -62,7 +64,7 @@ void InitRandSeeds()
 float ExpRand(float rate, long long rand_num)
 {
     float rand_exp = 0 - (1.0 / rate) *
-                       log(1.0 - (double)rand_num / RAND_MAX);
+                     log(1.0 - (double)rand_num / RAND_MAX);
     return rand_exp;
 }
 

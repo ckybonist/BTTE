@@ -24,11 +24,11 @@ public:
     {
         std::istringstream iss(val);
         T result;
-        if(!(iss >> result))
+        if (!(iss >> result))
         {
             ExitError("Not a valid " +
                       (std::string)typeid(T).name() +
-                      " received!\n ");
+                      " received!\n");
         }
         return result;
     }

@@ -21,7 +21,8 @@ void Config::RemoveComment(std::string &line) const
      * if no matches found, std::string.find() will return npos value.
      *
      * */
-    if(line.find(';') != line.npos) {
+    if (line.find(';') != line.npos)
+    {
         line.erase(line.find(';'));
     }
 }
@@ -36,12 +37,12 @@ bool Config::IsValidLine(const std::string &line) const
     std::string temp = line;
     temp.erase(0, temp.find_first_not_of("\t "));  // remove all whitespaces in front of the line
 
-    if(temp[0] == '=')
+    if (temp[0] == '=')
     {
         return false;
     }
 
-    for(size_t i = temp.find('='); i < temp.length(); i++)
+    for (size_t i = temp.find('='); i < temp.length(); i++)
     {
         if(temp[i] != ' ')
             return true;
@@ -54,7 +55,7 @@ void Config::ExtractKey(std::string &key, size_t const &sepPos,
                         const std::string &line) const
 {
     key = line.substr(0, sepPos);
-    if(key.find('\t') != line.npos || key.find(' ') != line.npos)
+    if (key.find('\t') != line.npos || key.find(' ') != line.npos)
     {
         key.erase(key.find_first_of("\t "));  // remove trailing whitespace
     }
@@ -78,7 +79,7 @@ void Config::ExtractContents(const std::string &line)
     ExtractKey(key, sepPos, temp);
     ExtractValue(value, sepPos, temp);
 
-    if(!KeyExists(key))
+    if (!KeyExists(key))
     {
         contents_.insert(std::pair<std::string, std::string>(key, value));
     }
@@ -90,12 +91,12 @@ void Config::ExtractContents(const std::string &line)
 
 void Config::ParseLine(const std::string &line, size_t const line_no)
 {
-    if(line.find('=') == line.npos)
+    if (line.find('=') == line.npos)
     {
         ExitError("Couldn't find separator on line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
 
-    if(!IsValidLine(line))
+    if (!IsValidLine(line))
     {
         ExitError("Wrong format for line: " + Convert::T_to_str<int>(line_no) + "\n");
     }
@@ -107,23 +108,23 @@ void Config::ReadConf()
 {
     std::ifstream file;
     file.open(filename_.c_str());
-    if(!file)
+    if (!file)
     {
         ExitError("Couldn't read file: " + filename_ + "\n");
     }
 
     std::string line;
     size_t line_no = 0;
-    while(std::getline(file, line))
+    while (std::getline(file, line))
     {
         line_no++;
         std::string temp = line;
         //std::cout << line << std::endl;
 
-        if(temp.empty()) continue;
+        if (temp.empty()) continue;
 
         RemoveComment(temp);
-        if(OnlyWhiteSpace(temp)) continue;
+        if (OnlyWhiteSpace(temp)) continue;
 
         ParseLine(temp, line_no);
     }

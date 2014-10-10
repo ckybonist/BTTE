@@ -139,7 +139,8 @@ void PeerManager::AllotPeerLevel()
 
     packet_tt_4_peers = new float[NUM_PEER];
 
-    if(nullptr == packet_tt_4_peers) {
+    if (nullptr == packet_tt_4_peers)
+    {
         ExitError("Memory Allocation Fault");
     }
 
@@ -148,12 +149,12 @@ void PeerManager::AllotPeerLevel()
 	int exclude_set[g_kNumLevel] = { 0 };
 
     float time_piece[g_kNumLevel] = { 0 };
-    for(int i = 0; i < g_kNumLevel; i++)
+    for (int i = 0; i < g_kNumLevel; i++)
     {
         time_piece[i] = g_kPieceSize / g_kPeerLevel[i].bandwidth;
     }
 
-	for(int pid = 0; pid < NUM_PEER; pid++)
+	for (int pid = 0; pid < NUM_PEER; pid++)
     {
 		int level = NewPeerLevel(exclude_set, RSC::PEER_LEVEL);
 
@@ -161,22 +162,22 @@ void PeerManager::AllotPeerLevel()
 
 		++count[level-1];
 
-		if(RateEnough(level-1,
+		if (RateEnough(level-1,
                       count[level-1],
                       args_.NUM_PEER))
         {
-			if(exclude_set[level-1] == 0)
+			if (exclude_set[level-1] == 0)
 				exclude_set[level-1] = level;
 		}
 	}
 
-    for(int i = 0; i < args_.NUM_PEER; i++)
+    for (int i = 0; i < args_.NUM_PEER; i++)
     {
         std::cout << packet_tt_4_peers[i] << "\n";
     }
     std::cout << "\n\n";
 
-    for(int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
         std::cout << "Amount of level " << i + 1 << " peers: "
                   << count[i] << "\n";
@@ -229,10 +230,9 @@ void PeerManager::InitLeeches() const
     {
 
         double prob_leech = 0;
-        prob_leech = uniformrand::Roll<float>(
-                     RSC::PROB_LEECH,
-                     (float)0.1,
-                     (float)0.9);
+        prob_leech = uniformrand::Roll<float>(RSC::PROB_LEECH,
+                                             0.1,
+                                             0.9);
 
         Neighbor* neighbors = type_peerselect_->SelectNeighbors();
 
@@ -263,8 +263,9 @@ static bool RateEnough(const int level,
                        const int amount,
                        const int NUM_PEER)
 {
-	const int limit = static_cast<int>(g_kPeerLevel[level].dist_rate *
-                                         NUM_PEER);
+	const int limit =
+              static_cast<int>(g_kPeerLevel[level].dist_rate * NUM_PEER);
+
 	return (amount == limit);
 }
 
@@ -290,14 +291,14 @@ static int NewPeerLevel(const int (&exclude_set)[g_kNumLevel],
     const int min = 1;  // NOTE: don't use 0, it will duplicate with loop counter
     const int max = g_kNumLevel;
 
-	while(flag)
+	while (flag)
     {
 		target = uniformrand::Roll<int>(rsc, min, max);
 
-		for(int i = 0; i < g_kNumLevel; i++)
+		for (int i = 0; i < g_kNumLevel; i++)
         {
 			//if(target == ex_set[i] && ex_set[i] != 0)
-			if(target == exclude_set[i])
+			if (target == exclude_set[i])
             {
 				flag = true;
 				break;
