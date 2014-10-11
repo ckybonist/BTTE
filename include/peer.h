@@ -1,7 +1,7 @@
 #ifndef _PEER_H
 #define _PEER_H
 
-#include <map>
+#include <set>
 
 #include "piece.h"
 #include "neighbor.h"
@@ -12,19 +12,17 @@ struct Peer
     Peer() {};
     Peer(const int id,
          const float time_packet,
-         Neighbor *neighbors,
          const int NUM_PIECE);  // seed
 
     Peer(const int id,
          const float time_packet,
-         Neighbor *neighbors,
          const int NUM_PIECE,
          const double prob_leech);  // leech
 
     Peer(const int id,
          const int cid,
          const float time_packet,
-         const float start_time,
+         const float join_time,
          const int NUM_PIECE);  // average peer
 
 
@@ -46,5 +44,9 @@ struct Peer
 };
 
 extern Peer* g_peers;     // sort by time-order
+
+typedef std::set<int> iSet;
+typedef iSet::iterator iSetIter;
+extern iSet g_in_swarm_set;
 
 #endif // for #ifndef _PEER_H

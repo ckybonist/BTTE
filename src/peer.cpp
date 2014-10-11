@@ -3,11 +3,13 @@
 #include "piece.h"
 #include "peer.h"
 
+
 Peer *g_peers = nullptr;
+iSet g_in_swarm_set;
+
 
 Peer::Peer(const int id,
            const float time_packet,
-           Neighbor* neighbors,
            const int NUM_PIECE)
 {
     in_swarm = true;
@@ -25,17 +27,18 @@ Peer::Peer(const int id,
 
     this->time_packet = time_packet;
 
-    this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
+    neighbors = nullptr;
 
     join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
+
+    g_in_swarm_set.insert(id);
 }
 
 Peer::Peer(const int id,
            const float time_packet,
-           Neighbor* neighbors,
            const int NUM_PIECE,
            const double prob_leech)
 {
@@ -56,13 +59,14 @@ Peer::Peer(const int id,
 
     this->time_packet = time_packet;
 
-    this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
+    neighbors = nullptr;
 
     join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
 
+    g_in_swarm_set.insert(id);
 }
 
 // for normal peer joining
@@ -87,4 +91,6 @@ Peer::Peer(const int id,
     end_time = 0.0;
 
     counts = 0.0;
+
+    g_in_swarm_set.insert(id);
 }
