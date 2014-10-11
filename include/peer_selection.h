@@ -1,6 +1,9 @@
 #ifndef _ABS_PEER_SELECTION_H
 #define _ABS_PEER_SELECTION_H
 
+#include <vector>
+
+#include "args.h"
 #include "neighbor.h"
 
 
@@ -20,13 +23,12 @@ typedef enum class TypePeerSelect
 class IPeerSelect
 {
 public:
-    IPeerSelect(const int NUM_PEERLIST, const int NUM_PEER);
+    IPeerSelect(Args args);
     virtual ~IPeerSelect() {};
-    virtual Neighbor* SelectNeighbors() = 0;
+    virtual Neighbor* SelectNeighbors(const int self_pid) = 0;
 
 protected:
-    int NUM_PEERLIST_;
-    int NUM_PEER_;
+    Args args_;
     int* ids_;
     int* pg_delays_;
 };
@@ -34,23 +36,21 @@ protected:
 class Standard : public IPeerSelect
 {
 public:
-    Standard(const int NUM_PEERLIST,
-             const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
+    Standard(Args args) : IPeerSelect(args) {};
     ~Standard();
 
 private:
-    Neighbor* SelectNeighbors() override;
+    Neighbor* SelectNeighbors(const int self_pid) override;
 };
 
 class LoadBalancing : public IPeerSelect
 {
 public:
-    LoadBalancing(const int NUM_PEERLIST,
-                  const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
+    LoadBalancing(Args args) : IPeerSelect(args) {};
     ~LoadBalancing() {};
 
 private:
-    Neighbor* SelectNeighbors() override;
+    Neighbor* SelectNeighbors(const int self_pid) override;
 };
 
 /*
@@ -58,7 +58,7 @@ private:
  * Method of cluster decision :
  *     1. range 0 ~ 100 will split to 4 segments/clusters (1, 33, 66, 100), each have NUM_PEER/4 peers
  *     2. for (i = 0; i < 4; i++) {
- *          for(j = 0; j < NUM_PEER/4; j++) {
+ *          for(j = 0; j < NUM_PEER / 4; j++) {
  *               peer_id = RangeRand((NUM_SEED + NUM_LEECH), (NUM_PEER - 1);
  *               if(0 == g_peers[peer_id].cid) {
  *                   pgdelay = rand();
@@ -79,13 +79,11 @@ private:
 class ClusterBased : public IPeerSelect
 {
 public:
-    ClusterBased(const int NUM_PEERLIST,
-                 const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
-
+    ClusterBased(Args args) : IPeerSelect(args) {};
     ~ClusterBased() {};
 
 private:
-    Neighbor* SelectNeighbors() override;
+    Neighbor* SelectNeighbors(const int self_pid) override;
     void setCluster(Peer &peers);
 };
 
