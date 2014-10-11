@@ -12,15 +12,12 @@
 
 class EventHandler;
 
-typedef void (EventHandler::*Fptr)(Event&);
-typedef std::map<Event::Type4BT, Fptr> FuncMap;
-typedef std::map<Event::Type4BT, Event::Type4BT> DepMap;  // map for event dependencies
 
 class EventHandler
 {
 public:
     EventHandler(Args args, const PeerManager* pm, float l, float m);
-    ~EventHandler() {};
+    ~EventHandler();
 
     void PushInitEvent();
     void GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt);
@@ -31,8 +28,6 @@ public:
 
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
-
-    static int num_arrival;
 
 private:
     void PeerJoinEvent(Event& e);
@@ -51,11 +46,20 @@ private:
 
     void PeerLeaveEvent(Event& e);
 
+    float GetNextArrivalEventTime(const Event::Type4BT t_bt,
+                                  const float time_packet,
+                                  const float current_event_time);
+
+    float GetNextDepartureEventTime(const float current_event_time);
+
+
     void MapEvent();
     void MapEventDeps();
 
+    typedef void (EventHandler::*Fptr)(Event&);
+    typedef std::map<Event::Type4BT, Fptr> FuncMap;
     FuncMap event_map_;
-    DepMap event_deps_map_;
+    std::map<Event::Type4BT, Event::Type4BT> event_deps_map_;
 
     std::list<Event> event_list_;
     std::list<Event> system_;
@@ -71,7 +75,7 @@ private:
     float current_time_;
     float waiting_time_;
 
-    static int peer_join_counts;
+    static int peer_join_counts_;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

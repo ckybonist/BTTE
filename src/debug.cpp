@@ -13,14 +13,14 @@ static void PeerInfo(const int pid);
 static void PieceInfo(const int pid,
                          const int NUM_PIECE,
                          const int NUM_SEED,
-                         int (&counter)[10]);
+                         int* counter);
 static void NeighborInfo(const int pid, const int NUM_PEERLIST);
 
 
 void ShowDbgInfo(const Args &args)
 {
-    //int* piece_own_counter = new int[args.NUM_PIECE];
-    int piece_own_counter[10] = {0};
+    int* piece_own_counter = new int[args.NUM_PIECE];
+
     if (nullptr == piece_own_counter)
     {
         ExitError("\nMemory Allocation Fault\n");
@@ -36,19 +36,8 @@ void ShowDbgInfo(const Args &args)
 
         PieceInfo(pid, args.NUM_PIECE, args.NUM_SEED, piece_own_counter);
 
-        NeighborInfo(pid, args.NUM_PEERLIST);
-
-        ///////////////////////////////////////
-        // count how many peers have  each piece
-        //
-        //if (pid > args.NUM_SEED -1)
-        //{
-        //    for(int c; c < args.NUM_PIECE; c++)
-        //    {
-        //        if(true == g_peers[pid].pieces[c])
-        //            ++piece_own_counter[c];
-        //    }
-        //}
+        if (pid >= args.NUM_SEED)
+            NeighborInfo(pid, args.NUM_PEERLIST);
 
         cout << "\n===========================\n";
     }
@@ -62,7 +51,7 @@ void ShowDbgInfo(const Args &args)
 
     cout << endl;
 
-    //delete [] piece_own_counter;
+    delete [] piece_own_counter;
 }
 
 static void PeerInfo(const int pid)
@@ -91,9 +80,9 @@ static void PeerInfo(const int pid)
 }
 
 static void PieceInfo(const int pid,
-                         const int NUM_PIECE,
-                         const int NUM_SEED,
-                         int (&counter)[10])
+                      const int NUM_PIECE,
+                      const int NUM_SEED,
+                      int* counter)
 {
     ///////////////////
     // pieces info

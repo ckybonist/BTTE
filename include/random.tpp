@@ -1,6 +1,7 @@
 #ifndef _RANDOM_IMPL_H
 #define _RANDOM_IMPL_H
 
+#include <iostream>
 #include <cassert>
 
 #include "random.h"
@@ -22,34 +23,36 @@ T Roll(const RSC& rsc,
 }
 
 template<typename T>
-T* DistinctRandNumbers(const RSC& rsc,
-                       size_t size,
-                       const T rand_limit)
+T* DistinctRandNum(const RSC& rsc,
+                   const size_t size,
+                   const T rand_limit)
 {
     T* arr = new T[size];
+    if(arr == nullptr)
+        ExitError("\nMemory allocation failed!");
 
     for (size_t m = 0; m < size; m++)
     {
-        T rand_num = Rand(rsc) % rand_limit + 1;
+        T rand_num = Rand(rsc) % rand_limit;
 
-        T s = m;
+        size_t s = m;
 
         bool duplicate = true;
 
         while (duplicate && s > 0)
         {
-            --s;
             if (rand_num == arr[s])  // rand_num is duplicate
             {
                 rand_num = Rand(rsc) % rand_limit;
                 s = m;
                 continue;
             }
-
-            if (rand_num != arr[s] && s == 0)  // rand_num is distinct
+            else if (s == 0)  // rand_num is distinct
             {
                 duplicate = false;
             }
+
+            --s;
         }
 
         arr[m] = rand_num;
@@ -68,7 +71,7 @@ void Shuffle(const RSC& rsc, T *arr, size_t N)
 
     if (N < 1)
     {
-        ExitError("\n Size must greater than 1\n");
+        ExitError("\nSize must greater than 1\n");
     }
 
     for (std::size_t i = 0; i < N; i++)

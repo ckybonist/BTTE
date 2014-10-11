@@ -17,24 +17,21 @@ PeerManager::PeerManager(const Args& args)
 {
     this->args_ = args;
 
-    const int NUM_PEERLIST = args_.NUM_PEERLIST;
-    const int NUM_PEER = args_.NUM_PEER;
-
     switch (args_.TYPE_PEERSELECT)
     {
         case static_cast<int>(PeerSelect_T::STANDARD) :
             type_peerselect_ =
-                static_cast<IPeerSelect*>(new Standard(NUM_PEERLIST, NUM_PEER));
+                static_cast<IPeerSelect*>(new Standard(args_));
             break;
 
         case static_cast<int>(PeerSelect_T::LOAD_BALANCING) :
             type_peerselect_ =
-                static_cast<IPeerSelect*>(new LoadBalancing(NUM_PEERLIST, NUM_PEER));
+                static_cast<IPeerSelect*>(new LoadBalancing(args_));
             break;
 
         case static_cast<int>(PeerSelect_T::CLUSTER_BASED) :
             type_peerselect_ =
-                static_cast<IPeerSelect*>(new ClusterBased(NUM_PEERLIST, NUM_PEER));
+                static_cast<IPeerSelect*>(new ClusterBased(args_));
             break;
 
         default:
@@ -47,7 +44,8 @@ PeerManager::~PeerManager()
 {
     for (int i = 0; i < args_.NUM_PEER; i++)
     {
-        delete [] g_peers[i].pieces;
+        if (g_peers[i].pieces != nullptr)
+            delete [] g_peers[i].pieces;
         g_peers[i].pieces = nullptr;
     }
 
@@ -66,7 +64,7 @@ PeerManager::~PeerManager()
 // for average peers
 void PeerManager::AllotNeighbors(const int peer_id) const
 {
-    Neighbor* neighbors = type_peerselect_->SelectNeighbors();
+    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id);
     g_peers[peer_id].neighbors = neighbors;
 }
 
@@ -100,12 +98,10 @@ void PeerManager::CreatePeers()
     }
     std::cout << "\n";
 
-    // create empty peers
+    ////// create empty peers
     AllocAllPeersSpaces();
 
-    // init seeds, leeches and their pieces
-    const int aborigine = args_.NUM_SEED + args_.NUM_LEECH;
-
+    ///// init seeds, leeches and their pieces
     AllotPeerLevel();
 
     InitSeeds();
@@ -118,13 +114,13 @@ void PeerManager::CreatePeers()
             g_all_pieces_get &= g_peers[pid].pieces[c];
     }
 
-    // test of peer join
+    /// Testing peer join
+    const int aborigine = args_.NUM_SEED + args_.NUM_LEECH;
     for(int pid = aborigine; pid < args_.NUM_PEER; ++pid)
     {
         float time = pid / static_cast<float>(100);
 
         int cid = uniformrand::Roll<int>(RSC::FREE_5, 1, 4);
-        //int cid = uniformrand::Roll(14, 1, 4);
 
         NewPeer(pid, cid, time);
 
@@ -191,11 +187,8 @@ void PeerManager::InitSeeds() const
 {
     for (int pid = 0; pid < args_.NUM_SEED; pid++)
     {
-        Neighbor* neighbors = type_peerselect_->SelectNeighbors();
-
         g_peers[pid] = Peer(pid,
                             packet_tt_4_peers[pid],
-                            neighbors,
                             args_.NUM_PIECE);
     }
 }
@@ -223,10 +216,10 @@ void PeerManager::InitLeeches() const
     using std::cout;
     using std::endl;
 
-    const int kStart = args_.NUM_SEED;
-    const int kEnd = kStart + args_.NUM_LEECH;
+    const int start = args_.NUM_SEED;
+    const int end = start + args_.NUM_LEECH;
 
-    for (int pid = kStart; pid < kEnd; pid++)
+    for (int pid = start; pid < end; pid++)
     {
 
         double prob_leech = 0;
@@ -234,15 +227,18 @@ void PeerManager::InitLeeches() const
                                              0.1,
                                              0.9);
 
-        Neighbor* neighbors = type_peerselect_->SelectNeighbors();
-
         g_peers[pid] = Peer(pid,
                             packet_tt_4_peers[pid],
-                            neighbors,
                             args_.NUM_PIECE,
                             prob_leech);
 
         std::cout << prob_leech << "\n";
+    }
+
+    for(int pid = start; pid < end; pid ++)
+    {
+        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid);
+        g_peers[pid].neighbors = neighbors;
     }
 
     std::cout << "============================\n";

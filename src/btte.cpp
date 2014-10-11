@@ -46,11 +46,9 @@ int main(int argc, const char *argv[])
     // 3. start simulating
     //
     PeerManager pm(args);
-
-    //EventHandler evh(args, &pm, 0.5, 0.2);
-
     pm.CreatePeers();
 
+    //EventHandler evh(args, &pm, 0.5, 0.2);
     //evh.StartRoutine();
 
     ShowDbgInfo(args);

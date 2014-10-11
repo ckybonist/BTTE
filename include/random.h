@@ -72,9 +72,9 @@ T Roll(const RSC& rsc,
        const T up);
 
 template <typename T>
-T* DistinctRandNumbers(const RSC& rsc,
-                       const size_t size,
-                       const T rand_limit);
+T* DistinctRandNum(const RSC& rsc,
+                   const size_t size,
+                   const T rand_limit);
 
 template<typename T>
 void Shuffle(const RSC& rsc, T *arr, size_t N);
