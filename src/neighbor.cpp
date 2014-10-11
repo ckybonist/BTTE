@@ -1,8 +1,16 @@
 #include "neighbor.h"
 
-Neighbor::Neighbor(const int k_id,
-                   const int k_pg_delay)
+Neighbor::Neighbor()
 {
-    this->id = k_id;
-    this->pg_delay = k_pg_delay;
+    id = -1;
+    pg_delay = 0;
+    exist = false;
+}
+
+Neighbor::Neighbor(const int pid,
+                   const int pg_delay)
+{
+    id = pid;
+    this->pg_delay = pg_delay;
+    exist = true;
 }
