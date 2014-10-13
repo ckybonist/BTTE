@@ -9,7 +9,11 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     time = ti;
 }
 
-bool Event::operator< (const Event& e)
+bool Event::operator<(const Event& e)
 {
-    return time < e.time;
+    if (time < e.time)
+        return true;
+    else
+        return false;
+    //return time < e.time;
 }

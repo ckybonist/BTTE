@@ -14,8 +14,7 @@
 int main(int argc, const char *argv[])
 {
     /////////////////////////////
-    // 1. init group of random seeds
-    //
+    // 1. init group of random seeds //
     uniformrand::InitRandSeeds();
 
     std::cout << "Group of Initial Rand-Seeds:\n";
@@ -45,11 +44,11 @@ int main(int argc, const char *argv[])
     /////////////////////
     // 3. start simulating
     //
-    PeerManager pm(args);
+    PeerManager pm(&args);
     pm.CreatePeers();
 
-    //EventHandler evh(args, &pm, 0.5, 0.2);
-    //evh.StartRoutine();
+    EventHandler evh(args, &pm, 0.2, 0.5);
+    evh.StartRoutine();
 
     ShowDbgInfo(args);
 

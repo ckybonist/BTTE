@@ -8,7 +8,8 @@ public:
     enum class Type
     {
         DEPARTURE,
-        ARRIVAL
+        ARRIVAL,
+        SIZE
     };
 
     enum Type4BT
@@ -21,10 +22,11 @@ public:
         PIECE_GET,
         COMPLETED,
         PEER_LEAVE,
+        SIZE
     };
 
     Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
-    bool operator< (const Event& e);
+    bool operator<(const Event& e);
 
     Type type;  // arrival or departure
     Type4BT type_bt;

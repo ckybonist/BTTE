@@ -33,8 +33,11 @@ Standard::~Standard()
 
     for(int pid = args_.NUM_SEED; pid < args_.NUM_PEER; pid++)
     {
-        delete [] g_peers[pid].neighbors;
-        g_peers[pid].neighbors = nullptr;
+        if (g_peers[pid].neighbors != nullptr)
+        {
+            delete [] g_peers[pid].neighbors;
+            g_peers[pid].neighbors = nullptr;
+        }
     }
 }
 

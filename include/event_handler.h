@@ -10,13 +10,12 @@
 #include "event.h"
 
 
-class EventHandler;
-
+//class PeerManager;
 
 class EventHandler
 {
 public:
-    EventHandler(Args args, const PeerManager* pm, float l, float m);
+    EventHandler(Args args, const PeerManager* pm, float lambda, float mu);
     ~EventHandler();
 
     void PushInitEvent();
@@ -28,6 +27,7 @@ public:
 
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
+
 
 private:
     void PeerJoinEvent(Event& e);
@@ -47,10 +47,10 @@ private:
     void PeerLeaveEvent(Event& e);
 
     float GetNextArrivalEventTime(const Event::Type4BT t_bt,
-                                  const float time_packet,
-                                  const float current_event_time);
+                                  float time_packet,
+                                  const float current_arrival_etime);
 
-    float GetNextDepartureEventTime(const float current_event_time);
+    float GetNextDepartureEventTime();
 
 
     void MapEvent();
@@ -75,6 +75,7 @@ private:
     float current_time_;
     float waiting_time_;
 
+    // count hom many peer-join-event was generated
     static int peer_join_counts_;
 };
 

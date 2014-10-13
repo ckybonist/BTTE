@@ -42,12 +42,12 @@ void ShowDbgInfo(const Args &args)
         cout << "\n===========================\n";
     }
 
-    cout << "\nNumber of peers own each piece:\n";
-    for (int i = 0; i < args.NUM_PIECE; ++i)
-    {
-        cout << "Piece #" << i << " : "
-             << piece_own_counter[i] << endl;
-    }
+    //cout << "\nNumber of peers own each piece:\n";
+    //for (int i = 0; i < args.NUM_PIECE; ++i)
+    //{
+    //    cout << "Piece #" << i << " : "
+    //         << piece_own_counter[i] << endl;
+    //}
 
     cout << endl;
 
@@ -58,16 +58,16 @@ static void PeerInfo(const int pid)
 {
     ////////////////////////
     // id info
-    cout << " 1. Peer ID: " << g_peers[pid].id << endl;
+    cout << " 1. Peer ID: " << g_peers[pid].pid << endl;
     cout << " 2. Cluster ID: " << g_peers[pid].cid << endl;
 
     cout << "\n 6. Join time (not yet): " << g_peers[pid].join_time << endl;
 
-    if (true == g_peers[pid].is_seed)
+    if (g_peers[pid].is_seed)
     {
         cout << " 3. Peer catagory: Seed" << endl;
     }
-    else if (true == g_peers[pid].is_leech)
+    else if (g_peers[pid].is_leech)
     {
         cout << " 3. Peer catagory: Leech" << endl;
     }
@@ -94,7 +94,7 @@ static void PieceInfo(const int pid,
         {
             ++piece_count;
 
-            if (pid > NUM_SEED - 1)
+            if (pid >= NUM_SEED)
                 ++counter[c];
         }
     }
