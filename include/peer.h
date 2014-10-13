@@ -2,38 +2,47 @@
 #define _PEER_H
 
 #include <set>
+#include <vector>
 
 #include "piece.h"
 #include "neighbor.h"
 
 
-struct Peer
+class Peer
 {
-    Peer() {};
-    Peer(const int id,
-         const float time_packet,
-         const int NUM_PIECE);  // seed
+public:
+    Peer();
 
-    Peer(const int id,
+    // seed
+    Peer(const int pid,
+         const float time_packet,
+         const int NUM_PIECE);
+
+    // leech
+    Peer(const int pid,
          const float time_packet,
          const int NUM_PIECE,
-         const double prob_leech);  // leech
+         const double prob_leech);
 
-    Peer(const int id,
+    // average peer
+    Peer(const int pid,
          const int cid,
-         const float time_packet,
          const float join_time,
-         const int NUM_PIECE);  // average peer
+         const float time_packet,
+         const int NUM_PIECE);
+    //static void NewPeerData(const int id,
+    //                        const int cid,
+    //                        const float join_time,
+    //                        const int NUM_PIECE);
 
-
-    int id;
+    int pid;
     int cid;              // cluster id :: { 1, 2, 3, 4 }
     bool is_seed;
     bool is_leech;
     bool in_swarm;
 
     bool* pieces;
-    float time_packet; // download time of each piece
+    double time_packet; // download time of each piece
 
     Neighbor* neighbors;
 
@@ -43,7 +52,8 @@ struct Peer
     int counts;           // counts of being selected as an candidate in other peers' neighbor lists
 };
 
-extern Peer* g_peers;     // sort by time-order
+//extern Peer* g_peers;     // sort by time-order
+extern std::vector<Peer> g_peers;
 
 typedef std::set<int> iSet;
 typedef iSet::iterator iSetIter;

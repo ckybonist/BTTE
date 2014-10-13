@@ -11,8 +11,11 @@ using namespace peerselection;
 class PeerManager
 {
 public:
-    PeerManager(const Args& args);
+    PeerManager();
+    PeerManager(Args* const args);
     ~PeerManager();
+
+    void Debug();
 
     // CreatePeers() does two things
     //   1. allocate memory-spaces of all peers
@@ -22,14 +25,21 @@ public:
     void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
     void AllotNeighbors(const int peer_id) const;  // for average peers
 
+    // A rate (0.x) for extracting steady peers stat..
+    // We get rid of head and tail's peers (0.x / 2 * NUM_PEERS), and
+    // gather stat. info of middle peers.
+    const float dummy_peers_rate = 0.1;
+
 private:
     void AllocAllPeersSpaces();
-    void AllotPeerLevel();
+    void AllotAllPeersLevel();
     void InitSeeds() const;
     void InitLeeches() const;
 
-    Args args_;  // don't use pointer
-    float* packet_tt_4_peers;  // tt : transmission time
+    Args *args_;  // don't use pointer
+
+    float* packet_time_4_peers_;  // tt : transmission time
+
     IPeerSelect* type_peerselect_;
 };
 

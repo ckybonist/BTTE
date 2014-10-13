@@ -4,20 +4,35 @@
 #include "peer.h"
 
 
-Peer *g_peers = nullptr;
+//Peer *g_peers = nullptr;
+std::vector<Peer> g_peers;
 iSet g_in_swarm_set;
 
+Peer::Peer()
+{
+    is_seed = false;
+    is_leech = false;
+    in_swarm = false;
+    pid = -1;
+    cid = -1;
 
-Peer::Peer(const int id,
-           const float time_packet,
-           const int NUM_PIECE)
+    pieces = nullptr;
+
+    neighbors = nullptr;
+
+    time_packet = 0.0;
+    join_time = 0.0;
+    end_time = 0.0;
+    counts = 0;
+}
+
+
+Peer::Peer(const int pid, const float time_packet, const int NUM_PIECE)
 {
     in_swarm = true;
     is_seed = true;
     is_leech = false;
-
-    this->id = id;
-    cid = 0;
+    this->pid = pid;
 
     pieces = MakePieces(NUM_PIECE);
     for (int i = 0; i < NUM_PIECE; i++)
@@ -25,19 +40,18 @@ Peer::Peer(const int id,
         pieces[i] = true;
     }
 
-    this->time_packet = time_packet;
-
     neighbors = nullptr;
 
+    this->time_packet = time_packet;
     join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
 
-    g_in_swarm_set.insert(id);
+    g_in_swarm_set.insert(pid);
 }
 
-Peer::Peer(const int id,
+Peer::Peer(const int pid,
            const float time_packet,
            const int NUM_PIECE,
            const double prob_leech)
@@ -45,9 +59,7 @@ Peer::Peer(const int id,
     in_swarm = true;
     is_leech = true;
     is_seed = false;
-
-    this->id = id;
-    cid = 0;
+    this->pid = pid;
 
     pieces = MakePieces(NUM_PIECE);
 
@@ -57,40 +69,37 @@ Peer::Peer(const int id,
         pieces[i] = (prob_piece < prob_leech);
     }
 
-    this->time_packet = time_packet;
-
     neighbors = nullptr;
 
+    this->time_packet = time_packet;
     join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
 
-    g_in_swarm_set.insert(id);
+    g_in_swarm_set.insert(pid);
 }
 
-// for normal peer joining
-Peer::Peer(const int id,
+
+// Set attributes to average peer
+Peer::Peer(const int pid,
            const int cid,
-           const float time_packet,
            const float join_time,
+           const float time_packet,
            const int NUM_PIECE)
 {
     in_swarm = true;
-
-    this->id = id;
+    this->pid = pid;
     this->cid = cid;
-
     is_seed = false;
     is_leech = false;
 
-    this->time_packet = time_packet;
-    this->pieces = MakePieces(NUM_PIECE);
+    pieces = MakePieces(NUM_PIECE);
 
+    this->time_packet = time_packet;
     this->join_time = join_time;
     end_time = 0.0;
+    counts = 0;
 
-    counts = 0.0;
-
-    g_in_swarm_set.insert(id);
+    g_in_swarm_set.insert(pid);
 }
