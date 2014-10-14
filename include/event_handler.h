@@ -15,11 +15,15 @@
 class EventHandler
 {
 public:
-    EventHandler(Args args, const PeerManager* pm, float lambda, float mu);
+    EventHandler(Args args, PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
 
     void PushInitEvent();
-    void GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt);
+    void GetNextEvent(Event& e,
+                      Event::Type t,
+                      Event::Type4BT t_bt,
+                      const int index = 0,
+                      const int pid = 0);
     void ProcessArrival(Event& e);
     void ProcessDeparture(Event& e);
     void ProcessEvent(Event& e);
@@ -52,9 +56,11 @@ private:
 
     float GetNextDepartureEventTime();
 
-
     void MapEvent();
     void MapEventDeps();
+
+    // count hom many peer-join-event was generated
+    static int peer_join_counts_;
 
     typedef void (EventHandler::*Fptr)(Event&);
     typedef std::map<Event::Type4BT, Fptr> FuncMap;
@@ -66,7 +72,7 @@ private:
 
     Args args_;
 
-    const PeerManager* pm_;
+    PeerManager* pm_;
 
     float lambda_;
     float mu_;
@@ -74,9 +80,6 @@ private:
     float total_sys_size_;
     float current_time_;
     float waiting_time_;
-
-    // count hom many peer-join-event was generated
-    static int peer_join_counts_;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

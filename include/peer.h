@@ -1,7 +1,6 @@
 #ifndef _PEER_H
 #define _PEER_H
 
-#include <set>
 #include <vector>
 
 #include "piece.h"
@@ -15,6 +14,7 @@ public:
 
     // seed
     Peer(const int pid,
+         const int cid,
          const float time_packet,
          const int NUM_PIECE);
 
@@ -30,10 +30,6 @@ public:
          const float join_time,
          const float time_packet,
          const int NUM_PIECE);
-    //static void NewPeerData(const int id,
-    //                        const int cid,
-    //                        const float join_time,
-    //                        const int NUM_PIECE);
 
     int pid;
     int cid;              // cluster id :: { 1, 2, 3, 4 }
@@ -44,7 +40,7 @@ public:
     bool* pieces;
     double time_packet; // download time of each piece
 
-    Neighbor* neighbors;
+    const Neighbor* neighbors;
 
     float join_time;     // start time of peer run the routine
     float end_time;       // end time of all pieces have been downloaded
@@ -54,9 +50,6 @@ public:
 
 //extern Peer* g_peers;     // sort by time-order
 extern std::vector<Peer> g_peers;
-
-typedef std::set<int> iSet;
-typedef iSet::iterator iSetIter;
-extern iSet g_in_swarm_set;
+extern bool* g_in_swarm_set;
 
 #endif // for #ifndef _PEER_H

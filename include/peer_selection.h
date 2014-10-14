@@ -1,7 +1,7 @@
 #ifndef _ABS_PEER_SELECTION_H
 #define _ABS_PEER_SELECTION_H
 
-#include <vector>
+#include <set>
 
 #include "args.h"
 #include "neighbor.h"
@@ -20,18 +20,22 @@ typedef enum class TypePeerSelect
 } PeerSelect_T;
 
 
+typedef std::set<int> iSet;
+typedef iSet::iterator iSetIter;
+
 class IPeerSelect
 {
 public:
     IPeerSelect(Args args);
     virtual ~IPeerSelect() {};
-    virtual Neighbor* SelectNeighbors(const int self_pid) = 0;
+    virtual Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) = 0;
 
 protected:
     Args args_;
     int* ids_;
     int* pg_delays_;
 };
+
 
 class Standard : public IPeerSelect
 {
@@ -40,8 +44,9 @@ public:
     ~Standard();
 
 private:
-    Neighbor* SelectNeighbors(const int self_pid) override;
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
 };
+
 
 class LoadBalancing : public IPeerSelect
 {
@@ -50,31 +55,10 @@ public:
     ~LoadBalancing() {};
 
 private:
-    Neighbor* SelectNeighbors(const int self_pid) override;
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
+    //Neighbor* SelectNeighbors(const int self_pid) override;
 };
 
-/*
- * TODO:
- * Method of cluster decision :
- *     1. range 0 ~ 100 will split to 4 segments/clusters (1, 33, 66, 100), each have NUM_PEER/4 peers
- *     2. for (i = 0; i < 4; i++) {
- *          for(j = 0; j < NUM_PEER / 4; j++) {
- *               peer_id = RangeRand((NUM_SEED + NUM_LEECH), (NUM_PEER - 1);
- *               if(0 == g_peers[peer_id].cid) {
- *                   pgdelay = rand();
- *                   if(pgdelay < 33) {
- *                      g_peers[peer_id].cid = i;
- *                   } else {
- *                     tmp_cid = "rand number 0 ~ 4 exclude current i"
- *                     g_peers[peer_id].cid = tmp_cid;
- *                   }
- *
- *               }
- *          }
- *     }
- *     if pgdelay of the peer was within first segment (1 ~ 32), then means
- *
- * * * * * * * */
 
 class ClusterBased : public IPeerSelect
 {
@@ -83,7 +67,8 @@ public:
     ~ClusterBased() {};
 
 private:
-    Neighbor* SelectNeighbors(const int self_pid) override;
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
+    //Neighbor* SelectNeighbors(const int self_pid) override;
     void setCluster(Peer &peers);
 };
 

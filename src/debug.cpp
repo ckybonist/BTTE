@@ -9,12 +9,14 @@ using std::cout;
 using std::endl;
 
 
-static void PeerInfo(const int pid);
-static void PieceInfo(const int pid,
-                         const int NUM_PIECE,
-                         const int NUM_SEED,
-                         int* counter);
-static void NeighborInfo(const int pid, const int NUM_PEERLIST);
+static void PeerInfo(const size_t pid);
+
+static void PieceInfo(const size_t pid,
+                      const size_t NUM_PIECE,
+                      const size_t NUM_SEED,
+                      int* counter);
+
+static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST);
 
 
 void ShowDbgInfo(const Args &args)
@@ -30,7 +32,7 @@ void ShowDbgInfo(const Args &args)
 
     cout << "\n@ Peer Infos: \n\n";
 
-    for (int pid = 0; pid < args.NUM_PEER; pid++)
+    for (size_t pid = 0; pid < args.NUM_PEER; pid++)
     {
         PeerInfo(pid);
 
@@ -54,7 +56,7 @@ void ShowDbgInfo(const Args &args)
     delete [] piece_own_counter;
 }
 
-static void PeerInfo(const int pid)
+static void PeerInfo(const size_t pid)
 {
     ////////////////////////
     // id info
@@ -79,16 +81,16 @@ static void PeerInfo(const int pid)
     cout << "\n 4. Time per packet: " << g_peers[pid].time_packet << endl;
 }
 
-static void PieceInfo(const int pid,
-                      const int NUM_PIECE,
-                      const int NUM_SEED,
+static void PieceInfo(const size_t pid,
+                      const size_t NUM_PIECE,
+                      const size_t NUM_SEED,
                       int* counter)
 {
     ///////////////////
     // pieces info
     int piece_count = 0;
 
-    for (int c = 0; c < NUM_PIECE; c++)
+    for (size_t c = 0; c < NUM_PIECE; c++)
     {
         if (g_peers[pid].pieces[c])
         {
@@ -104,12 +106,12 @@ static void PieceInfo(const int pid,
     cout << "    * Not yet: " << (NUM_PIECE - piece_count) << endl;
 }
 
-static void NeighborInfo(const int pid, const int NUM_PEERLIST)
+static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
 {
     /////////////////////////
     // neighbors info
     cout << "\n 6. Neighbors info (id, pg_delay):\n";
-    for(int k = 0; k < NUM_PEERLIST; k++)
+    for(size_t k = 0; k < NUM_PEERLIST; k++)
     {
         cout << "    (" << g_peers[pid].neighbors[k].id
              << ", " << g_peers[pid].neighbors[k].pg_delay

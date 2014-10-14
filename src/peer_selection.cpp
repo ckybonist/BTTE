@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include "error.h"
 #include "random.h"
 
@@ -31,7 +31,7 @@ Standard::~Standard()
     delete [] pg_delays_;
     pg_delays_ = nullptr;
 
-    for(int pid = args_.NUM_SEED; pid < args_.NUM_PEER; pid++)
+    for(size_t pid = args_.NUM_SEED; pid < args_.NUM_PEER; pid++)
     {
         if (g_peers[pid].neighbors != nullptr)
         {
@@ -41,7 +41,8 @@ Standard::~Standard()
     }
 }
 
-Neighbor* Standard::SelectNeighbors(const int self_pid)
+//Neighbor* Standard::SelectNeighbors(const int self_pid)
+Neighbor* Standard::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     Neighbor* neighbors = new Neighbor[args_.NUM_PEERLIST];
     if(neighbors == nullptr)
@@ -50,24 +51,20 @@ Neighbor* Standard::SelectNeighbors(const int self_pid)
                    peerselection::Standard::SelectNeighbors()");
     }
 
-    iSet in_swarm = g_in_swarm_set;
+    /// Erase self first, then, shuffle the index and
+    /// select other peers which in swarm.
+    iSet in_swarm(in_swarm_set);
     in_swarm.erase(in_swarm.find(self_pid));
 
     ids_ = new int[in_swarm.size()];
-    if(nullptr == ids_) ExitError("Memory Allocation Fault");
+    if(nullptr == ids_)
+        ExitError("Memory Allocation Fault");
 
     int index = 0;
-    for(iSetIter iter = in_swarm.begin(); iter != in_swarm.end(); iter++, index++)
+    for(iSetIter it = in_swarm.begin(); it != in_swarm.end(); it++, index++)
     {
-        ids_[index] = *iter;
+        ids_[index] = *it;
     }
-
-    std::cout << "\nPeers in swarm: ";
-    for(size_t i = 0; i < in_swarm.size(); i++)
-    {
-        std::cout << ids_[i] << " ";
-    }
-    std::cout << "\n";
 
     Shuffle<int>(RSC::STD_PEERSELECT, ids_, in_swarm.size());
 
@@ -89,45 +86,13 @@ Neighbor* Standard::SelectNeighbors(const int self_pid)
         Shuffle<int>(RSC::STD_PEERSELECT, pg_delays_, g_kMaxPGdelay);
     }
 
-    //if(nullptr == ids_ && nullptr == pg_delays_)  // create array of random numbers first time
-    //{
-    //    //ids_ = DistinctRandNumsAndExcludeNum<int>(RSC::STD_PEERSELECT,
-    //    //                                          NUM_PEER_,  // size of number set
-    //    //                                          self_pid,       // number be excluded
-    //    //                                          NUM_PEER_);     // number of max peer
-
-    //    pg_delays_ = new int[g_kMaxPGdelay];
-
-    //    if(ids_ == nullptr || pg_delays_ == nullptr)
-    //    {
-    //        ExitError("Memory Allocation Fault in \
-    //                   peerselection::Standard::SelectNeighbors()");
-    //    }
-
-    //    for(int i = 0; i < g_kMaxPGdelay; i++)
-    //    {
-    //        pg_delays_[i] = Roll<int>(RSC::PGDELAY,
-    //                                  1, g_kMaxPGdelay);
-    //    }
-    //}
-    //else  // shuffle array if it had ever been created
-    //{
-    //    Shuffle<int>(RSC::STD_PEERSELECT, ids_, NUM_PEER_);
-
-    //    Shuffle<int>(RSC::STD_PEERSELECT, pg_delays_, g_kMaxPGdelay);
-    //}
-
-    for(int i = 0; i < args_.NUM_PEERLIST; i++)
+    for(size_t i = 0; i < args_.NUM_PEERLIST; i++)
     {
         if (i < in_swarm.size())
         {
             neighbors[i].id = ids_[i];
             neighbors[i].pg_delay = pg_delays_[i];
             neighbors[i].exist = true;
-        }
-        else
-        {
-            continue;
         }
     }
 
@@ -137,15 +102,15 @@ Neighbor* Standard::SelectNeighbors(const int self_pid)
     return neighbors;
 }
 
-
-Neighbor* LoadBalancing::SelectNeighbors(const int self_pid)
+//Neighbor* LoadBalancing::SelectNeighbors(const int self_pid)
+Neighbor* LoadBalancing::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     //TODO
     ExitError("\n\nNot Implement Yet!!!");
     return nullptr;
 }
-
-Neighbor* ClusterBased::SelectNeighbors(const int self_pid)
+//Neighbor* ClusterBased::SelectNeighbors(const int self_pid)
+Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     //TODO
     ExitError("\n\nNot Implement Yet!!!");

@@ -9,22 +9,22 @@ Args::Args(const std::string filename)
 {
     Config cfg(filename);
 
-    NUM_PEER = cfg.GetValueOfKey<int>("NUM_PEER", 5000);
-    NUM_SEED = cfg.GetValueOfKey<int>("NUM_SEED", 100);
-    NUM_LEECH = cfg.GetValueOfKey<int>("NUM_LEECH", 100);
+    NUM_PEER = cfg.GetValueOfKey<size_t>("NUM_PEER", 5000);
+    NUM_SEED = cfg.GetValueOfKey<size_t>("NUM_SEED", 100);
+    NUM_LEECH = cfg.GetValueOfKey<size_t>("NUM_LEECH", 100);
 
-    NUM_PIECE = cfg.GetValueOfKey<int>("NUM_PIECE", 256);
+    NUM_PIECE = cfg.GetValueOfKey<size_t>("NUM_PIECE", 256);
 
-    NUM_PEERLIST = cfg.GetValueOfKey<int>("NUM_PEERLIST", 50);
+    NUM_PEERLIST = cfg.GetValueOfKey<size_t>("NUM_PEERLIST", 50);
 
-    NUM_CHOKING = cfg.GetValueOfKey<int>("NUM_CHOKING", 4);
-    NUM_OU = cfg.GetValueOfKey<int>("NUM_OU", 1);
+    NUM_CHOKING = cfg.GetValueOfKey<size_t>("NUM_CHOKING", 4);
+    NUM_OU = cfg.GetValueOfKey<size_t>("NUM_OU", 1);
 
-    TYPE_PEERSELECT = cfg.GetValueOfKey<int>("TYPE_PEERSELECT",
-                                             static_cast<int>(PeerSelect_T::STANDARD));
+    TYPE_PEERSELECT = cfg.GetValueOfKey<size_t>("TYPE_PEERSELECT",
+                                             static_cast<size_t>(PeerSelect_T::STANDARD));
 
-    TYPE_PIECESELECT = cfg.GetValueOfKey<int>("TYPE_PIECESELECT",
-                                              static_cast<int>(PieceSelect_T::RANDOM_FIRST_PIECE));
+    TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
+                                              static_cast<size_t>(PieceSelect_T::RANDOM_FIRST_PIECE));
 
-    ARRIVAL_RATE = cfg.GetValueOfKey<int>("ARRIVAL_RATE", 1);
+    ARRIVAL_RATE = cfg.GetValueOfKey<size_t>("ARRIVAL_RATE", 1);
 }

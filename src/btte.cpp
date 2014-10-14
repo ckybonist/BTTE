@@ -14,7 +14,8 @@
 int main(int argc, const char *argv[])
 {
     /////////////////////////////
-    // 1. init group of random seeds //
+    // 1. init group of random seeds
+    //
     uniformrand::InitRandSeeds();
 
     std::cout << "Group of Initial Rand-Seeds:\n";

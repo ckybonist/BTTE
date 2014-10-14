@@ -8,9 +8,9 @@
 using namespace uniformrand;
 
 
-int EventHandler::peer_join_counts_ = 1;  // compare with number of average peer
+int EventHandler::peer_join_counts_ = 0;  // compare with number of average peer
 
-EventHandler::EventHandler(Args args, const PeerManager* pm, float lambda, float mu)
+EventHandler::EventHandler(Args args, PeerManager* const pm, float lambda, float mu)
 {
     args_ = args;
     pm_ = pm;
@@ -64,21 +64,18 @@ void EventHandler::PushInitEvent()
     event_list_.push_back(first_event);
 }
 
-void EventHandler::GetNextEvent(Event& e, Event::Type t, Event::Type4BT t_bt)
+void EventHandler::GetNextEvent(Event& e,
+                                Event::Type t,
+                                Event::Type4BT t_bt,
+                                const int index,
+                                const int pid)
 {
     if (Event::Type::ARRIVAL == t && Event::Type4BT::PEER_LEAVE != e.type_bt)
     {
-        int pid = e.pid;
-
-        if (Event::PEER_JOIN == t_bt)
-        {
-            ++pid;
-        }
-
         float time_packet = g_peers[e.pid].time_packet;
-        float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
+        float time = GetNextArrivalEventTime(t_bt, time_packet, e.time);
 
-        Event new_event(t, t_bt, e.index + 1, pid, time);
+        Event new_event(t, t_bt, index, pid, time);
         event_list_.push_back(new_event);
     }
     else if (Event::Type::DEPARTURE == t)
@@ -127,43 +124,51 @@ void EventHandler::ProcessArrival(Event& e)
     ///// 處理 System 的頭一個BT 事件
     (this->*event_map_[e.type_bt])(e);
 
+    int next_event_idx = e.index;
 
     ///// 如果不是 Peer Leave 事件, 就產生下一個相依事件
-    //if (e.type_bt != Event::PEER_LEAVE)
-    //{
-    //    Event::Type4BT derived_event_type = event_deps_map_[e.type_bt];
-    //    std::cout << "\nDerived event type: " << derived_event_type << "\n";
-    //    GetNextEvent(e, Event::Type::ARRIVAL, derived_event_type);
-    //}
+    if (e.type_bt != Event::PEER_LEAVE)
+    {
+        Event::Type4BT derived_event_type = event_deps_map_[e.type_bt];
+        //std::cout << "\nDerived event type: " << derived_event_type << "\n";
+        GetNextEvent(e,
+                     Event::Type::ARRIVAL,
+                     derived_event_type,
+                     ++next_event_idx,
+                     e.pid);
+    }
 
     if (system_.size() == 1)
     {
         current_time_ = e.time;
         GetNextEvent(e, Event::Type::DEPARTURE, e.type_bt);
     }
+
     event_list_.sort();
 
-    ///// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
-    const int num_avg_peer = args_.NUM_PEER -
-                                (args_.NUM_SEED + args_.NUM_LEECH);
-    const int next_join_pid = e.pid + 1;
+    /// 0 5  init event
+    /// 0 5 6
+    /// 1 5 7
+    /// 2 5 8
+    /// 3 5 9
+    /// 4 -> do not need any peer join events
+    /// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
+    const int aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
+    const int num_avg_peer = args_.NUM_PEER - aborigin;
 
-    if (peer_join_counts_ < num_avg_peer &&
-            !g_peers[next_join_pid].in_swarm)
+    const int next_join_pid = peer_join_counts_ + 1 + aborigin;
+
+    if (peer_join_counts_ < num_avg_peer - 1 &&
+            !g_in_swarm_set[next_join_pid])
     {
-        GetNextEvent(e, Event::Type::ARRIVAL, Event::PEER_JOIN);
+        GetNextEvent(e, Event::Type::ARRIVAL,
+                     Event::PEER_JOIN,
+                     ++next_event_idx,
+                     next_join_pid);
         ++peer_join_counts_;
     }
-    event_list_.sort();
 
-    std::cout.precision(5);
-    std::cout << "\nEvent ID: " << e.index << "\n";
-    std::cout << "Event PID: " << e.pid << "\n";
-    std::cout << "\nBT event type: " << e.type_bt << "\n";
-    std::cout << "Event time: " << e.time << "\n";
-    std::cout << "PeerJoin counts: " << peer_join_counts_ << "\n";
-    std::cout << "Peer " <<next_join_pid << " is in swarm: "
-              << g_peers[next_join_pid].in_swarm << "\n\n";
+    event_list_.sort();
 }
 
 void EventHandler::ProcessDeparture(Event& e)
@@ -185,50 +190,48 @@ void EventHandler::ProcessDeparture(Event& e)
 void EventHandler::PeerJoinEvent(Event& e)
 {
     pm_->NewPeer(e.pid, -1, e.time);
-    pm_->AllotNeighbors(e.pid);
-    std::cout << "\nPeer Join Event";
+    pm_->CheckInSwarm();
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& e)
 {
     pm_->AllotNeighbors(e.pid);
-    std::cout << "\nPeer List Req Recv Event";
 }
 
 void EventHandler::PeerListGetEvent(Event& e)
 {
-    std::cout << "\nPeer List Get Event";
+    //TODO
 }
 
 void EventHandler::ReqPieceEvent(Event& e)
 {
     // for debug usage
-    for (int c = 0; c < args_.NUM_PIECE; c++)
+    for (size_t c = 0; c < args_.NUM_PIECE; c++)
     {
         g_peers[e.pid].pieces[c] = true;
     }
-    std::cout << "\nRequest Piece Event";
 }
 
 void EventHandler::PieceAdmitEvent(Event& e)
 {
-    std::cout << "\nPiece Admit Event!";
+    //TODO
 }
 void EventHandler::PieceGetEvent(Event& e)
 {
-    std::cout << "\nGet list of neighbors";
+    //TODO
 }
 
 void EventHandler::CompletedEvent(Event& e)
 {
-    std::cout << "\nCompleted Event";
+    //TODO
 }
 
 void EventHandler::PeerLeaveEvent(Event& e)
 {
-    std::cout << "\nPeer Leave Event";
-    iSetIter idx = g_in_swarm_set.find(e.pid);
-    g_in_swarm_set.erase(idx);
+    g_peers[e.pid].in_swarm = false;
+    pm_->CheckInSwarm();
+    //iSetIter idx = g_in_swarm_set.find(e.pid);
+    //g_in_swarm_set.erase(idx);
 }
 
 void EventHandler::ProcessEvent(Event& e)
@@ -243,14 +246,41 @@ void EventHandler::ProcessEvent(Event& e)
     }
 }
 
+static void EventDebugInfo(Event& head)
+{
+    std::map<Event::Type4BT, std::string> tbt2str;
+    tbt2str[Event::PEER_JOIN] = "Peer-Join Event";
+    tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
+    tbt2str[Event::PEERLIST_GET] = "Peer-List-Get Event";
+    tbt2str[Event::REQ_PIECE] = "Req-Piece Event";
+    tbt2str[Event::PIECE_ADMIT] = "Piece-Admit Event";
+    tbt2str[Event::PIECE_GET] = "Piece-Get Event";
+    tbt2str[Event::COMPLETED] = "Completed Event";
+    tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
+
+    std::cout.precision(5);
+
+    if(head.type == Event::Type::ARRIVAL)
+    {
+        std::cout << "\nEvent #" << head.index << " arrival at "
+                  << head.time << "\n";
+    }
+    else
+    {
+        std::cout << "\nEvent #" << head.index << " departure at "
+                  << head.time << "\n";
+    }
+    std::cout << "It is a " << tbt2str[head.type_bt];
+    std::cout << "\nThis is event belongs to peer #" << head.pid
+              << "\n\n\n";
+}
+
 void EventHandler::StartRoutine()
 {
-    ///// FIXME: Invalid read of memory which cause
-    ///// g_peers[pid].time_packet has a strange value.
-    ///// Then, this behavior influence whole event routine
     PushInitEvent();
 
-    const int num_avg_peer = args_.NUM_PEER - (args_.NUM_SEED + args_.NUM_LEECH);
+    const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
+    const int num_avg_peer = args_.NUM_PEER - aborigin;
 
     while(!event_list_.empty())
     {
@@ -259,5 +289,7 @@ void EventHandler::StartRoutine()
         event_list_.pop_front();
 
         ProcessEvent(head);
+
+        EventDebugInfo(head);
     }
 }

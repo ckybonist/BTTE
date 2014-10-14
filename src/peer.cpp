@@ -6,7 +6,7 @@
 
 //Peer *g_peers = nullptr;
 std::vector<Peer> g_peers;
-iSet g_in_swarm_set;
+bool* g_in_swarm_set = nullptr;
 
 Peer::Peer()
 {
@@ -26,20 +26,24 @@ Peer::Peer()
     counts = 0;
 }
 
-
-Peer::Peer(const int pid, const float time_packet, const int NUM_PIECE)
+// seed
+Peer::Peer(const int pid,
+           const int cid,
+           const float time_packet,
+           const int NUM_PIECE)
 {
     in_swarm = true;
     is_seed = true;
     is_leech = false;
+
     this->pid = pid;
+    this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
     for (int i = 0; i < NUM_PIECE; i++)
     {
         pieces[i] = true;
     }
-
     neighbors = nullptr;
 
     this->time_packet = time_packet;
@@ -47,10 +51,9 @@ Peer::Peer(const int pid, const float time_packet, const int NUM_PIECE)
     end_time = 0.0;
 
     counts = 0;
-
-    g_in_swarm_set.insert(pid);
 }
 
+// leech
 Peer::Peer(const int pid,
            const float time_packet,
            const int NUM_PIECE,
@@ -59,7 +62,9 @@ Peer::Peer(const int pid,
     in_swarm = true;
     is_leech = true;
     is_seed = false;
+
     this->pid = pid;
+    cid = -1;
 
     pieces = MakePieces(NUM_PIECE);
 
@@ -76,12 +81,10 @@ Peer::Peer(const int pid,
     end_time = 0.0;
 
     counts = 0;
-
-    g_in_swarm_set.insert(pid);
 }
 
 
-// Set attributes to average peer
+// average peer
 Peer::Peer(const int pid,
            const int cid,
            const float join_time,
@@ -89,17 +92,18 @@ Peer::Peer(const int pid,
            const int NUM_PIECE)
 {
     in_swarm = true;
-    this->pid = pid;
-    this->cid = cid;
     is_seed = false;
     is_leech = false;
 
+    this->pid = pid;
+    this->cid = cid;
+
     pieces = MakePieces(NUM_PIECE);
+
+    neighbors = nullptr;
 
     this->time_packet = time_packet;
     this->join_time = join_time;
     end_time = 0.0;
     counts = 0;
-
-    g_in_swarm_set.insert(pid);
 }

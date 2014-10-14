@@ -1,5 +1,3 @@
-//#include <cstdlib>
-
 #include "error.h"
 #include "random.h"
 
@@ -11,11 +9,6 @@
 
 static bool RateEnough(const int level, const int amount, const int NUM_PEER);
 static int NewPeerLevel(const int (&exclude_set)[g_kNumLevel], const RSC& rsc);
-
-void PeerManager::Debug()
-{
-    std::cout << "\nThis is for debug\n";
-}
 
 PeerManager::PeerManager()
 {
@@ -58,33 +51,28 @@ PeerManager::PeerManager(Args* const args)
 PeerManager::~PeerManager()
 {
     std::cout << "\nDestructor of PeerManager\n";
-    for (int i = 0; i < args_->NUM_PEER; i++)
+    for (size_t pid = 0; pid < args_->NUM_PEER; pid++)
     {
-        delete [] g_peers[i].pieces;
-        g_peers[i].pieces = nullptr;
+        delete [] g_peers[pid].pieces;
+        g_peers[pid].pieces = nullptr;
     }
 
     // also call the destructor to delete neighbors
     delete type_peerselect_; // MUST BEFORE THE DELETION OF G_PEERS
+    type_peerselect_ = nullptr;
 
-    //std::cout << "\ndelete all peers\n";
     //delete [] g_peers;
-
-    delete [] packet_time_4_peers_;
-
     //g_peers = nullptr;
 
-    type_peerselect_ = nullptr;
+    delete [] g_in_swarm_set;
+    g_in_swarm_set = nullptr;
+
+    delete [] packet_time_4_peers_;
     packet_time_4_peers_ = nullptr;
+
     args_ = nullptr;
 }
 
-// for average peers
-void PeerManager::AllotNeighbors(const int peer_id) const
-{
-    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id);
-    g_peers[peer_id].neighbors = neighbors;
-}
 
 void PeerManager::NewPeer(const int pid,
                           const int cid,
@@ -95,10 +83,43 @@ void PeerManager::NewPeer(const int pid,
     g_peers.push_back(peer);
 }
 
+void PeerManager::CheckInSwarm()
+{
+    if (g_in_swarm_set == nullptr)
+    {
+        g_in_swarm_set = new bool[args_->NUM_PEER];
+        if (g_in_swarm_set == nullptr)
+        {
+            ExitError("Memory Allocation Error");
+        }
+        else
+        {
+            for(size_t i = 0; i < args_->NUM_PEER; i++)
+                g_in_swarm_set[i] = false;
+        }
+    }
+
+    for(size_t pid = 0; pid < g_peers.size(); pid++)
+    {
+        if (g_peers[pid].in_swarm)
+            in_swarm_set.insert((int)pid);
+    }
+
+    for(iSetIter it = in_swarm_set.begin(); it != in_swarm_set.end(); it++)
+    {
+        g_in_swarm_set[*it] = true;
+    }
+}
+
+// for average peers
+void PeerManager::AllotNeighbors(const int peer_id) const
+{
+    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id, in_swarm_set);
+    g_peers[peer_id].neighbors = neighbors;
+}
+
 void PeerManager::AllocAllPeersSpaces()
 {
-    std::cout.flush();
-    std::cout << "\nNumber of total peers: " << args_->NUM_PEER << "\n";
     //g_peers = new Peer[args_->NUM_PEER];
     //if (g_peers == nullptr)
     //{
@@ -126,30 +147,17 @@ void PeerManager::CreatePeers()
 
     InitLeeches();
 
-    std::cout << "\nIn Swarm : " << g_peers[8].in_swarm << "\n";
-
     /// A boolean value to check. All pieces are get if it's true
-    for(int pid = args_->NUM_SEED; pid < args_->NUM_LEECH; pid++)
+    for(size_t pid = args_->NUM_SEED; pid < args_->NUM_LEECH; pid++)
     {
-        for(int c = 0; c < args_->NUM_PIECE; c++)
+        for(size_t c = 0; c < args_->NUM_PIECE; c++)
             g_all_pieces_get &= g_peers[pid].pieces[c];
     }
-
-    /// Testing peer join
-    //const int aborigine = args_->NUM_SEED + args_->NUM_LEECH;
-    //for(int pid = aborigine; pid < args_->NUM_PEER; ++pid)
-    //{
-    //    float time = uniformrand::ExpRand(0.2, uniformrand::Rand(RSC::EVENT_TIME));
-
-    //    NewPeer(pid, -1, time);
-
-    //    AllotNeighbors(pid);
-    //}
 }
 
 void PeerManager::AllotAllPeersLevel()
 {
-    const int NUM_PEER = args_->NUM_PEER;
+    const size_t NUM_PEER = args_->NUM_PEER;
 
     packet_time_4_peers_ = new float[NUM_PEER];
 
@@ -168,7 +176,7 @@ void PeerManager::AllotAllPeersLevel()
         time_piece[i] = (float)g_kPieceSize / g_kPeerLevel[i].bandwidth;
     }
 
-	for (int pid = 0; pid < NUM_PEER; pid++)
+	for (size_t pid = 0; pid < NUM_PEER; pid++)
     {
 		int level = NewPeerLevel(exclude_set, RSC::PEER_LEVEL);
 
@@ -185,13 +193,7 @@ void PeerManager::AllotAllPeersLevel()
 		}
 	}
 
-    //for(int pid = 0; pid < NUM_PEER; pid++)
-    //{
-    //    g_peers[pid].time_packet = packet_time_4_peers_[pid];
-    //}
-
     std::cout << "\n\n";
-
     for (int i = 0; i < 3; i++)
     {
         std::cout << "Amount of level " << i + 1 << " peers: "
@@ -204,10 +206,13 @@ void PeerManager::AllotAllPeersLevel()
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds() const
 {
-    for (int pid = 0; pid < args_->NUM_SEED; pid++)
+    for (size_t pid = 0; pid < args_->NUM_SEED; pid++)
     {
         //g_peers[pid] = Peer(pid, args_->NUM_PIECE);
-        Peer seed(pid, packet_time_4_peers_[pid], args_->NUM_PIECE);
+        Peer seed(static_cast<int>(pid),
+                  -1,
+                  packet_time_4_peers_[pid],
+                  args_->NUM_PIECE);
         g_peers.push_back(seed);
     }
 }
@@ -226,7 +231,7 @@ void PeerManager::InitSeeds() const
  * NOTE: Not every peer have 50% of its picces certainly, decided by prob.
  *
  * * */
-void PeerManager::InitLeeches() const
+void PeerManager::InitLeeches()
 {
     std::cout.precision(3);
 
@@ -235,25 +240,29 @@ void PeerManager::InitLeeches() const
     using std::cout;
     using std::endl;
 
-    const int start = args_->NUM_SEED;
-    const int end = start + args_->NUM_LEECH;
+    const size_t start = args_->NUM_SEED;
+    const size_t end = start + args_->NUM_LEECH;
 
-    for (int pid = start; pid < end; pid++)
+    for (size_t pid = start; pid < end; pid++)
     {
-        double prob_leech = 0;
+        double prob_leech = 0.0;
         prob_leech = uniformrand::Roll<float>(RSC::PROB_LEECH,
-                                             0.1,
-                                             0.9);
-
-        Peer leech = Peer(pid, packet_time_4_peers_[pid], args_->NUM_PIECE, prob_leech);
+                                              0.1,
+                                              0.9);
+        Peer leech = Peer(static_cast<int>(pid),
+                          packet_time_4_peers_[pid],
+                          args_->NUM_PIECE,
+                          prob_leech);
         g_peers.push_back(leech);
-
         std::cout << prob_leech << "\n";
     }
 
-    for(int pid = start; pid < end; pid ++)
+    CheckInSwarm();
+
+    // TODO: bugs in peer selection
+    for(size_t pid = start; pid < end; pid++)
     {
-        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid);
+        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid, in_swarm_set);
         g_peers[pid].neighbors = neighbors;
     }
 
