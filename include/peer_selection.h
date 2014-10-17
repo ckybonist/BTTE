@@ -56,7 +56,6 @@ public:
 
 private:
     Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
-    //Neighbor* SelectNeighbors(const int self_pid) override;
 };
 
 
@@ -68,7 +67,6 @@ public:
 
 private:
     Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
-    //Neighbor* SelectNeighbors(const int self_pid) override;
     void setCluster(Peer &peers);
 };
 

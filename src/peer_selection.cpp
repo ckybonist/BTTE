@@ -102,14 +102,13 @@ Neighbor* Standard::SelectNeighbors(const int self_pid, const iSet& in_swarm_set
     return neighbors;
 }
 
-//Neighbor* LoadBalancing::SelectNeighbors(const int self_pid)
 Neighbor* LoadBalancing::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     //TODO
     ExitError("\n\nNot Implement Yet!!!");
     return nullptr;
 }
-//Neighbor* ClusterBased::SelectNeighbors(const int self_pid)
+
 Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     //TODO

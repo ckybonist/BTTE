@@ -11,9 +11,5 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
 
 bool Event::operator<(const Event& e)
 {
-    if (time < e.time)
-        return true;
-    else
-        return false;
-    //return time < e.time;
+    return time < e.time;
 }

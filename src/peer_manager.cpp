@@ -44,7 +44,7 @@ PeerManager::PeerManager(Args* const args)
     }
 
     const int dummy_peers = static_cast<int>(args_->NUM_PEER * dummy_peers_rate);
-    std::cout << "\nNumber of Dummy Peers:" << dummy_peers << "\n";
+    std::cout << "\nNumber of Dummy Peers: " << dummy_peers << "\n";
     //args_->NUM_PEER += dummy_peers;
 }
 
@@ -63,6 +63,8 @@ PeerManager::~PeerManager()
 
     //delete [] g_peers;
     //g_peers = nullptr;
+    g_peers.clear();
+    in_swarm_set_.clear();
 
     delete [] g_in_swarm_set;
     g_in_swarm_set = nullptr;
@@ -78,12 +80,15 @@ void PeerManager::NewPeer(const int pid,
                           const int cid,
                           const float join_time) const
 {
-    //Peer::NewPeerData(pid, cid, join_time, args_->NUM_PIECE);
-    Peer peer(pid, cid, join_time, packet_time_4_peers_[pid], args_->NUM_PIECE);
+    Peer peer(pid,
+              cid,
+              join_time,
+              packet_time_4_peers_[pid],
+              args_->NUM_PIECE);
     g_peers.push_back(peer);
 }
 
-void PeerManager::CheckInSwarm()
+void PeerManager::CheckInSwarm(const ISF isf, const int pid)
 {
     if (g_in_swarm_set == nullptr)
     {
@@ -99,22 +104,22 @@ void PeerManager::CheckInSwarm()
         }
     }
 
-    for(size_t pid = 0; pid < g_peers.size(); pid++)
+    if (isf == ISF::JOIN)
     {
-        if (g_peers[pid].in_swarm)
-            in_swarm_set.insert((int)pid);
+        in_swarm_set_.insert(pid);
+        g_in_swarm_set[pid] = true;
     }
-
-    for(iSetIter it = in_swarm_set.begin(); it != in_swarm_set.end(); it++)
+    else if (isf == ISF::LEAVE)
     {
-        g_in_swarm_set[*it] = true;
+        in_swarm_set_.erase(pid);
+        g_in_swarm_set[pid] = false;
     }
 }
 
 // for average peers
 void PeerManager::AllotNeighbors(const int peer_id) const
 {
-    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id, in_swarm_set);
+    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id, in_swarm_set_);
     g_peers[peer_id].neighbors = neighbors;
 }
 
@@ -137,7 +142,7 @@ void PeerManager::CreatePeers()
     }
     std::cout << "\n";
 
-    ////// create empty peers
+    ////// Allocate memroy space for all peers (if use typical array)
     //AllocAllPeersSpaces();
 
     ///// init seeds, leeches and their pieces
@@ -254,15 +259,18 @@ void PeerManager::InitLeeches()
                           args_->NUM_PIECE,
                           prob_leech);
         g_peers.push_back(leech);
+
+        CheckInSwarm(ISF::JOIN, pid);
+
         std::cout << prob_leech << "\n";
     }
 
-    CheckInSwarm();
+    //CheckInSwarm();
 
     // TODO: bugs in peer selection
     for(size_t pid = start; pid < end; pid++)
     {
-        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid, in_swarm_set);
+        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid, in_swarm_set_);
         g_peers[pid].neighbors = neighbors;
     }
 

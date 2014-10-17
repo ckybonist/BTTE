@@ -64,7 +64,7 @@ void InitRandSeeds()
 float ExpRand(float rate, long long rand_num)
 {
     float rand_exp = 0 - (1.0 / rate) *
-                      log(1.0 - (double)rand_num / (double)RAND_MAX);
+                     log(1.0 - (double)rand_num / (double)RAND_MAX);
     return rand_exp;
 }
 

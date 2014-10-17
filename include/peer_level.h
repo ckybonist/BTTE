@@ -4,15 +4,10 @@
 #include "piece.h"
 
 /**
- * Simulation arguments
- *
- * Piece:
- *     @piece_size: 512 (Kbytes)
- *
- * Category of peers:
- *	   @level 1 : 10 (Mbps)   seeder  30 %
- *	   @level 2 : 128 (Kbps)  leecher or normal peer  50 %
- *	   @level 3 : 56 (Kbps)   leecher or normal peer  20 %
+ * Peer Level:
+ *	   @level 1 : 10 (Mbps)   30 % of peers
+ *	   @level 2 : 128 (Kbps)  50 % of peers
+ *	   @level 3 : 56 (Kbps)   20 % of peers
  *
  * */
 

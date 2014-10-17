@@ -30,16 +30,17 @@ int main(int argc, const char *argv[])
     ////////////////////
     // 2. read arguments
     //
-    if(argc == 1)
-    {
-        ExitError("First argument: path of config file");
-    }
-    else if (argc > 2)
-    {
-        ExitError("Too much arguments.");
-    }
+    //if(argc == 1)
+    //{
+    //    ExitError("First argument: path of config file");
+    //}
+    //else if (argc > 2)
+    //{
+    //    ExitError("Too much arguments.");
+    //}
 
-    Args args(argv[1]);
+    //Args args(argv[1]);
+    Args args("../btte.conf.dbg");
 
 
     /////////////////////

@@ -18,7 +18,15 @@ public:
     ~PeerManager();
 
     void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
-    void CheckInSwarm();
+
+    enum class InSwarmFlag
+    {
+        LEAVE,
+        JOIN
+    };
+    typedef InSwarmFlag ISF;
+    void CheckInSwarm(const ISF isf, const int pid);
+
     void AllotNeighbors(const int peer_id) const;  // for average peers
     void CreatePeers();
 
@@ -35,7 +43,7 @@ private:
 
     typedef std::set<int> iSet;
     typedef iSet::iterator iSetIter;
-    iSet in_swarm_set;
+    iSet in_swarm_set_;
 
     Args *args_;  // don't use pointer
 

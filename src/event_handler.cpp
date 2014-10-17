@@ -7,7 +7,11 @@
 
 using namespace uniformrand;
 
+typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
+static void Event2Str(TBTmapStr&);
+
+int EventHandler::next_event_idx_ = 0;
 int EventHandler::peer_join_counts_ = 0;  // compare with number of average peer
 
 EventHandler::EventHandler(Args args, PeerManager* const pm, float lambda, float mu)
@@ -54,55 +58,63 @@ void EventHandler::MapEventDeps()
 void EventHandler::PushInitEvent()
 {
     float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    const int initial_index = 1;
+    next_event_idx_ = initial_index;  // init next event index
     const int initial_pid = args_.NUM_SEED + args_.NUM_LEECH;
     Event first_event(Event::Type::ARRIVAL,
                       Event::PEER_JOIN,
-                      0,
+                      initial_index,
                       initial_pid,
                       time);
 
     event_list_.push_back(first_event);
 }
 
-void EventHandler::GetNextEvent(Event& e,
-                                Event::Type t,
-                                Event::Type4BT t_bt,
-                                const int index,
-                                const int pid)
+void EventHandler::GetNextArrivalEvent(const Event::Type4BT next_tbt,
+                                       const int next_index,
+                                       const int next_pid,
+                                       const float next_etime)
 {
-    if (Event::Type::ARRIVAL == t && Event::Type4BT::PEER_LEAVE != e.type_bt)
-    {
-        float time_packet = g_peers[e.pid].time_packet;
-        float time = GetNextArrivalEventTime(t_bt, time_packet, e.time);
-
-        Event new_event(t, t_bt, index, pid, time);
-        event_list_.push_back(new_event);
-    }
-    else if (Event::Type::DEPARTURE == t)
-    {
-        float time = GetNextDepartureEventTime();
-
-        Event depart_event(t, t_bt, e.index, e.pid, time);
-        event_list_.push_back(depart_event);
-    }
+    Event new_event(Event::Type::ARRIVAL,
+                    next_tbt,
+                    next_index,
+                    next_pid,
+                    next_etime);
+    event_list_.push_back(new_event);
 
     event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
 }
 
-float EventHandler::GetNextArrivalEventTime(const Event::Type4BT t_bt,
+void EventHandler::GetNextDepartureEvent(const Event::Type4BT tbt,
+                                         const int next_index,
+                                         const int orig_pid)
+{
+    float next_etime = GetNextDepartureEventTime();
+
+    Event depart_event(Event::Type::DEPARTURE,
+                       tbt,
+                       next_index,
+                       orig_pid,
+                       next_etime);
+    event_list_.push_back(depart_event);
+    event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
+}
+
+float EventHandler::GetNextArrivalEventTime(const Event::Type4BT orig_tbt,
                                             float time_packet,
-                                            const float current_arrival_etime)
+                                            const float current_etime)
 {
     float time = 0.0;
 
-    if (Event::PEER_JOIN == t_bt || Event::PEER_LEAVE == t_bt)
+    if (Event::PEER_JOIN == orig_tbt ||
+            Event::PEER_LEAVE == orig_tbt)
     {
         float lambda_time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-        time = current_arrival_etime + lambda_time;
+        time = current_etime + lambda_time;
     }
     else
     {
-        time = current_arrival_etime + time_packet;
+        time = current_etime + time_packet;
     }
 
     return time;
@@ -124,51 +136,48 @@ void EventHandler::ProcessArrival(Event& e)
     ///// 處理 System 的頭一個BT 事件
     (this->*event_map_[e.type_bt])(e);
 
-    int next_event_idx = e.index;
-
     ///// 如果不是 Peer Leave 事件, 就產生下一個相依事件
     if (e.type_bt != Event::PEER_LEAVE)
     {
-        Event::Type4BT derived_event_type = event_deps_map_[e.type_bt];
-        //std::cout << "\nDerived event type: " << derived_event_type << "\n";
-        GetNextEvent(e,
-                     Event::Type::ARRIVAL,
-                     derived_event_type,
-                     ++next_event_idx,
-                     e.pid);
+        Event::Type4BT derived_tbt = event_deps_map_[e.type_bt];
+        float time_packet = g_peers[e.pid].time_packet;
+        float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
+        //next_etime = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
+
+        GetNextArrivalEvent(derived_tbt,
+                            ++next_event_idx_,
+                            e.pid,
+                            time);
     }
+    event_list_.sort();
+
+    /// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
+    const int aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
+    const int num_avg_peer = args_.NUM_PEER - aborigin;
+    const int next_join_pid = peer_join_counts_ + 1 + aborigin;
+
+    if(e.type_bt == Event::PEER_JOIN)
+    {
+        if (next_join_pid < args_.NUM_PEER &&
+                !g_in_swarm_set[next_join_pid])
+        {
+            float time_packet = g_peers[e.pid].time_packet;
+            float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
+            //next_etime = GetNextArrivalEventTime(e.type_bt, time_packet, next_etime);
+            GetNextArrivalEvent(Event::PEER_JOIN,
+                                ++next_event_idx_,
+                                next_join_pid,
+                                e.time);
+            ++peer_join_counts_;
+        }
+    }
+    event_list_.sort();
 
     if (system_.size() == 1)
     {
         current_time_ = e.time;
-        GetNextEvent(e, Event::Type::DEPARTURE, e.type_bt);
+        GetNextDepartureEvent(e.type_bt, next_event_idx_, e.pid);
     }
-
-    event_list_.sort();
-
-    /// 0 5  init event
-    /// 0 5 6
-    /// 1 5 7
-    /// 2 5 8
-    /// 3 5 9
-    /// 4 -> do not need any peer join events
-    /// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
-    const int aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
-    const int num_avg_peer = args_.NUM_PEER - aborigin;
-
-    const int next_join_pid = peer_join_counts_ + 1 + aborigin;
-
-    if (peer_join_counts_ < num_avg_peer - 1 &&
-            !g_in_swarm_set[next_join_pid])
-    {
-        GetNextEvent(e, Event::Type::ARRIVAL,
-                     Event::PEER_JOIN,
-                     ++next_event_idx,
-                     next_join_pid);
-        ++peer_join_counts_;
-    }
-
-    event_list_.sort();
 }
 
 void EventHandler::ProcessDeparture(Event& e)
@@ -177,11 +186,12 @@ void EventHandler::ProcessDeparture(Event& e)
 
     if (system_.size() != 0)
     {
-        Event ev = system_.front();
+        Event sys_head = system_.front();
         current_time_ = e.time;
-        waiting_time_ = waiting_time_ + (current_time_ - ev.time);
+        waiting_time_ = waiting_time_ + (current_time_ - sys_head.time);
 
-        GetNextEvent(ev, Event::Type::DEPARTURE, e.type_bt);
+        GetNextDepartureEvent(sys_head.type_bt, next_event_idx_, sys_head.pid);
+        //GetNextEvent(ev, Event::Type::DEPARTURE, e.type_bt, e.time);
     }
 
     event_list_.sort();
@@ -190,7 +200,7 @@ void EventHandler::ProcessDeparture(Event& e)
 void EventHandler::PeerJoinEvent(Event& e)
 {
     pm_->NewPeer(e.pid, -1, e.time);
-    pm_->CheckInSwarm();
+    pm_->CheckInSwarm(PeerManager::ISF::JOIN, e.pid);
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& e)
@@ -229,9 +239,7 @@ void EventHandler::CompletedEvent(Event& e)
 void EventHandler::PeerLeaveEvent(Event& e)
 {
     g_peers[e.pid].in_swarm = false;
-    pm_->CheckInSwarm();
-    //iSetIter idx = g_in_swarm_set.find(e.pid);
-    //g_in_swarm_set.erase(idx);
+    pm_->CheckInSwarm(PeerManager::ISF::LEAVE, e.pid);
 }
 
 void EventHandler::ProcessEvent(Event& e)
@@ -246,9 +254,8 @@ void EventHandler::ProcessEvent(Event& e)
     }
 }
 
-static void EventDebugInfo(Event& head)
+static void Event2Str(TBTmapStr &tbt2str)
 {
-    std::map<Event::Type4BT, std::string> tbt2str;
     tbt2str[Event::PEER_JOIN] = "Peer-Join Event";
     tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
     tbt2str[Event::PEERLIST_GET] = "Peer-List-Get Event";
@@ -257,9 +264,16 @@ static void EventDebugInfo(Event& head)
     tbt2str[Event::PIECE_GET] = "Piece-Get Event";
     tbt2str[Event::COMPLETED] = "Completed Event";
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
+}
 
+static void EventInfo(const Event& head)
+{
     std::cout.precision(5);
 
+    TBTmapStr tbt2str;
+    Event2Str(tbt2str);
+
+    std::cout << std::flush;
     if(head.type == Event::Type::ARRIVAL)
     {
         std::cout << "\nEvent #" << head.index << " arrival at "
@@ -282,7 +296,7 @@ void EventHandler::StartRoutine()
     const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
     const int num_avg_peer = args_.NUM_PEER - aborigin;
 
-    while(!event_list_.empty())
+    while(!event_list_.empty() || peer_join_counts_ < num_avg_peer - 1)
     {
         Event head = event_list_.front();
 
@@ -290,6 +304,6 @@ void EventHandler::StartRoutine()
 
         ProcessEvent(head);
 
-        EventDebugInfo(head);
+        EventInfo(head);
     }
 }

@@ -38,7 +38,7 @@ public:
     bool in_swarm;
 
     bool* pieces;
-    double time_packet; // download time of each piece
+    float time_packet; // download time of each piece
 
     const Neighbor* neighbors;
 
