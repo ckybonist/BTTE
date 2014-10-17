@@ -30,7 +30,7 @@ void ShowDbgInfo(const Args &args)
 
     cout.precision(3);
 
-    cout << "\n@ Peer Infos: \n\n";
+    cout << "\n@ Peer Info: \n\n";
 
     for (size_t pid = 0; pid < args.NUM_PEER; pid++)
     {
