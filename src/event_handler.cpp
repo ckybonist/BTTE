@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "random.h"
 #include "peer.h"
@@ -142,8 +143,6 @@ void EventHandler::ProcessArrival(Event& e)
         Event::Type4BT derived_tbt = event_deps_map_[e.type_bt];
         float time_packet = g_peers[e.pid].time_packet;
         float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
-        //next_etime = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
-
         GetNextArrivalEvent(derived_tbt,
                             ++next_event_idx_,
                             e.pid,
@@ -152,9 +151,8 @@ void EventHandler::ProcessArrival(Event& e)
     event_list_.sort();
 
     /// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
-    const int aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
-    const int num_avg_peer = args_.NUM_PEER - aborigin;
-    const int next_join_pid = peer_join_counts_ + 1 + aborigin;
+    const size_t aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
+    const size_t next_join_pid = peer_join_counts_ + 1 + aborigin;
 
     if(e.type_bt == Event::PEER_JOIN)
     {
@@ -163,11 +161,10 @@ void EventHandler::ProcessArrival(Event& e)
         {
             float time_packet = g_peers[e.pid].time_packet;
             float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
-            //next_etime = GetNextArrivalEventTime(e.type_bt, time_packet, next_etime);
             GetNextArrivalEvent(Event::PEER_JOIN,
                                 ++next_event_idx_,
-                                next_join_pid,
-                                e.time);
+                                static_cast<int>(next_join_pid),
+                                time);
             ++peer_join_counts_;
         }
     }
@@ -190,7 +187,9 @@ void EventHandler::ProcessDeparture(Event& e)
         current_time_ = e.time;
         waiting_time_ = waiting_time_ + (current_time_ - sys_head.time);
 
-        GetNextDepartureEvent(sys_head.type_bt, next_event_idx_, sys_head.pid);
+        GetNextDepartureEvent(sys_head.type_bt,
+                              ++next_event_idx_,
+                              sys_head.pid);
         //GetNextEvent(ev, Event::Type::DEPARTURE, e.type_bt, e.time);
     }
 
