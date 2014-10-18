@@ -238,15 +238,14 @@ void PeerManager::InitSeeds() const
  * * */
 void PeerManager::InitLeeches()
 {
-    std::cout.precision(3);
-
-    std::cout << "Prob. of each leech: \n";
-
     using std::cout;
     using std::endl;
 
     const size_t start = args_->NUM_SEED;
     const size_t end = start + args_->NUM_LEECH;
+
+    //std::cout.precision(3);
+    //std::cout << "Prob. of each leech: \n";
 
     for (size_t pid = start; pid < end; pid++)
     {
@@ -262,7 +261,7 @@ void PeerManager::InitLeeches()
 
         CheckInSwarm(ISF::JOIN, pid);
 
-        std::cout << prob_leech << "\n";
+        //std::cout << prob_leech << "\n";
     }
 
     //CheckInSwarm();

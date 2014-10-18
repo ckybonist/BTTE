@@ -150,12 +150,14 @@ void EventHandler::ProcessArrival(Event& e)
     }
     event_list_.sort();
 
-    /// 持續產生 Peer Join 事件, 直到數量滿足 NUM_PEER
-    const size_t aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
-    const size_t next_join_pid = peer_join_counts_ + 1 + aborigin;
-
+    /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件,
+    //  直到數量滿足 NUM_PEER
+    //const size_t aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
+    //const size_t next_join_pid = peer_join_counts_ + 1 + aborigin;
     if(e.type_bt == Event::PEER_JOIN)
     {
+        const size_t next_join_pid = e.pid + 1;
+
         if (next_join_pid < args_.NUM_PEER &&
                 !g_in_swarm_set[next_join_pid])
         {
