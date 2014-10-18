@@ -4,10 +4,9 @@
 #include <set>
 
 #include "args.h"
+#include "peer.h"
 #include "neighbor.h"
 
-
-struct Peer;
 
 namespace peerselection
 {
@@ -27,7 +26,7 @@ class IPeerSelect
 {
 public:
     IPeerSelect(Args args);
-    virtual ~IPeerSelect() {};
+    virtual ~IPeerSelect() {};  // ensuring destructor of derived class will be invoked
     virtual Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) = 0;
 
 protected:
