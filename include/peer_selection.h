@@ -1,6 +1,9 @@
 #ifndef _ABS_PEER_SELECTION_H
 #define _ABS_PEER_SELECTION_H
 
+#include <set>
+
+#include "args.h"
 #include "neighbor.h"
 
 
@@ -9,84 +12,62 @@ struct Peer;
 namespace peerselection
 {
 
-typedef enum
+typedef enum class TypePeerSelect
 {
     STANDARD = 0,
     LOAD_BALANCING,
     CLUSTER_BASED
-} TypePeerSelect;
+} PeerSelect_T;
 
+
+typedef std::set<int> iSet;
+typedef iSet::iterator iSetIter;
 
 class IPeerSelect
 {
 public:
-    IPeerSelect(const int NUM_PEERLIST, const int NUM_PEER);
+    IPeerSelect(Args args);
     virtual ~IPeerSelect() {};
-    virtual Neighbor* SelectNeighbors() = 0;
+    virtual Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) = 0;
 
 protected:
-    int _NUM_PEERLIST;
-    int _NUM_PEER;
-    int* _ids;
-    int* _pg_delays;
+    Args args_;
+    int* ids_;
+    int* pg_delays_;
 };
+
 
 class Standard : public IPeerSelect
 {
 public:
-    Standard(const int NUM_PEERLIST,
-             const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
+    Standard(Args args) : IPeerSelect(args) {};
     ~Standard();
 
 private:
-    Neighbor* SelectNeighbors() override;
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
 };
+
 
 class LoadBalancing : public IPeerSelect
 {
 public:
-    LoadBalancing(const int NUM_PEERLIST,
-                  const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
+    LoadBalancing(Args args) : IPeerSelect(args) {};
     ~LoadBalancing() {};
 
 private:
-    Neighbor* SelectNeighbors() override;
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
 };
 
-/*
- * TODO:
- * Method of cluster decision :
- *     1. range 0 ~ 100 will split to 4 segments/clusters (1, 33, 66, 100), each have NUM_PEER/4 peers
- *     2. for (i = 0; i < 4; i++) {
- *          for(j = 0; j < NUM_PEER/4; j++) {
- *               peer_id = RangeRand((NUM_SEED + NUM_LEECH), (NUM_PEER - 1);
- *               if(0 == g_peers[peer_id].cid) {
- *                   pgdelay = rand();
- *                   if(pgdelay < 33) {
- *                      g_peers[peer_id].cid = i;
- *                   } else {
- *                     tmp_cid = "rand number 0 ~ 4 exclude current i"
- *                     g_peers[peer_id].cid = tmp_cid;
- *                   }
- *
- *               }
- *          }
- *     }
- *     if pgdelay of the peer was within first segment (1 ~ 32), then means
- *
- * * * * * * * */
 
 class ClusterBased : public IPeerSelect
 {
 public:
-    ClusterBased(const int NUM_PEERLIST,
-                 const int NUM_PEER) : IPeerSelect(NUM_PEERLIST, NUM_PEER) {};
-
+    ClusterBased(Args args) : IPeerSelect(args) {};
     ~ClusterBased() {};
 
 private:
-    Neighbor* SelectNeighbors() override;
-    void _setCluster(Peer &peers);
+    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
+    void setCluster(Peer &peers);
 };
 
 }

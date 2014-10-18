@@ -3,85 +3,107 @@
 #include "piece.h"
 #include "peer.h"
 
-Peer *g_peers = nullptr;
 
-Peer::Peer(const int k_id,
-           const float k_time_per_piece,
-           Neighbor* neighbors,
+//Peer *g_peers = nullptr;
+std::vector<Peer> g_peers;
+bool* g_in_swarm_set = nullptr;
+
+Peer::Peer()
+{
+    is_seed = false;
+    is_leech = false;
+    in_swarm = false;
+    pid = -1;
+    cid = -1;
+
+    pieces = nullptr;
+
+    neighbors = nullptr;
+
+    time_packet = 0.0;
+    join_time = 0.0;
+    end_time = 0.0;
+    counts = 0;
+}
+
+// seed
+Peer::Peer(const int pid,
+           const int cid,
+           const float time_packet,
            const int NUM_PIECE)
 {
     in_swarm = true;
     is_seed = true;
     is_leech = false;
 
-    this->id = k_id;
-    cid = 0;
+    this->pid = pid;
+    this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
-    for(int i = 0; i < NUM_PIECE; i++) {
+    for (int i = 0; i < NUM_PIECE; i++)
+    {
         pieces[i] = true;
     }
-    this->time_per_piece = k_time_per_piece;
+    neighbors = nullptr;
 
-    this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
-
-    start_time = 0.0;
+    this->time_packet = time_packet;
+    join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
 }
 
-Peer::Peer(const int k_id,
-           const float k_time_per_piece,
-           Neighbor* neighbors,
+// leech
+Peer::Peer(const int pid,
+           const float time_packet,
            const int NUM_PIECE,
-           const double k_prob_leech)
+           const double prob_leech)
 {
     in_swarm = true;
     is_leech = true;
     is_seed = false;
 
-    this->id = k_id;
-    cid = 0;
+    this->pid = pid;
+    cid = -1;
 
     pieces = MakePieces(NUM_PIECE);
 
-    for(int i = 0; i < NUM_PIECE; i++) {
-        double prob_piece = uniformrand::Rand(rsc_prob_piece) / (double)g_k_rand_max;
-        //double prob_piece = uniformrand::Rand(2) / (double)g_k_rand_max;
-        pieces[i] = (prob_piece < k_prob_leech);
+    for (int i = 0; i < NUM_PIECE; i++)
+    {
+        double prob_piece = uniformrand::Rand(RSC::PROB_PIECE) / (double)RAND_MAX;
+        pieces[i] = (prob_piece < prob_leech);
     }
-    this->time_per_piece = k_time_per_piece;
 
-    this->neighbors = neighbors;  // TODO:  Until the peer selection have completed
+    neighbors = nullptr;
 
-    start_time = 0.0;
+    this->time_packet = time_packet;
+    join_time = 0.0;
     end_time = 0.0;
 
     counts = 0;
-
 }
 
-// for normal peer joining
-Peer::Peer(const int k_id,
-           const int k_cid,
-           const float k_time_per_piece,
-           const float k_start_time,
+
+// average peer
+Peer::Peer(const int pid,
+           const int cid,
+           const float join_time,
+           const float time_packet,
            const int NUM_PIECE)
 {
     in_swarm = true;
-
-    this->id = k_id;
-    this->cid = k_cid;
-
     is_seed = false;
     is_leech = false;
 
-    this->time_per_piece = k_time_per_piece;
-    this->pieces = MakePieces(NUM_PIECE);
+    this->pid = pid;
+    this->cid = cid;
 
-    this->start_time = k_start_time;
+    pieces = MakePieces(NUM_PIECE);
+
+    neighbors = nullptr;
+
+    this->time_packet = time_packet;
+    this->join_time = join_time;
     end_time = 0.0;
-
-    counts = 0.0;
+    counts = 0;
 }
