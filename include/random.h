@@ -1,11 +1,12 @@
 #ifndef _RANDOM_H
 #define _RANDOM_H
 
+#include <cstdlib>
 #include <cstring>
 
 #include "error.h"
 
-const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
+//const long long g_kRandMax = 2147483647;  // C++ RAND_MAX Macro
 
 /*
  * Group of Rand Seeds (size 15) :
@@ -26,55 +27,57 @@ const long long g_k_rand_max = 2147483647;  // C++ RAND_MAX Macro
  *       14 : free
  *
  * * * * * * * * */
-const int k_num_rseeds = 15;
+const int g_kNumRSeeds = 15;
 
-typedef enum RandSeedCases
+typedef enum class RandSeedCases
 {
-    rsc_peer_level = 0,
-    rsc_prob_leech,
-    rsc_prob_piece,
-    rsc_event_time,
-    rsc_peer_leave,
-    rsc_pgdelay,
-    rsc_std_peerselect,
-    rsc_cb_peerselect,
-    rsc_lb_peerselect,
-    rsc_pieceselect,
-    rsc_choking,
+    PEER_LEVEL = 0,
+    PROB_LEECH,
+    PROB_PIECE,
+    EVENT_TIME,
+    PEER_LEAVE,
+    PGDELAY,
+    STD_PEERSELECT,
+    CB_PEERSELECT,
+    LB_PEERSELECT,
+    PIECESELECT,
+    CHOKING,
 
     // Free usage below
-    rsc_free_2,
-    rsc_free_3,
-    rsc_free_4,
-    rsc_free_5,
+    FREE_2,
+    FREE_3,
+    FREE_4,
+    FREE_5,
 } RSC;
 
-extern long long g_rand_grp[k_num_rseeds];
 
+extern long long g_rand_grp[g_kNumRSeeds];
 //extern long long g_rand_num;
 
 
 namespace uniformrand
 {
 
-long long Rand(const RSC& k_seed_rsc_id);
+long long Rand(const RSC& rsc);
 
-void Srand(const int k_seed_id, const int k_seed);
+void Srand(const int iRsc, const int seed);
 
 void InitRandSeeds();
 
+float ExpRand(float rate, long long rand_num);
+
 template<typename T>
-T Roll(const RSC& k_seed_rsc_id,
-       const T k_low,
-       const T k_up);
+T Roll(const RSC& rsc,
+       const T low,
+       const T up);
 
 template <typename T>
-T* DistinctRandNumbers(const RSC& k_seed_rsc_id,
-                       const size_t k_size,
-                       const T k_rand_limit);
+T* DistinctRandNum(const RSC& rsc,
+                   const size_t size,
+                   const T rand_limit);
 
 template<typename T>
-void Shuffle(const RSC& k_seed_rsc_id, T *arr, size_t N);
+void Shuffle(const RSC& rsc, T *arr, size_t N);
 
 #include "random.tpp"
 

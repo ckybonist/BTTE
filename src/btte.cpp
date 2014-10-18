@@ -1,5 +1,4 @@
 #include <iostream>
-//#include <cstdlib> // if use normal srand()
 
 #include "debug.h"
 #include "error.h"
@@ -7,18 +6,19 @@
 #include "args.h"
 #include "peer.h"
 #include "peer_manager.h"
+#include "event_handler.h"
 //#include "env_manager.h"
 
 
 int main(int argc, const char *argv[])
 {
     /////////////////////////////
-    // 1. init group of random seeds
+    // 1. init random seeds group
     //
     uniformrand::InitRandSeeds();
 
     std::cout << "Group of Initial Rand-Seeds:\n";
-    for(int i = 0; i < k_num_rseeds; i++)
+    for(int i = 0; i < g_kNumRSeeds; i++)
     {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";
@@ -41,22 +41,22 @@ int main(int argc, const char *argv[])
     Args args(argv[1]);
 
 
-    /////////////////////
+    ///////////////////////
     // 3. start simulating
     //
-    PeerManager pm(args);
-
+    PeerManager pm(&args);
     pm.CreatePeers();
 
+    EventHandler evh(args, &pm, 0.2, 0.5);
+    evh.StartRoutine();
+
     ShowDbgInfo(args);
-    // end simluating
 
 
-    //////////////////////////////////
-    // 4. check seeds was being used or not
+    /////////////////////////////////
+    // 4. check seeds was being used
     //
-    std::cout << "\n\nGroup of Final Rand-Seeds:\n";
-    for(int i = 0; i < k_num_rseeds; i++)
+    std::cout << "\n\nGroup of Final Rand-Seeds:\n"; for(int i = 0; i < g_kNumRSeeds; i++)
     {
         if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";

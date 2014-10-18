@@ -5,15 +5,15 @@
 
 struct Args
 {
-    int NUM_PEER;
-    int NUM_SEED;
-    int NUM_LEECH;
-    int NUM_PEERLIST;
-    int NUM_CHOKING;
-    int NUM_OU;
-    int NUM_PIECE;
-    int TYPE_PEERSELECT;
-    int TYPE_PIECESELECT;
+    size_t NUM_PEER;
+    size_t NUM_SEED;
+    size_t NUM_LEECH;
+    size_t NUM_PEERLIST;
+    size_t NUM_CHOKING;
+    size_t NUM_OU;
+    size_t NUM_PIECE;
+    size_t TYPE_PEERSELECT;
+    size_t TYPE_PIECESELECT;
     float ARRIVAL_RATE;
 
     Args() {};
