@@ -32,20 +32,20 @@ void ShowDbgInfo(const Args &args)
 
     cout << "\n@ Peer Info: \n\n";
 
-    for (size_t pid = 0; pid < args.NUM_PEER; pid++)
+    for (int pid = 0; (size_t)pid < args.NUM_PEER; pid++)
     {
         PeerInfo(pid);
 
         PieceInfo(pid, args.NUM_PIECE, args.NUM_SEED, piece_own_counter);
 
-        if (pid >= args.NUM_SEED)
+        if ((size_t)pid >= args.NUM_SEED)
             NeighborInfo(pid, args.NUM_PEERLIST);
 
         cout << "\n===========================\n";
     }
 
     //cout << "\nNumber of peers own each piece:\n";
-    //for (int i = 0; i < args.NUM_PIECE; ++i)
+    //for (int i = 0; (size_t)i < args.NUM_PIECE; ++i)
     //{
     //    cout << "Piece #" << i << " : "
     //         << piece_own_counter[i] << endl;
@@ -90,7 +90,7 @@ static void PieceInfo(const size_t pid,
     // pieces info
     int piece_count = 0;
 
-    for (size_t c = 0; c < NUM_PIECE; c++)
+    for (int c = 0; (size_t)c < NUM_PIECE; c++)
     {
         if (g_peers[pid].pieces[c])
         {
@@ -111,10 +111,16 @@ static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
     /////////////////////////
     // neighbors info
     cout << "\n 6. Neighbors info (id, pg_delay):\n";
-    for(size_t k = 0; k < NUM_PEERLIST; k++)
+    for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
     {
-        cout << "    (" << g_peers[pid].neighbors[k].id
-             << ", " << g_peers[pid].neighbors[k].pg_delay
-             << ")" << endl;
+        Neighbor neighbor = g_peers[pid].neighbors[k];
+        const int nid = neighbor.id;
+        if (nid != -1)
+        {
+            cout << "    (" << nid
+                 << ", " << g_peers[nid].cid
+                 << ", " << neighbor.pg_delay
+                 << ")" << endl;
+        }
     }
 }
