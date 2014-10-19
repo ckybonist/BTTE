@@ -123,7 +123,7 @@ void PeerManager::AllotNeighbors(const int peer_id) const
     g_peers[peer_id].neighbors = neighbors;
 }
 
-void PeerManager::AllocAllPeersSpaces()
+void PeerManager::AllocPeersSpace()
 {
     //g_peers = new Peer[args_->NUM_PEER];
     //if (g_peers == nullptr)
@@ -143,10 +143,10 @@ void PeerManager::CreatePeers()
     std::cout << "\n";
 
     ////// Allocate memroy space for all peers (if use typical array)
-    //AllocAllPeersSpaces();
+    //AllocPeersSpace();
 
     ///// init seeds, leeches and their pieces
-    AllotAllPeersLevel();
+    DeployPeersLevel();
 
     InitSeeds();
 
@@ -160,7 +160,7 @@ void PeerManager::CreatePeers()
     }
 }
 
-void PeerManager::AllotAllPeersLevel()
+void PeerManager::DeployPeersLevel()
 {
     const size_t NUM_PEER = args_->NUM_PEER;
 

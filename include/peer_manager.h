@@ -36,8 +36,8 @@ public:
     const float dummy_peers_rate = 0.1;
 
 private:
-    void AllocAllPeersSpaces();
-    void AllotAllPeersLevel();
+    void AllocPeersSpace();
+    void DeployPeersLevel();
     void InitSeeds() const;
     void InitLeeches();
 
