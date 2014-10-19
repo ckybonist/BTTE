@@ -1,10 +1,11 @@
 #ifndef _RANDOM_IMPL_H
 #define _RANDOM_IMPL_H
 
-#include <iostream>
 #include <cassert>
 
 #include "random.h"
+
+//using namespace uniformrand;
 
 
 template<typename T>
@@ -13,12 +14,33 @@ T Roll(const RSC& rsc,
        const T up)
 {
     assert(up > low);
+
+    T number = 0;
+
     // [low, up]
-	T number = static_cast<T>((((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1)) *
-			     (up - low + 1)) + low);
+    //double sub_formula_01 = ((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1));
+    //double sub_formula_02 = sub_formula_01 * (up - low + 1);
+	//T number = static_cast<T>(sub_formula_02 + low);
+
+    typedef T type_T;  // define template parameter to real type
+
+    if (typeid(int) == typeid(type_T))
+    {
+        // [low, up]
+        double sub_formula_01 = ((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1));
+
+        double sub_formula_02 = sub_formula_01 * (up - low + 1);
+
+        number = static_cast<T>(low + sub_formula_02);
+    }
+    else if (typeid(float) == typeid(type_T) || typeid(double) == typeid(type_T))
+    {
+        number = low + static_cast<T>(uniformrand::Rand(rsc)) / (static_cast<T>(RAND_MAX / (up - low)));
+    }
+
     // [low, up)
-	// int number = (int)(((double)uniformdist::rand(rsc) / ((double)RAND_MAX + 1)) *
-			     //(up - low)) + low;
+	// int number = (int)(((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1)) * (up - low)) + low;
+
 	return number;
 }
 
@@ -33,7 +55,7 @@ T* DistinctRandNum(const RSC& rsc,
 
     for (size_t m = 0; m < size; m++)
     {
-        T rand_num = Rand(rsc) % rand_limit;
+        T rand_num = uniformrand::Rand(rsc) % rand_limit;
 
         size_t s = m;
 
@@ -43,7 +65,7 @@ T* DistinctRandNum(const RSC& rsc,
         {
             if (rand_num == arr[s])  // rand_num is duplicate
             {
-                rand_num = Rand(rsc) % rand_limit;
+                rand_num = uniformrand::Rand(rsc) % rand_limit;
                 s = m;
                 continue;
             }
@@ -81,6 +103,36 @@ void Shuffle(const RSC& rsc, T *arr, size_t N)
         arr[idx] = arr[i];
         arr[i] = temp;
     }
+}
+
+template<typename T, size_t set_size>
+T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size])
+{
+	int target = 0;
+	bool flag = true;
+    const int low = 1;  // NOTE: don't use 0, it will conflict with loop counter
+    const int up = set_size;
+
+	while (flag)
+    {
+		target = uniformrand::Roll<int>(rsc, low, up);
+
+		for (size_t i = 0; i < set_size; i++)
+        {
+			//if(target == ex_set[i] && ex_set[i] != 0)
+			if (target == exclude_set[i])
+            {
+				flag = true;
+				break;
+			}
+            else
+            {
+				flag = false;
+			}
+		}
+	}
+
+	return target;
 }
 
 #endif // for #ifndef _RANDOM_IMPL_H

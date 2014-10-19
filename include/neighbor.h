@@ -12,10 +12,10 @@
 struct Neighbor
 {
     Neighbor();
-    Neighbor(const int id, const int pg_delay);
+    Neighbor(const int id, const float pg_delay);
 
     int id;
-    int pg_delay;
+    float pg_delay;
     bool exist;
 };
 

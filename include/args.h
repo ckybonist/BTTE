@@ -12,8 +12,8 @@ struct Args
     size_t NUM_CHOKING;
     size_t NUM_OU;
     size_t NUM_PIECE;
-    size_t TYPE_PEERSELECT;
-    size_t TYPE_PIECESELECT;
+    int TYPE_PEERSELECT;
+    int TYPE_PIECESELECT;
     float ARRIVAL_RATE;
 
     Args() {};
