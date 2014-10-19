@@ -108,8 +108,7 @@ void PeerManager::NewPeer(const int pid,
     g_peers.push_back(peer);
 }
 
-void PeerManager::CheckInSwarm(const ISF isf, const int pid)
-{
+void PeerManager::CheckInSwarm(const ISF isf, const int pid) {
     if (g_in_swarm_set == nullptr)
     {
         g_in_swarm_set = new bool[args_->NUM_PEER];
@@ -276,9 +275,6 @@ void PeerManager::InitSeeds() const
  * * */
 void PeerManager::InitLeeches()
 {
-    using std::cout;
-    using std::endl;
-
     const int start = args_->NUM_SEED;
     const int end = start + args_->NUM_LEECH;
 
