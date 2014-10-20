@@ -3,7 +3,7 @@
 #include "piece_selection.h"
 #include "args.h"
 
-using namespace peerselection;
+using namespace btte_peer_selection;
 
 Args::Args(const std::string filename)
 {

@@ -7,7 +7,7 @@
 #include "peer_selection.h"
 
 
-using namespace peerselection;
+using namespace btte_peer_selection;
 
 
 class PeerManager
