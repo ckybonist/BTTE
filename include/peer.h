@@ -20,6 +20,7 @@ public:
 
     // leech
     Peer(const int pid,
+         const int cid,
          const float time_packet,
          const int NUM_PIECE,
          const double prob_leech);
@@ -48,7 +49,8 @@ public:
     int counts;           // counts of being selected as an candidate in other peers' neighbor lists
 };
 
-//extern Peer* g_peers;     // sort by time-order
+
+//extern Peer* g_peers;
 extern std::vector<Peer> g_peers;
 extern bool* g_in_swarm_set;
 

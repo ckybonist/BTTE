@@ -1,10 +1,11 @@
 #ifndef _RANDOM_IMPL_H
 #define _RANDOM_IMPL_H
 
-#include <iostream>
 #include <cassert>
 
 #include "random.h"
+
+using namespace uniformrand;  // for Rand(), Roll()
 
 
 template<typename T>
@@ -13,12 +14,28 @@ T Roll(const RSC& rsc,
        const T up)
 {
     assert(up > low);
-    // [low, up]
-	T number = static_cast<T>((((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1)) *
-			     (up - low + 1)) + low);
+
+    T number = 0;
+
+    typedef T type_T;  // define template parameter to real type
+
+    if (typeid(int) == typeid(type_T))
+    {
+        // [low, up]
+        double sub_formula_01 = ((double)Rand(rsc) / ((double)RAND_MAX + 1));
+
+        double sub_formula_02 = sub_formula_01 * (up - low + 1);
+
+        number = static_cast<T>(low + sub_formula_02);
+    }
+    else if (typeid(float) == typeid(type_T) || typeid(double) == typeid(type_T))
+    {
+        number = low + static_cast<T>(Rand(rsc)) / (static_cast<T>(RAND_MAX / (up - low)));
+    }
+
     // [low, up)
-	// int number = (int)(((double)uniformdist::rand(rsc) / ((double)RAND_MAX + 1)) *
-			     //(up - low)) + low;
+	// int number = (int)(((double)Rand(rsc) / ((double)RAND_MAX + 1)) * (up - low)) + low;
+
 	return number;
 }
 
@@ -76,11 +93,41 @@ void Shuffle(const RSC& rsc, T *arr, size_t N)
 
     for (std::size_t i = 0; i < N; i++)
     {
-        std::size_t idx = uniformrand::Roll<T>(rsc, 0, N - 1);
+        std::size_t idx = Roll<T>(rsc, 0, N - 1);
         T temp = arr[idx];
         arr[idx] = arr[i];
         arr[i] = temp;
     }
+}
+
+template<typename T, size_t set_size>
+T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size])
+{
+	int target = 0;
+	bool flag = true;
+    const int low = 1;  // NOTE: don't use 0, it will conflict with loop counter
+    const int up = set_size;
+
+	while (flag)
+    {
+		target = Roll<int>(rsc, low, up);
+
+		for (size_t i = 0; i < set_size; i++)
+        {
+			//if(target == ex_set[i] && ex_set[i] != 0)
+			if (target == exclude_set[i])
+            {
+				flag = true;
+				break;
+			}
+            else
+            {
+				flag = false;
+			}
+		}
+	}
+
+	return target;
 }
 
 #endif // for #ifndef _RANDOM_IMPL_H

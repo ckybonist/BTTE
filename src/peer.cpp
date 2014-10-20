@@ -55,6 +55,7 @@ Peer::Peer(const int pid,
 
 // leech
 Peer::Peer(const int pid,
+           const int cid,
            const float time_packet,
            const int NUM_PIECE,
            const double prob_leech)
@@ -64,7 +65,7 @@ Peer::Peer(const int pid,
     is_seed = false;
 
     this->pid = pid;
-    cid = -1;
+    this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
 
