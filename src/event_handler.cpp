@@ -200,7 +200,7 @@ void EventHandler::ProcessDeparture(Event& e)
 
 void EventHandler::PeerJoinEvent(Event& e)
 {
-    pm_->NewPeer(e.pid, -1, e.time);
+    pm_->NewPeer(e.pid, e.time);
     pm_->CheckInSwarm(PeerManager::ISF::JOIN, e.pid);
 }
 
@@ -217,7 +217,7 @@ void EventHandler::PeerListGetEvent(Event& e)
 void EventHandler::ReqPieceEvent(Event& e)
 {
     // for debug usage
-    for (size_t c = 0; c < args_.NUM_PIECE; c++)
+    for (int c = 0; (size_t)c < args_.NUM_PIECE; c++)
     {
         g_peers[e.pid].pieces[c] = true;
     }
@@ -305,6 +305,6 @@ void EventHandler::StartRoutine()
 
         ProcessEvent(head);
 
-        EventInfo(head);
+        //EventInfo(head);
     }
 }

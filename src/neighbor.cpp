@@ -3,12 +3,12 @@
 Neighbor::Neighbor()
 {
     id = -1;
-    pg_delay = 0;
+    pg_delay = 0.0;
     exist = false;
 }
 
 Neighbor::Neighbor(const int pid,
-                   const int pg_delay)
+                   const float pg_delay)
 {
     id = pid;
     this->pg_delay = pg_delay;

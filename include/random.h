@@ -1,8 +1,10 @@
 #ifndef _RANDOM_H
 #define _RANDOM_H
 
+#include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <typeinfo>
 
 #include "error.h"
 
@@ -78,6 +80,25 @@ T* DistinctRandNum(const RSC& rsc,
 
 template<typename T>
 void Shuffle(const RSC& rsc, T *arr, size_t N);
+
+
+/*
+ * Generating random numbers except some numbers in
+ * exclude-set
+ *
+ * Args:
+ *     @set : the set of numbers trying to exclude
+ *     @set_size : the size of set
+ *     @min : minimum for range of numbers
+ *     @max : maximum for range of numbers
+ *
+ * Return:
+ *	   random nubmer within the specific range but
+ *	   except numbers in that exclusive set
+ *
+ * */
+template<typename T, size_t set_size>
+T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size]);
 
 #include "random.tpp"
 

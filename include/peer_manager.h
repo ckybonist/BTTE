@@ -17,7 +17,8 @@ public:
     PeerManager(Args* const args);
     ~PeerManager();
 
-    void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
+    //void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
+    void NewPeer(const int id, const float start_time) const;  // for peer_join event
 
     enum class InSwarmFlag
     {
@@ -36,20 +37,23 @@ public:
     const float dummy_peers_rate = 0.1;
 
 private:
-    void AllocAllPeersSpaces();
-    void AllotAllPeersLevel();
+    void AllocPeersSpace();
+    void DeployPeersLevel();
+    void DeployClusterIDs();  // if use cluster-based
     void InitSeeds() const;
     void InitLeeches();
 
-    typedef std::set<int> iSet;
-    typedef iSet::iterator iSetIter;
-    iSet in_swarm_set_;
-
     Args *args_;  // don't use pointer
 
-    float* packet_time_4_peers_;  // tt : transmission time
-
     IPeerSelect* type_peerselect_;
+
+    int* cluster_ids_;  // pre-init, assign to peer after
+    float* packet_time_4_peers_;  // pre-init, assign to peer after
+
+    typedef std::set<int> iSet;
+    typedef iSet::iterator iSetIter;
+    iSet in_swarm_set_;  // for peer selection
+
 };
 
 #endif // for #ifndef _PEERMANAGER_H
