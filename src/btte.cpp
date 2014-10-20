@@ -39,7 +39,7 @@ int main(int argc, const char *argv[])
     //}
 
     //Args args(argv[1]);
-    Args args("../btte.conf");
+    Args args("../btte.conf.dbg");
 
 
     ///////////////////////

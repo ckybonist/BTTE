@@ -9,8 +9,12 @@
 #include "neighbor.h"
 
 
-namespace peerselection
+namespace btte_peer_selection
 {
+
+typedef std::set<int> iSet;
+typedef iSet::iterator iSetIter;
+
 
 typedef enum class TypePeerSelect
 {
@@ -19,9 +23,6 @@ typedef enum class TypePeerSelect
     CLUSTER_BASED
 } PeerSelect_T;
 
-
-typedef std::set<int> iSet;
-typedef iSet::iterator iSetIter;
 
 class IPeerSelect
 {
@@ -39,42 +40,11 @@ protected:
     int* candidates_;
 };
 
+class Standard;
 
-class Standard : public IPeerSelect
-{
-public:
-    Standard(Args args) : IPeerSelect(args),
-                          pg_delays_(nullptr) {};
-    ~Standard();
+class LoadBalancing;
 
-private:
-    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
-    float* pg_delays_;
-};
-
-
-class LoadBalancing : public IPeerSelect
-{
-public:
-    LoadBalancing(Args args) : IPeerSelect(args),
-                               pg_delays_(nullptr) {};
-    ~LoadBalancing() {};
-
-private:
-    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
-    float* pg_delays_;
-};
-
-
-class ClusterBased : public IPeerSelect
-{
-public:
-    ClusterBased(Args args) : IPeerSelect(args) {};
-    ~ClusterBased() {};
-
-private:
-    Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
-};
+class ClusterBased;
 
 }
 #endif // for _ABS_PEER_SELECTION_H
