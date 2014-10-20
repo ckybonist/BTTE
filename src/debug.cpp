@@ -9,14 +9,19 @@ using std::cout;
 using std::endl;
 
 
-static void PeerInfo(const size_t pid);
+namespace
+{
 
-static void PieceInfo(const size_t pid,
-                      const size_t NUM_PIECE,
-                      const size_t NUM_SEED,
-                      int* counter);
+void PeerInfo(const size_t pid);
 
-static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST);
+void PieceInfo(const size_t pid,
+               const size_t NUM_PIECE,
+               const size_t NUM_SEED,
+               int* counter);
+
+void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST);
+
+}
 
 
 void ShowDbgInfo(const Args &args)
@@ -56,7 +61,10 @@ void ShowDbgInfo(const Args &args)
     delete [] piece_own_counter;
 }
 
-static void PeerInfo(const size_t pid)
+namespace  // enclose in compile unit
+{
+
+void PeerInfo(const size_t pid)
 {
     ////////////////////////
     // id info
@@ -81,7 +89,7 @@ static void PeerInfo(const size_t pid)
     cout << "\nTime per packet: " << g_peers[pid].time_packet << endl;
 }
 
-static void PieceInfo(const size_t pid,
+void PieceInfo(const size_t pid,
                       const size_t NUM_PIECE,
                       const size_t NUM_SEED,
                       int* counter)
@@ -106,7 +114,7 @@ static void PieceInfo(const size_t pid,
     cout << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
 }
 
-static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
+void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
 {
     /////////////////////////
     // neighbors info
@@ -124,3 +132,5 @@ static void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
         }
     }
 }
+
+} // unamed namespace

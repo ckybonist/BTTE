@@ -2,9 +2,13 @@
 #include "random.h"
 #include "piece.h"
 
+
 bool g_all_pieces_get = false;
 
-static bool* AllocPieces(const int NUM_PIECE)
+namespace  // enclosing in compile unit
+{
+
+bool* AllocPieces(const int NUM_PIECE)
 {
     bool* pieces = new bool[NUM_PIECE];
     if (pieces == nullptr)
@@ -12,6 +16,8 @@ static bool* AllocPieces(const int NUM_PIECE)
         ExitError("Memory allocation of pieces is failed!");
     }
     return pieces;
+}
+
 }
 
 bool* MakePieces(const int NUM_PIECE)
