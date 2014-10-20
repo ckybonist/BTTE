@@ -5,7 +5,7 @@
 
 #include "random.h"
 
-//using namespace uniformrand;
+using namespace uniformrand;  // for Rand(), Roll()
 
 
 template<typename T>
@@ -17,17 +17,12 @@ T Roll(const RSC& rsc,
 
     T number = 0;
 
-    // [low, up]
-    //double sub_formula_01 = ((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1));
-    //double sub_formula_02 = sub_formula_01 * (up - low + 1);
-	//T number = static_cast<T>(sub_formula_02 + low);
-
     typedef T type_T;  // define template parameter to real type
 
     if (typeid(int) == typeid(type_T))
     {
         // [low, up]
-        double sub_formula_01 = ((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1));
+        double sub_formula_01 = ((double)Rand(rsc) / ((double)RAND_MAX + 1));
 
         double sub_formula_02 = sub_formula_01 * (up - low + 1);
 
@@ -35,11 +30,11 @@ T Roll(const RSC& rsc,
     }
     else if (typeid(float) == typeid(type_T) || typeid(double) == typeid(type_T))
     {
-        number = low + static_cast<T>(uniformrand::Rand(rsc)) / (static_cast<T>(RAND_MAX / (up - low)));
+        number = low + static_cast<T>(Rand(rsc)) / (static_cast<T>(RAND_MAX / (up - low)));
     }
 
     // [low, up)
-	// int number = (int)(((double)uniformrand::Rand(rsc) / ((double)RAND_MAX + 1)) * (up - low)) + low;
+	// int number = (int)(((double)Rand(rsc) / ((double)RAND_MAX + 1)) * (up - low)) + low;
 
 	return number;
 }
@@ -55,7 +50,7 @@ T* DistinctRandNum(const RSC& rsc,
 
     for (size_t m = 0; m < size; m++)
     {
-        T rand_num = uniformrand::Rand(rsc) % rand_limit;
+        T rand_num = Rand(rsc) % rand_limit;
 
         size_t s = m;
 
@@ -65,7 +60,7 @@ T* DistinctRandNum(const RSC& rsc,
         {
             if (rand_num == arr[s])  // rand_num is duplicate
             {
-                rand_num = uniformrand::Rand(rsc) % rand_limit;
+                rand_num = Rand(rsc) % rand_limit;
                 s = m;
                 continue;
             }
@@ -98,7 +93,7 @@ void Shuffle(const RSC& rsc, T *arr, size_t N)
 
     for (std::size_t i = 0; i < N; i++)
     {
-        std::size_t idx = uniformrand::Roll<T>(rsc, 0, N - 1);
+        std::size_t idx = Roll<T>(rsc, 0, N - 1);
         T temp = arr[idx];
         arr[idx] = arr[i];
         arr[i] = temp;
@@ -115,7 +110,7 @@ T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size])
 
 	while (flag)
     {
-		target = uniformrand::Roll<int>(rsc, low, up);
+		target = Roll<int>(rsc, low, up);
 
 		for (size_t i = 0; i < set_size; i++)
         {
