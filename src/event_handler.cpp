@@ -8,9 +8,17 @@
 
 using namespace uniformrand;
 
+
+namespace  // enclosing in compile unit
+{
+
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
-static void Event2Str(TBTmapStr&);
+void Event2Str(TBTmapStr&);
+void EventInfo(const Event& head);
+
+}
+
 
 int EventHandler::next_event_idx_ = 0;
 int EventHandler::peer_join_counts_ = 0;  // compare with number of average peer
@@ -255,7 +263,11 @@ void EventHandler::ProcessEvent(Event& e)
     }
 }
 
-static void Event2Str(TBTmapStr &tbt2str)
+
+namespace  // enclose in compile unit
+{
+
+void Event2Str(TBTmapStr &tbt2str)
 {
     tbt2str[Event::PEER_JOIN] = "Peer-Join Event";
     tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
@@ -267,7 +279,7 @@ static void Event2Str(TBTmapStr &tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
-static void EventInfo(const Event& head)
+void EventInfo(const Event& head)
 {
     std::cout.precision(5);
 
@@ -289,6 +301,8 @@ static void EventInfo(const Event& head)
     std::cout << "\nThis is event belongs to peer #" << head.pid
               << "\n\n\n";
 }
+
+}  // unnamed namespace
 
 void EventHandler::StartRoutine()
 {
