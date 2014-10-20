@@ -5,7 +5,13 @@
 #include "piece.h"
 #include "peer_level.h"
 #include "cluster_info.h"
+
+#include "STD_peer_selection.h"
+#include "LB_peer_selection.h"
+#include "CB_peer_selection.h"
+
 #include "peer_manager.h"
+
 
 using namespace uniformrand;
 
