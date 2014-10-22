@@ -24,6 +24,8 @@ PeerManager::PeerManager()
     args_ = nullptr;
     packet_time_4_peers_ = nullptr;
     obj_peerselect_ = nullptr;
+
+    std::cout.precision(4);
 }
 
 void PeerManager::InitAbstractObj()
@@ -90,6 +92,8 @@ PeerManager::PeerManager(Args* const args)
 {
     this->args_ = args;
 
+    InitAbstractObj();
+
     packet_time_4_peers_ = new float[args->NUM_PEER];
     if (nullptr == packet_time_4_peers_)
         ExitError("Memory Allocation Fault");
@@ -100,10 +104,9 @@ PeerManager::PeerManager(Args* const args)
         ExitError("Memory Allocation Fault");
     DeployClusterIDs();
 
-    InitAbstractObj();
-
-    const int dummy_peers = static_cast<int>(args_->NUM_PEER * dummy_peers_rate);
-    std::cout << "\nNumber of Dummy Peers: " << dummy_peers << "\n";
+    // TODO: Add some extra events
+    //const int dummy_peers = static_cast<int>(args_->NUM_PEER * dummy_peers_rate);
+    //std::cout << "\nNumber of Dummy Peers: " << dummy_peers << "\n";
     //args_->NUM_PEER += dummy_peers;
 }
 
@@ -205,8 +208,8 @@ void PeerManager::CreatePeers()
     // DEBUG
     for(int i = 0; i < g_kNumLevel; i++)
     {
-        std::cout << "Bandwidth of level "<< i << " : "
-                  << g_kPeerLevel[i].bandwidth << "\n";
+        std::cout << "Transmission Time of level "<< i << " : "
+                  << g_kPieceSize / g_kPeerLevel[i].bandwidth << "\n";
     }
     std::cout << "\n";
 
@@ -283,7 +286,6 @@ void PeerManager::DeployClusterIDs()
 
 		++count[idx];
 
-        std::cout.precision(4);
         const int max_cluster_amount = static_cast<int>(args_->NUM_PEER / (float)g_kNumClusters);
 
         if (count[idx] == max_cluster_amount)
