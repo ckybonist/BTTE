@@ -1,10 +1,15 @@
+# Config File for BTTE (debug version)
+
+# 1. Use number which is multiple of 10
+# 2. If you using Cluster-Based Peer Selection,
+#    the amount of peers must also be multiple of amount of clusters
 NUM_PEER = 20
 
 
-NUM_SEED = 5
+NUM_SEED = 2
 
 
-NUM_LEECH = 5
+NUM_LEECH = 3
 
 
 NUM_PEERLIST = 5
@@ -17,15 +22,21 @@ NUM_CHOKING = 4
 NUM_OU = 1
 
 
-NUM_PIECE = 20
+NUM_PIECE = 5
 
 
-# Type of peer selection,
-# 0, 1, 2 are our builtin method (default is 0)
+# Type of peer selection
+# 0, 1, 2 are builtin method (default is 0)
+#
+# 0: Standard Peer Selection
+# 1: Load Balancing Peer Selection
+# 2: Cluster Based Peer Selection
 TYPE_PEERSELECT = 2
 
-# Type of piece selection, all user-defined
+
+# Type of piece selection (user-defined)
 TYPE_PIECESELECT = 0
 
+
 # Time of each peer arriving in swarm
-ARRIVAL_RATE = 1
+#ARRIVAL_RATE = 1
