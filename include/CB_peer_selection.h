@@ -13,6 +13,9 @@ public:
     ~ClusterBased() {};
 
 private:
+    float ComputePGDelay(const int self_cid, const int cand_cid);
+    bool IsNewNeighbor(const int self_pid,
+                       const int cand_pid);
     Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
 };
 
