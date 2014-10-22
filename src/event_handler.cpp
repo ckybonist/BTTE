@@ -334,7 +334,8 @@ void EventHandler::StartRoutine()
     const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
     const int num_avg_peer = args_.NUM_PEER - aborigin;
 
-    while(!event_list_.empty() || peer_join_counts_ < num_avg_peer - 1)
+    //while(!event_list_.empty() || peer_join_counts_ < num_avg_peer - 1)
+    while(!event_list_.empty())
     {
         Event head = event_list_.front();
 
@@ -342,6 +343,6 @@ void EventHandler::StartRoutine()
 
         ProcessEvent(head);
 
-        //EventInfo(head);
+        EventInfo(head);
     }
 }
