@@ -107,7 +107,7 @@ int RarestFirst::SelectTargetPiece(const int self_pid)
     std::cout << "\nPiece Count Info (piece-no, counts) :\n";
     for (int i = 0; (size_t)i < num_targets; ++i)
     {
-        std::cout << "(" << piece_counts_info_[i].piece_no << ", "
+        std::cout << "(" << piece_counts_info_[i].piece_no << ",   "
                   << piece_counts_info_[i].counts << ")\n";
     }
     std::cout << std::endl;

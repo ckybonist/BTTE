@@ -35,7 +35,7 @@ void ShowDbgInfo(const Args &args)
 
     cout.precision(3);
 
-    cout << "\n@ Peer Info: \n\n";
+    cout << "\n\n\n\n@ Peer Info: \n\n";
 
     for (int pid = 0; (size_t)pid < args.NUM_PEER; pid++)
     {
@@ -126,8 +126,8 @@ void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
         if (nid != -1)
         {
             cout << "    (" << nid
-                 << ", " << g_peers[nid].cid
-                 << ", " << neighbor.pg_delay
+                 << ",  " << g_peers[nid].cid
+                 << ",  " << neighbor.pg_delay
                  << ")" << endl;
         }
     }

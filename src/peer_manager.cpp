@@ -211,7 +211,7 @@ void PeerManager::CreatePeers()
         std::cout << "Transmission Time of level "<< i << " : "
                   << g_kPieceSize / g_kPeerLevel[i].bandwidth << "\n";
     }
-    std::cout << "\n";
+    std::cout << "\n\n\n";
 
     /// Allocate memroy space for all peers (if use typical array)
     //AllocPeersSpace();

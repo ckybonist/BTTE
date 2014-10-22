@@ -230,7 +230,7 @@ void EventHandler::PeerListGetEvent(Event& e)
 void EventHandler::ReqPieceEvent(Event& e)
 {
     // TODO: Need some debug test for Rarest First
-    std::cout << "Peer #" << e.pid << " execute piece selection" << "\n";
+    std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
     const int req_piece = pm_->GetReqPiece(e.pid);
     std::cout << "I want piece #" << req_piece
               << "\n=========================\n\n";

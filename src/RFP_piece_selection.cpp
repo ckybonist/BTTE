@@ -9,7 +9,7 @@ int RandomFirstPiece::SelectTargetPiece(const int self_pid)
 {
     CheckNeighbors(self_pid);
 
-    SetTargetPieces(self_pid);  // FIXME: Segmentation fault
+    SetTargetPieces(self_pid);
 
     const size_t num_targets = targets_set_.size();
 
