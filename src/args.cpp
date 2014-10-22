@@ -4,6 +4,7 @@
 #include "args.h"
 
 using namespace btte_peer_selection;
+using namespace btte_piece_selection;
 
 Args::Args(const std::string filename)
 {
@@ -24,7 +25,7 @@ Args::Args(const std::string filename)
                                              static_cast<int>(PeerSelect_T::STANDARD));
 
     TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
-                                              static_cast<int>(PieceSelect_T::RANDOM_FIRST_PIECE));
+                                              static_cast<int>(PieceSelect_T::BUILTIN));
 
     ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 }

@@ -10,6 +10,12 @@ bool* MakePieces(const int NUM_PIECE);
 //                    const double& prob_leech,
 //                    const int NUM_PIECE);
 
+struct PieceReqMsg
+{
+    int pid;
+    int piece_no;
+};
+
 extern bool g_all_pieces_get;
 
 #endif // for #ifndef _PIECE_H

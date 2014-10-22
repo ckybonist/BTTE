@@ -40,11 +40,5 @@ protected:
     int* candidates_;
 };
 
-class Standard;
-
-class LoadBalancing;
-
-class ClusterBased;
-
 }
 #endif // for _ABS_PEER_SELECTION_H

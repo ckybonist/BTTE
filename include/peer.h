@@ -44,9 +44,11 @@ public:
     const Neighbor* neighbors;
 
     float join_time;     // start time of peer run the routine
-    float end_time;       // end time of all pieces have been downloaded
+    float end_time;      // end time of all pieces have been downloaded
 
-    int counts;           // counts of being selected as an candidate in other peers' neighbor lists
+    // counts of being selected as an neighbor, this variable will use
+    // in Load Balancing Peer Selection
+    int neighbor_counts;
 };
 
 

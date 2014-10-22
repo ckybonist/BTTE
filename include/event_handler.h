@@ -84,6 +84,8 @@ private:
     float lambda_;
     float mu_;
 
+    static const float kTimeout_;
+
     float total_sys_size_;
     float current_time_;
     float waiting_time_;

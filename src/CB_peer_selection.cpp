@@ -49,6 +49,7 @@ Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm
         }
     }
 
+    // refresh info
     delete [] candidates_;
     candidates_ = nullptr;
 

@@ -51,6 +51,7 @@ Neighbor* Standard::SelectNeighbors(const int self_pid, const iSet& in_swarm_set
         }
     }
 
+    // refresh info
     delete [] candidates_;
     candidates_ = nullptr;
 

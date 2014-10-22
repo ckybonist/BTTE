@@ -20,8 +20,11 @@ IPeerSelect::IPeerSelect(Args args)
 
 IPeerSelect::~IPeerSelect()
 {
-    delete [] candidates_;
-    candidates_ = nullptr;
+    if (candidates_ != nullptr)
+    {
+        delete [] candidates_;
+        candidates_ = nullptr;
+    }
 
     for(int pid = args_.NUM_SEED; (size_t)pid < args_.NUM_PEER; pid++)
     {
@@ -52,6 +55,7 @@ size_t IPeerSelect::SetCandidates(const int self_pid,
 {
     /// Erase self first, then, shuffle the index and
     /// select other peers which in swarm.
+
     iSet in_swarm(in_swarm_set);
     in_swarm.erase(in_swarm.find(self_pid));
 

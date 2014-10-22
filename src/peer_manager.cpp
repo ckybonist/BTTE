@@ -10,6 +10,9 @@
 #include "LB_peer_selection.h"
 #include "CB_peer_selection.h"
 
+#include "RFP_piece_selection.h"
+#include "RF_piece_selection.h"
+
 #include "peer_manager.h"
 
 
@@ -20,7 +23,67 @@ PeerManager::PeerManager()
 {
     args_ = nullptr;
     packet_time_4_peers_ = nullptr;
-    type_peerselect_ = nullptr;
+    obj_peerselect_ = nullptr;
+}
+
+void PeerManager::InitAbstractObj()
+{
+    // 將指定的 peer selection 演算法所屬之衍生類別轉形成基底類別
+    const PeerSelect_T type_peer_select = static_cast<PeerSelect_T>(args_->TYPE_PEERSELECT);
+    switch (type_peer_select)
+    {
+        case PeerSelect_T::STANDARD:
+            obj_peerselect_ =
+                static_cast<IPeerSelect*>(new Standard(*args_));
+            std::cout << "\n----Using Standard Peer Selection----\n\n";
+            break;
+
+        case PeerSelect_T::LOAD_BALANCING:
+            obj_peerselect_ =
+                static_cast<IPeerSelect*>(new LoadBalancing(*args_));
+            std::cout << "\n----Using Load Balancing Peer Selection----\n\n";
+            break;
+
+        case PeerSelect_T::CLUSTER_BASED:
+            obj_peerselect_ =
+                static_cast<IPeerSelect*>(new ClusterBased(*args_));
+            std::cout << "\n----Using Cluster Based Peer Selection----\n\n";
+            break;
+
+        default:
+            ExitError("Error of casting child-class to \
+                       interface-class IPeerSelect");
+            break;
+    }
+
+    //const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(args_->TYPE_PIECESELECT);
+    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(0);  // test rarest first, default is random-first-piece
+    switch (type_piece_select)
+    {
+        case PieceSelect_T::BUILTIN:
+            obj_pieceselect_ =
+                static_cast<IPieceSelect*>(new RarestFirst(*args_));
+                //static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
+            //std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
+            std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
+            break;
+        case PieceSelect_T::USER_DEFINED_1:
+            //obj_pieceselect_ =
+            //    static_cast<IPieceSelect*>(new UserDefined1(*args_));
+            //std::cout << "\n----Using First User Defined Piece Selection----\n\n";
+            break;
+
+        case PieceSelect_T::USER_DEFINED_2:
+            //obj_pieceselect_ =
+            //    static_cast<IPieceSelect*>(new UserDefined2(*args_));
+            //std::cout << "\n----Using Second User Defined Piece Selection----\n\n";
+            break;
+
+        default:
+            ExitError("Error of casting child-class to \
+                       interface-class IPeerSelect");
+            break;
+    }
 }
 
 PeerManager::PeerManager(Args* const args)
@@ -32,40 +95,12 @@ PeerManager::PeerManager(Args* const args)
         ExitError("Memory Allocation Fault");
     DeployPeersLevel();
 
-
     cluster_ids_ = new int[args->NUM_PEER];
     if (nullptr == cluster_ids_)
         ExitError("Memory Allocation Fault");
     DeployClusterIDs();
 
-
-    // 將指定的 peer selection 演算法所屬之衍生類別轉形成基底類別
-    const PeerSelect_T type_ps = static_cast<PeerSelect_T>(args_->TYPE_PEERSELECT);
-    switch (type_ps)
-    {
-        case PeerSelect_T::STANDARD:
-            type_peerselect_ =
-                static_cast<IPeerSelect*>(new Standard(*args_));
-            std::cout << "\n----Using Standard Peer Selection----\n\n";
-            break;
-
-        case PeerSelect_T::LOAD_BALANCING:
-            type_peerselect_ =
-                static_cast<IPeerSelect*>(new LoadBalancing(*args_));
-            std::cout << "\n----Using Load Balancing Selection----\n\n";
-            break;
-
-        case PeerSelect_T::CLUSTER_BASED:
-            type_peerselect_ =
-                static_cast<IPeerSelect*>(new ClusterBased(*args_));
-            std::cout << "\n----Using Cluster Based Selection----\n\n";
-            break;
-
-        default:
-            ExitError("Error of casting child-class to \
-                       interface-class IPeerSelect");
-            break;
-    }
+    InitAbstractObj();
 
     const int dummy_peers = static_cast<int>(args_->NUM_PEER * dummy_peers_rate);
     std::cout << "\nNumber of Dummy Peers: " << dummy_peers << "\n";
@@ -89,8 +124,11 @@ PeerManager::~PeerManager()
     }
 
     // also call the destructor to delete neighbors
-    delete type_peerselect_; // MUST BEFORE THE DELETION OF G_PEERS
-    type_peerselect_ = nullptr;
+    delete obj_peerselect_; // MUST BEFORE THE DELETION OF G_PEERS
+    obj_peerselect_ = nullptr;
+
+    delete obj_pieceselect_; // MUST BEFORE THE DELETION OF G_PEERS
+    obj_pieceselect_ = nullptr;
 
     //delete [] g_peers;
     //g_peers = nullptr;
@@ -141,11 +179,16 @@ void PeerManager::CheckInSwarm(const ISF isf, const int pid) {
     }
 }
 
-// for average peers
-void PeerManager::AllotNeighbors(const int peer_id) const
+void PeerManager::AllotNeighbors(const int self_pid) const
 {
-    Neighbor* neighbors = type_peerselect_->SelectNeighbors(peer_id, in_swarm_set_);
-    g_peers[peer_id].neighbors = neighbors;
+    Neighbor* neighbors = obj_peerselect_->SelectNeighbors(self_pid, in_swarm_set_);
+    g_peers[self_pid].neighbors = neighbors;
+}
+
+int PeerManager::GetReqPiece(const int self_pid) const
+{
+    const int req_piece = obj_pieceselect_->SelectTargetPiece(self_pid);
+    return req_piece;
 }
 
 void PeerManager::AllocPeersSpace()
@@ -307,7 +350,7 @@ void PeerManager::InitLeeches()
     // TODO: bugs in peer selection
     for(int pid = start; pid < end; pid++)
     {
-        Neighbor* neighbors = type_peerselect_->SelectNeighbors(pid, in_swarm_set_);
+        Neighbor* neighbors = obj_peerselect_->SelectNeighbors(pid, in_swarm_set_);
         g_peers[pid].neighbors = neighbors;
     }
 
