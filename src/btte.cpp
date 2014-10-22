@@ -87,7 +87,7 @@ int main(int argc, const char *argv[])
 
     /////////////////////////////////
     // 4. check seeds was being used
-    //
+
     std::cout << "\n\nFinal Random Seeds:\n";
     for(int i = 0; i < g_kNumRSeeds; i++)
     {
