@@ -27,5 +27,5 @@ Args::Args(const std::string filename)
     TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
                                               static_cast<int>(PieceSelect_T::BUILTIN));
 
-    ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
+    //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 }
