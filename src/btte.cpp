@@ -17,10 +17,10 @@ int main(int argc, const char *argv[])
     //
     uniformrand::InitRandSeeds();
 
-    std::cout << "Group of Initial Rand-Seeds:\n";
+    std::cout << "Initial Random Seeds:\n";
     for(int i = 0; i < g_kNumRSeeds; i++)
     {
-        if(i == 10) { std::cout << "\nUnused rand seeds: \n"; }
+        if(i == 12) { std::cout << "\nUnused Rand Seeds: \n"; }
         std::cout << i << " : " << g_rand_grp[i] << "\n";
     }
     std::cout << "\n\n";
@@ -29,17 +29,17 @@ int main(int argc, const char *argv[])
     ////////////////////
     // 2. read arguments
     //
-    //if(argc == 1)
-    //{
-    //    ExitError("First argument: path of config file");
-    //}
-    //else if (argc > 2)
-    //{
-    //    ExitError("Too much arguments.");
-    //}
+    if(argc == 1)
+    {
+        ExitError("First argument: path of config file");
+    }
+    else if (argc > 2)
+    {
+        ExitError("Too much arguments.");
+    }
 
-    //Args args(argv[1]);
-    Args args("../btte.conf.dbg");
+    Args args(argv[1]);
+    //Args args("../btte.conf.dbg");
 
 
     ///////////////////////
@@ -57,10 +57,10 @@ int main(int argc, const char *argv[])
     /////////////////////////////////
     // 4. check seeds was being used
     //
-    std::cout << "\n\nGroup of Final Rand-Seeds:\n";
+    std::cout << "\n\nFinal Random Seeds:\n";
     for(int i = 0; i < g_kNumRSeeds; i++)
     {
-        if(i == 10)
+        if(i == 12)
         {
             std::cout << "\nUnused rand seeds: \n";
         }
