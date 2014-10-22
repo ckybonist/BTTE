@@ -206,7 +206,6 @@ void EventHandler::ProcessDeparture(Event& e)
         GetNextDepartureEvent(sys_head.type_bt,
                               ++next_event_idx_,
                               sys_head.pid);
-        //GetNextEvent(ev, Event::Type::DEPARTURE, e.type_bt, e.time);
     }
 
     event_list_.sort();
@@ -225,7 +224,7 @@ void EventHandler::PeerListReqRecvEvent(Event& e)
 
 void EventHandler::PeerListGetEvent(Event& e)
 {
-    //TODO
+    // TODO
 }
 
 void EventHandler::ReqPieceEvent(Event& e)
@@ -253,13 +252,13 @@ void EventHandler::ReqPieceEvent(Event& e)
 
 void EventHandler::PieceAdmitEvent(Event& e)
 {
-    //TODO
+    // TODO
     // Choking
 }
 
 void EventHandler::PieceGetEvent(Event& e)
 {
-    //TODO
+    // TODO
     //
 }
 

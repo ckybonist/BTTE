@@ -33,7 +33,7 @@ const int g_kNumRSeeds = 15;
 
 typedef enum class RandSeedCases
 {
-    PEER_LEVEL = 0,
+    PEER_LEVEL,
     PROB_LEECH,
     PROB_PIECE,
     EVENT_TIME,
