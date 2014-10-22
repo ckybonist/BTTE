@@ -1,6 +1,7 @@
 #ifndef _PEER_H
 #define _PEER_H
 
+#include <map>
 #include <vector>
 
 #include "piece.h"
@@ -42,6 +43,9 @@ public:
     float time_packet; // download time of each piece
 
     const Neighbor* neighbors;
+
+    typedef std::map<int, float> Map_i2f;
+    Map_i2f pg_delay_pairs;
 
     float join_time;     // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded
