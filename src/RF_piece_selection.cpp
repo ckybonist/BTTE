@@ -28,9 +28,12 @@ void RarestFirst::CountNumPeerOwnPiece(const int self_pid, const size_t num_targ
         int counts = 0;
         for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
         {
-            const int nid = neighbors[n].id;
-            bool is_get_piece = g_peers[nid].pieces[*it];
-            if (is_get_piece) ++counts;
+            if (neighbors[n].exist)  // ensure the neighbor is exist
+            {
+                const int nid = neighbors[n].id;
+                bool is_get_piece = g_peers[nid].pieces[*it];
+                if (is_get_piece) ++counts;
+            }
         }
         piece_counts_info_[index].piece_no = *it;
         piece_counts_info_[index].counts = counts;
