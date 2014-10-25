@@ -15,7 +15,6 @@ int RandomFirstPiece::SelectTargetPiece(const int self_pid)
 
     // Randomly select a piece no from set
     iSetIter target_piece_no = targets_set_.begin();
-    //int rand_offset = Roll<int>(RSC::RFP_PIECESELECT, 0, num_targets - 1);
     int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_targets;
     for(; rand_offset != 0; --rand_offset) ++target_piece_no;
 

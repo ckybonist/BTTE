@@ -61,7 +61,7 @@ void ShowDbgInfo(const Args &args)
     delete [] piece_own_counter;
 }
 
-namespace  // enclose in compile unit
+namespace
 {
 
 void PeerInfo(const size_t pid)
@@ -127,6 +127,7 @@ void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
         {
             cout << "    (" << nid
                  << ",  " << g_peers[nid].cid
+                 << ",  " << g_peers[nid].neighbor_counts
                  << ",  " << neighbor.pg_delay
                  << ")" << endl;
         }

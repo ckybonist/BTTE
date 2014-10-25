@@ -45,16 +45,15 @@ public:
     const Neighbor* neighbors;
 
     typedef std::map<int, float> Map_i2f;
-    Map_i2f pg_delay_pairs;
+    Map_i2f pg_delay_records;
 
     float join_time;     // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded
 
     // counts of being selected as an neighbor, this variable will use
     // in Load Balancing Peer Selection
-    int neighbor_counts;
+    int neighbor_counts;  // counts of peer being served(selected) as neighbor
 };
-
 
 //extern Peer* g_peers;
 extern std::vector<Peer> g_peers;
