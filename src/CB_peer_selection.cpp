@@ -10,28 +10,7 @@ using namespace uniformrand;
 namespace btte_peer_selection
 {
 
-bool ClusterBased::IsNewNeighbor(const int self_pid, const int cand_pid)
-{
-    bool flag = false;
-
-    try  // key found
-    {
-        const Peer& myself = g_peers[self_pid];
-
-        // don't use [] accessor of STL map. It will automatically
-        // insert a new pair(key, value). This operation will cause
-        // original propagation delay become 0
-        const float unused_val = myself.pg_delay_pairs.at(cand_pid);
-    }
-    catch (const std::out_of_range& oor)  // key not found exception
-    {
-        flag = true;
-    }
-
-    return flag;
-}
-
-float ClusterBased::ComputePGDelay(const int self_cid, const int cand_cid)
+float ClusterBased::ComputePGDelayByCluster(const int self_cid, const int cand_cid)
 {
     const float min_delay = 0.01;
     const float same_cid_bound = 1.00 / static_cast<float>(g_kNumClusters);
@@ -55,35 +34,46 @@ float ClusterBased::ComputePGDelay(const int self_cid, const int cand_cid)
     return pg_delay;
 }
 
+void ClusterBased::RefreshInfo()
+{
+    delete [] candidates_;
+    candidates_ = nullptr;
+}
+
 Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     Neighbor* neighbors = AllocNeighbors();
 
     const int self_cid = g_peers[self_pid].cid;
-    size_t candidates_size = SetCandidates(self_pid, in_swarm_set, true);
 
-    Peer& myself = g_peers[self_pid];
+    // Set parameter of sort_cid_flag to true, in order to get
+    // candidates (most part, not all) which have
+    // same cluster id as selector.
+    size_t candidates_size = SetCandidates(self_pid, in_swarm_set, true);
 
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
         if ((size_t)i < candidates_size)
         {
-            const int candidate_pid = candidates_[i];
-            const int candidate_cid = myself.cid;
-            neighbors[i].id = candidate_pid;
+            const int cand_pid = candidates_[i];
+            const int cand_cid = g_peers[self_pid].cid;
+            neighbors[i].id = cand_pid;
             neighbors[i].exist = true;
 
-            if (IsNewNeighbor(self_pid, candidate_pid))
+            // assign propagation delay
+            float pg_delay = 0.0;
+            if (IsNewNeighbor(self_pid, cand_pid))
             {
-                const float new_pg_delay = ComputePGDelay(self_cid, candidate_cid);
-                myself.pg_delay_pairs.insert(std::pair<int, float>(candidate_pid, new_pg_delay));
-                neighbors[i].pg_delay = new_pg_delay;
+                pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
+                RecordPGDelay(self_pid, cand_pid, pg_delay);
             }
             else
             {
-                const float pg_delay = myself.pg_delay_pairs[candidate_pid];
-                neighbors[i].pg_delay = pg_delay;
+                pg_delay = QueryPGDelay(self_pid, cand_pid);
             }
+            neighbors[i].pg_delay = pg_delay;
+
+            ++g_peers[cand_pid].neighbor_counts;
         }
         else
         {
@@ -91,9 +81,25 @@ Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm
         }
     }
 
-    // refresh info
-    delete [] candidates_;
-    candidates_ = nullptr;
+    // debug info
+    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
+    std::cout << "Cluster ID of Peer #" << self_pid
+              << " : " << g_peers[self_pid].cid << std::endl;
+    std::cout << "Info: (pid, cid, PG delay)\n";
+    for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+    {
+        Neighbor nei = neighbors[n];
+        if (nei.id == -1)
+        {
+            std::cout << "None\n";
+            continue;
+        }
+        std::cout << "(" << nei.id << ",  "
+                  << g_peers[nei.id].cid << ",  "
+                  << nei.pg_delay << ")" << std::endl;
+    }
+
+    RefreshInfo();
 
     return neighbors;
 }

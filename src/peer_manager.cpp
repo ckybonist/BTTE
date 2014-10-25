@@ -64,10 +64,10 @@ void PeerManager::InitAbstractObj()
     {
         case PieceSelect_T::BUILTIN:
             obj_pieceselect_ =
-                static_cast<IPieceSelect*>(new RarestFirst(*args_));
-                //static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
-            //std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
-            std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
+                //static_cast<IPieceSelect*>(new RarestFirst(*args_));
+                static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
+            std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
+            //std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
             break;
         case PieceSelect_T::USER_DEFINED_1:
             //obj_pieceselect_ =

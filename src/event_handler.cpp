@@ -10,7 +10,7 @@
 using namespace uniformrand;
 
 
-namespace  // enclosing in compile unit
+namespace
 {
 
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
@@ -164,10 +164,8 @@ void EventHandler::ProcessArrival(Event& e)
     }
     event_list_.sort();
 
-    /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件,
-    //  直到數量滿足 NUM_PEER
-    //const size_t aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
-    //const size_t next_join_pid = peer_join_counts_ + 1 + aborigin;
+    /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
+    //  (因為節點加入順序是按照要配合陣列索引）, 直到數量滿足 NUM_PEER
     if(e.type_bt == Event::PEER_JOIN)
     {
         const size_t next_join_pid = e.pid + 1;
@@ -286,7 +284,7 @@ void EventHandler::ProcessEvent(Event& e)
 }
 
 
-namespace  // enclose in compile unit
+namespace
 {
 
 void Event2Str(TBTmapStr &tbt2str)
@@ -325,7 +323,7 @@ void EventInfo(const Event& head)
               << "\n\n\n";
 }
 
-}  // unnamed namespace
+}
 
 void EventHandler::StartRoutine()
 {
@@ -334,7 +332,6 @@ void EventHandler::StartRoutine()
     const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
     const int num_avg_peer = args_.NUM_PEER - aborigin;
 
-    //while(!event_list_.empty() || peer_join_counts_ < num_avg_peer - 1)
     while(!event_list_.empty())
     {
         Event head = event_list_.front();
