@@ -15,44 +15,71 @@ Standard::~Standard()
     pg_delays_ = nullptr;
 }
 
+void Standard::RefreshInfo()
+{
+    delete [] candidates_;
+    candidates_ = nullptr;
+}
+
+void Standard::AssignNeighbors(Neighbor* const neighbors,
+                              const size_t cand_size,
+                              const int self_pid)
+{
+    Peer& myself = g_peers[self_pid];
+    for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    {
+        if ((size_t)i < cand_size)
+        {
+            const int cand_pid = candidates_[i];
+            neighbors[i].id = cand_pid;
+            neighbors[i].exist = true;
+
+            // assign propagation delay
+            float pg_delay = 0.0;
+            if (IsNewNeighbor(self_pid, cand_pid))
+            {
+                pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
+                RecordPGDelay(self_pid, cand_pid, pg_delay);
+            }
+            else
+            {
+                pg_delay = QueryPGDelay(self_pid, cand_pid);
+            }
+            neighbors[i].pg_delay = pg_delay;
+
+            ++g_peers[cand_pid].neighbor_counts;
+        }
+    }
+}
+
 Neighbor* Standard::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
 {
     Neighbor* neighbors = AllocNeighbors();
 
     size_t candidates_size = SetCandidates(self_pid, in_swarm_set, false);
 
+    // randomly selected peers
     Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);
 
-    // Randomly allot propagation delay values
-    if(pg_delays_ == nullptr)
-    {
-        pg_delays_ = new float[g_kMaxPGdelay];
-        if(nullptr == pg_delays_) ExitError("Memory Allocation Fault");
+    AssignNeighbors(neighbors, candidates_size, self_pid);
 
-        for(int i = 0; (size_t)i < g_kMaxPGdelay; i++)
+    // debug info
+    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
+    std::cout << "Info: (pid, cid, PG delay)\n";
+    for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+    {
+        Neighbor nei = neighbors[n];
+        if (nei.id == -1)
         {
-            pg_delays_[i] = Roll<float>(RSC::PGDELAY,
-                                        0.01,
-                                        (float)g_kMaxPGdelay / 100.0);
+            std::cout << "None\n";
+            continue;
         }
-    }
-    else
-    {
-      Shuffle<float>(RSC::STD_PEERSELECT, pg_delays_, g_kMaxPGdelay);
+        std::cout << "(" << nei.id << ",  "
+                  << g_peers[nei.id].cid << ",  "
+                  << nei.pg_delay << ")" << std::endl;
     }
 
-    for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
-    {
-        if ((size_t)i < candidates_size)
-        {
-            neighbors[i].id = candidates_[i];
-            neighbors[i].pg_delay = pg_delays_[i];
-            neighbors[i].exist = true;
-        }
-    }
-
-    delete [] candidates_;
-    candidates_ = nullptr;
+    RefreshInfo();
 
     return neighbors;
 }

@@ -4,10 +4,13 @@
 #include <set>
 
 #include "args.h"
+#include "peer_level.h"
 #include "peer_selection.h"
+#include "piece_selection.h"
 
 
 using namespace btte_peer_selection;
+using namespace btte_piece_selection;
 
 
 class PeerManager
@@ -28,7 +31,9 @@ public:
     typedef InSwarmFlag ISF;
     void CheckInSwarm(const ISF isf, const int pid);
 
-    void AllotNeighbors(const int peer_id) const;  // for average peers
+    void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
+    int GetReqPiece(const int self_pid) const;      // Piece Selection , for average peers
+
     void CreatePeers();
 
     // A rate (0.x) for extracting steady peers stat..
@@ -42,18 +47,20 @@ private:
     void DeployClusterIDs();  // if use cluster-based
     void InitSeeds() const;
     void InitLeeches();
+    void InitAbstractObj();
 
     Args *args_;  // don't use pointer
 
-    IPeerSelect* type_peerselect_;
+    IPeerSelect* obj_peerselect_;
+    IPieceSelect* obj_pieceselect_;
 
     int* cluster_ids_;  // pre-init, assign to peer after
+
     float* packet_time_4_peers_;  // pre-init, assign to peer after
 
     typedef std::set<int> iSet;
     typedef iSet::iterator iSetIter;
     iSet in_swarm_set_;  // for peer selection
-
 };
 
 #endif // for #ifndef _PEERMANAGER_H

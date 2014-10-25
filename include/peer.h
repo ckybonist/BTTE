@@ -1,6 +1,7 @@
 #ifndef _PEER_H
 #define _PEER_H
 
+#include <map>
 #include <vector>
 
 #include "piece.h"
@@ -43,12 +44,16 @@ public:
 
     const Neighbor* neighbors;
 
+    typedef std::map<int, float> Map_i2f;
+    Map_i2f pg_delay_records;
+
     float join_time;     // start time of peer run the routine
-    float end_time;       // end time of all pieces have been downloaded
+    float end_time;      // end time of all pieces have been downloaded
 
-    int counts;           // counts of being selected as an candidate in other peers' neighbor lists
+    // counts of being selected as an neighbor, this variable will use
+    // in Load Balancing Peer Selection
+    int neighbor_counts;  // counts of peer being served(selected) as neighbor
 };
-
 
 //extern Peer* g_peers;
 extern std::vector<Peer> g_peers;

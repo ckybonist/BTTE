@@ -21,9 +21,10 @@ void Config::RemoveComment(std::string &line) const
      * if no matches found, std::string.find() will return npos value.
      *
      * */
-    if (line.find(';') != line.npos)
+    char comment_symbol = '#';
+    if (line.find(comment_symbol) != line.npos)
     {
-        line.erase(line.find(';'));
+        line.erase(line.find(comment_symbol));
     }
 }
 

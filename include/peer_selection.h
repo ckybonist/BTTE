@@ -33,18 +33,26 @@ public:
 
 protected:
     Neighbor* AllocNeighbors();
+
+    bool IsNewNeighbor(const int self_pid,
+                       const int cand_pid);
+
+    void RecordPGDelay(const int self_pid,
+                       const int cand_pid,
+                       const float pg_delay);
+
+    float QueryPGDelay(const int self_pid,
+                       const int cand_pid);
+
+    iSet ExcludeSelf(const int self_pid,
+                     const iSet& in_swarm_set);
+
     size_t SetCandidates(const int self_pid,
                          const iSet& in_swarm_set,
                          bool sort_cid_flag);  // find candidates for neighbors
     Args args_;
     int* candidates_;
 };
-
-class Standard;
-
-class LoadBalancing;
-
-class ClusterBased;
 
 }
 #endif // for _ABS_PEER_SELECTION_H

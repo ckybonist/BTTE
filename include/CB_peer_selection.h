@@ -14,6 +14,9 @@ public:
 
 private:
     Neighbor* SelectNeighbors(const int self_pid, const iSet& in_swarm_set) override;
+
+    float ComputePGDelayByCluster(const int self_cid, const int cand_cid);
+    void RefreshInfo();
 };
 
 }

@@ -15,14 +15,13 @@
  *       0 : peer level
  *       1 : prob_leech
  *       2 : prob_piece
- *       3 : Event Time
- *       4 : peer leave (random time)
+ *       3 : event time (peer_join, peer_leave)
  *       5 : standard piece selection
  *       6 : cluster-based peer selection
  *       7 : load balancing peer selection
- *       8 : piece selection (random-first-piece, rarest-first)
- *       9 : choking & optimistic unchoking
- *       10 : free
+ *       8 : random piece selection
+ *       9 : rarest first piece selection
+ *       10 : choking & optimistic unchoking
  *       11 : free
  *       12 : free
  *       13 : free
@@ -33,23 +32,23 @@ const int g_kNumRSeeds = 15;
 
 typedef enum class RandSeedCases
 {
-    PEER_LEVEL = 0,
+    PEER_LEVEL,
     PROB_LEECH,
     PROB_PIECE,
-    EVENT_TIME,
-    PEER_LEAVE,
+    EVENT_TIME,  // for peer-join and peer-leave
     PGDELAY,
     STD_PEERSELECT,
     CB_PEERSELECT,
     LB_PEERSELECT,
-    PIECESELECT,
+    RFP_PIECESELECT,
+    RF_PIECESELECT,
     CHOKING,
 
     // Free usage below
+    FREE_1,
     FREE_2,
     FREE_3,
     FREE_4,
-    FREE_5,
 } RSC;
 
 
