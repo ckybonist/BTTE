@@ -3,13 +3,14 @@
 
 #include "random.h"
 #include "peer.h"
+#include "peer_level.h"
 #include "piece.h"
 #include "event_handler.h"
 
 using namespace uniformrand;
 
 
-namespace  // enclosing in compile unit
+namespace
 {
 
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
@@ -19,7 +20,8 @@ void EventInfo(const Event& head);
 
 }
 
-
+const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth;
+const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 int EventHandler::next_event_idx_ = 0;
 int EventHandler::peer_join_counts_ = 0;  // compare with number of average peer
 
@@ -46,7 +48,10 @@ void EventHandler::MapEvent()
     event_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
     event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
     event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
+
     event_map_[Event::REQ_PIECE] = &EventHandler::ReqPieceEvent;
+    event_map_[Event::TIMEOUT_REQ_PIECE] = &EventHandler::ReqPieceEvent;
+
     event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
     event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
     event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
@@ -142,11 +147,12 @@ void EventHandler::ProcessArrival(Event& e)
 
     system_.push_back(e);
 
-    ///// 處理 System 的頭一個BT 事件
+    ///// 處理 System 的頭一個 BT 事件
     (this->*event_map_[e.type_bt])(e);
 
     ///// 如果不是 Peer Leave 事件, 就產生下一個相依事件
-    if (e.type_bt != Event::PEER_LEAVE)
+    if (e.type_bt != Event::PEER_LEAVE &&
+            e.type_bt != Event::TIMEOUT_REQ_PIECE)
     {
         Event::Type4BT derived_tbt = event_deps_map_[e.type_bt];
         float time_packet = g_peers[e.pid].time_packet;
@@ -158,10 +164,8 @@ void EventHandler::ProcessArrival(Event& e)
     }
     event_list_.sort();
 
-    /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件,
-    //  直到數量滿足 NUM_PEER
-    //const size_t aborigin = (args_.NUM_SEED + args_.NUM_LEECH);
-    //const size_t next_join_pid = peer_join_counts_ + 1 + aborigin;
+    /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
+    //  (因為節點加入順序是按照要配合陣列索引）, 直到數量滿足 NUM_PEER
     if(e.type_bt == Event::PEER_JOIN)
     {
         const size_t next_join_pid = e.pid + 1;
@@ -200,7 +204,6 @@ void EventHandler::ProcessDeparture(Event& e)
         GetNextDepartureEvent(sys_head.type_bt,
                               ++next_event_idx_,
                               sys_head.pid);
-        //GetNextEvent(ev, Event::Type::DEPARTURE, e.type_bt, e.time);
     }
 
     event_list_.sort();
@@ -219,25 +222,42 @@ void EventHandler::PeerListReqRecvEvent(Event& e)
 
 void EventHandler::PeerListGetEvent(Event& e)
 {
-    //TODO
+    // TODO
 }
 
 void EventHandler::ReqPieceEvent(Event& e)
 {
-    // for debug usage
-    for (int c = 0; (size_t)c < args_.NUM_PIECE; c++)
-    {
-        g_peers[e.pid].pieces[c] = true;
-    }
+    // TODO: Need some debug test for Rarest First
+    std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
+    const int req_piece = pm_->GetReqPiece(e.pid);
+    std::cout << "I want piece #" << req_piece
+              << "\n=========================\n\n";
+
+    // 暫時假設它直接拿到要求的 piece
+    g_peers[e.pid].pieces[req_piece] = true;
+
+    // TODO
+    // 2. 預先產生 Timeout request 事件，如果到時收到 piece
+    //    就把這個 timeout 事件移除
+    //float time_packet = g_peers[e.pid].time_packet;
+    //float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time) + kTimeout_;
+    //GetNextArrivalEvent(Event::TIMEOUT_REQ_PIECE,
+    //                    ++next_event_idx_,
+    //                    e.pid,
+    //                    time);
+    //event_list_.sort();
 }
 
 void EventHandler::PieceAdmitEvent(Event& e)
 {
-    //TODO
+    // TODO
+    // Choking
 }
+
 void EventHandler::PieceGetEvent(Event& e)
 {
-    //TODO
+    // TODO
+    //
 }
 
 void EventHandler::CompletedEvent(Event& e)
@@ -264,7 +284,7 @@ void EventHandler::ProcessEvent(Event& e)
 }
 
 
-namespace  // enclose in compile unit
+namespace
 {
 
 void Event2Str(TBTmapStr &tbt2str)
@@ -273,6 +293,7 @@ void Event2Str(TBTmapStr &tbt2str)
     tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
     tbt2str[Event::PEERLIST_GET] = "Peer-List-Get Event";
     tbt2str[Event::REQ_PIECE] = "Req-Piece Event";
+    tbt2str[Event::TIMEOUT_REQ_PIECE] = "Req-Piece Event";
     tbt2str[Event::PIECE_ADMIT] = "Piece-Admit Event";
     tbt2str[Event::PIECE_GET] = "Piece-Get Event";
     tbt2str[Event::COMPLETED] = "Completed Event";
@@ -302,7 +323,7 @@ void EventInfo(const Event& head)
               << "\n\n\n";
 }
 
-}  // unnamed namespace
+}
 
 void EventHandler::StartRoutine()
 {
@@ -311,7 +332,7 @@ void EventHandler::StartRoutine()
     const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
     const int num_avg_peer = args_.NUM_PEER - aborigin;
 
-    while(!event_list_.empty() || peer_join_counts_ < num_avg_peer - 1)
+    while(!event_list_.empty())
     {
         Event head = event_list_.front();
 
@@ -319,6 +340,6 @@ void EventHandler::StartRoutine()
 
         ProcessEvent(head);
 
-        //EventInfo(head);
+        EventInfo(head);
     }
 }

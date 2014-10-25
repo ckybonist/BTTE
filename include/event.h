@@ -18,6 +18,7 @@ public:
         PEERLIST_REQ_RECV,
         PEERLIST_GET,
         REQ_PIECE,
+        TIMEOUT_REQ_PIECE,
         PIECE_ADMIT,
         PIECE_GET,
         COMPLETED,

@@ -23,7 +23,7 @@ Peer::Peer()
     time_packet = 0.0;
     join_time = 0.0;
     end_time = 0.0;
-    counts = 0;
+    neighbor_counts = 0;
 }
 
 // seed
@@ -50,7 +50,7 @@ Peer::Peer(const int pid,
     join_time = 0.0;
     end_time = 0.0;
 
-    counts = 0;
+    neighbor_counts = 0;
 }
 
 // leech
@@ -81,7 +81,7 @@ Peer::Peer(const int pid,
     join_time = 0.0;
     end_time = 0.0;
 
-    counts = 0;
+    neighbor_counts = 0;
 }
 
 
@@ -106,5 +106,5 @@ Peer::Peer(const int pid,
     this->time_packet = time_packet;
     this->join_time = join_time;
     end_time = 0.0;
-    counts = 0;
+    neighbor_counts = 0;
 }
