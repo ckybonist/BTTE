@@ -44,8 +44,9 @@ public:
 
     const Neighbor* neighbors;
 
-    typedef std::map<int, float> Map_i2f;
-    Map_i2f pg_delay_records;
+    // If pg_delay is steady (but need a large amount of space)
+    //typedef std::map<int, float> Map_i2f;
+    //Map_i2f pg_delay_records;
 
     float join_time;     // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded

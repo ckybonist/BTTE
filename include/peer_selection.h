@@ -34,15 +34,15 @@ public:
 protected:
     Neighbor* AllocNeighbors();
 
-    bool IsNewNeighbor(const int self_pid,
-                       const int cand_pid);
+    //bool IsNewNeighbor(const int self_pid,
+    //                   const int cand_pid);
 
-    void RecordPGDelay(const int self_pid,
-                       const int cand_pid,
-                       const float pg_delay);
+    //void RecordPGDelay(const int self_pid,
+    //                   const int cand_pid,
+    //                   const float pg_delay);
 
-    float QueryPGDelay(const int self_pid,
-                       const int cand_pid);
+    //float QueryPGDelay(const int self_pid,
+    //                   const int cand_pid);
 
     iSet ExcludeSelf(const int self_pid,
                      const iSet& in_swarm_set);
