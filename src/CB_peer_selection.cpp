@@ -56,22 +56,26 @@ Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm
         if ((size_t)i < candidates_size)
         {
             const int cand_pid = candidates_[i];
-            const int cand_cid = g_peers[self_pid].cid;
+            const int cand_cid = g_peers[cand_pid].cid;
             neighbors[i].id = cand_pid;
             neighbors[i].exist = true;
 
-            // assign propagation delay
-            float pg_delay = 0.0;
-            if (IsNewNeighbor(self_pid, cand_pid))
-            {
-                pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
-                RecordPGDelay(self_pid, cand_pid, pg_delay);
-            }
-            else
-            {
-                pg_delay = QueryPGDelay(self_pid, cand_pid);
-            }
+            // 1. assign propagation delay (pg_delay is various)
+            float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
             neighbors[i].pg_delay = pg_delay;
+
+            // 2. assign propagation delay (pg_delay is steady)
+            //float pg_delay = 0.0;
+            //if (IsNewNeighbor(self_pid, cand_pid))
+            //{
+            //    pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
+            //    RecordPGDelay(self_pid, cand_pid, pg_delay);
+            //}
+            //else
+            //{
+            //    pg_delay = QueryPGDelay(self_pid, cand_pid);
+            //}
+            //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers[cand_pid].neighbor_counts;
         }

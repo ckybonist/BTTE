@@ -2,8 +2,22 @@
 
 #include "random.h"
 
-static const long long kInitSeed = 377003613;
+//static const long long kInitSeed = 377003613;
 //long long g_rand_num = k_init_seed;
+
+namespace
+{
+    const long long kInitSeed = 377003613;
+
+    void RandForInternal(const RSC& rsc)
+    {
+        const int iRSC = static_cast<int>(rsc);
+
+        /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
+        g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
+    }
+}
+
 
 long long g_rand_grp[] =
 {
@@ -14,18 +28,10 @@ long long g_rand_grp[] =
     kInitSeed, kInitSeed, kInitSeed
 };
 
-static void RandForInternal(const RSC& rsc)
-{
-    const int iRSC = static_cast<int>(rsc);
-
-    /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-    g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
-}
 
 namespace uniformrand {
 
 const int kInterval = 1000000;
-
 
 long long Rand(const RSC& rsc)
 {

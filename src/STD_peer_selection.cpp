@@ -25,7 +25,7 @@ void Standard::AssignNeighbors(Neighbor* const neighbors,
                               const size_t cand_size,
                               const int self_pid)
 {
-    Peer& myself = g_peers[self_pid];
+    //Peer& myself = g_peers[self_pid];
     for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
         if ((size_t)i < cand_size)
@@ -34,18 +34,22 @@ void Standard::AssignNeighbors(Neighbor* const neighbors,
             neighbors[i].id = cand_pid;
             neighbors[i].exist = true;
 
-            // assign propagation delay
-            float pg_delay = 0.0;
-            if (IsNewNeighbor(self_pid, cand_pid))
-            {
-                pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
-                RecordPGDelay(self_pid, cand_pid, pg_delay);
-            }
-            else
-            {
-                pg_delay = QueryPGDelay(self_pid, cand_pid);
-            }
+            // 1. assign propagation delay (pg_delay is various)
+            float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
             neighbors[i].pg_delay = pg_delay;
+
+            // 2. assign propagation delay (pg_delay is steady)
+            //float pg_delay = 0.0;
+            //if (IsNewNeighbor(self_pid, cand_pid))
+            //{
+            //    pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
+            //    RecordPGDelay(self_pid, cand_pid, pg_delay);
+            //}
+            //else
+            //{
+            //    pg_delay = QueryPGDelay(self_pid, cand_pid);
+            //}
+            //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers[cand_pid].neighbor_counts;
         }

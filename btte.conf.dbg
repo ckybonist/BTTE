@@ -31,7 +31,7 @@ NUM_PIECE = 5
 # 0: Standard Peer Selection
 # 1: Load Balancing Peer Selection
 # 2: Cluster Based Peer Selection
-TYPE_PEERSELECT = 0
+TYPE_PEERSELECT = 2
 
 
 # Type of piece selection (user-defined)
