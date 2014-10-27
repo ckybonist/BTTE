@@ -42,42 +42,42 @@ Neighbor* IPeerSelect::AllocNeighbors()
 }
 
 
-bool IPeerSelect::IsNewNeighbor(const int self_pid, const int cand_pid)
-{
-    bool flag = false;
+//bool IPeerSelect::IsNewNeighbor(const int self_pid, const int cand_pid)
+//{
+//    bool flag = false;
+//
+//    try  // key found
+//    {
+//        const Peer& myself = g_peers[self_pid];
+//
+//        // don't use [] accessor of STL map. It will automatically
+//        // insert a new pair(key, value). This operation will cause
+//        // original propagation delay become 0
+//        const float unused_val = myself.pg_delay_records.at(cand_pid);
+//    }
+//    catch (const std::out_of_range& oor)  // key not found exception
+//    {
+//        flag = true;
+//    }
+//
+//    return flag;
+//}
 
-    try  // key found
-    {
-        const Peer& myself = g_peers[self_pid];
-
-        // don't use [] accessor of STL map. It will automatically
-        // insert a new pair(key, value). This operation will cause
-        // original propagation delay become 0
-        const float unused_val = myself.pg_delay_records.at(cand_pid);
-    }
-    catch (const std::out_of_range& oor)  // key not found exception
-    {
-        flag = true;
-    }
-
-    return flag;
-}
-
-void IPeerSelect::RecordPGDelay(const int self_pid,
-                                const int cand_pid,
-                                const float pg_delay)
-{
-    Peer &myself = g_peers[self_pid];
-    std::pair<int, float> record(cand_pid, pg_delay);
-    //myself.pg_delay_records.insert(std::pair<int, float>(cand_pid, new_pg_delay));
-    myself.pg_delay_records.insert(record);
-}
-
-float IPeerSelect::QueryPGDelay(const int self_pid, const int cand_pid)
-{
-    Peer &myself = g_peers[self_pid];
-    return myself.pg_delay_records[cand_pid];
-}
+//void IPeerSelect::RecordPGDelay(const int self_pid,
+//                                const int cand_pid,
+//                                const float pg_delay)
+//{
+//    Peer &myself = g_peers[self_pid];
+//    std::pair<int, float> record(cand_pid, pg_delay);
+//    //myself.pg_delay_records.insert(std::pair<int, float>(cand_pid, new_pg_delay));
+//    myself.pg_delay_records.insert(record);
+//}
+//
+//float IPeerSelect::QueryPGDelay(const int self_pid, const int cand_pid)
+//{
+//    Peer &myself = g_peers[self_pid];
+//    return myself.pg_delay_records[cand_pid];
+//}
 
 // The peer-info of swarm which exclude selector itself
 iSet IPeerSelect::ExcludeSelf(const int self_pid,

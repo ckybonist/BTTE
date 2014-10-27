@@ -118,7 +118,7 @@ void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
 {
     /////////////////////////
     // neighbors info
-    cout << "\nNeighbors info (pid, cid, pg_delay):\n";
+    cout << "\nNeighbors info (pid, cid, neighbor_counts, pg_delay):\n";
     for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
     {
         Neighbor neighbor = g_peers[pid].neighbors[k];

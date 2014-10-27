@@ -26,8 +26,9 @@ private:
                               const iSet& in_swarm_set) override;
 
     void AllocNBCInfo(const size_t N);
-    void GatherNeighborCounts(const int self_pid, const size_t cand_size);
+    void GatherNeighborCounts(const size_t cand_size);
     void SortCountsInfo(const size_t cand_size);
+
     void AssignNeighbors(Neighbor* const neighbors,
                          const size_t cand_size,
                          const int self_pid);
