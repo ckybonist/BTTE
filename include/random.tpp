@@ -30,7 +30,7 @@ T Roll(const RSC& rsc,
     }
     else if (typeid(float) == typeid(type_T) || typeid(double) == typeid(type_T))
     {
-        number = low + static_cast<T>(Rand(rsc)) / (static_cast<T>(RAND_MAX / (up - low)));
+        number = low + static_cast<T>(Rand(rsc)) / (static_cast<T>((double)RAND_MAX / (up - low)));
     }
 
     // [low, up)
