@@ -20,10 +20,16 @@ private:
         int counts;
     };
 
-    void CountNumPeerOwnPiece(const int self_pid, const size_t num_targets);
-    int GetNumRarest(const int num_targets);
-    int GetTargetPieceNo(const int num_rarest);
-    int SelectTargetPiece(const int self_pid) override;
+    PRMVec StartSelection(const int self_pid) override;
+
+    void CountNumPeerOwnPiece(const size_t num_targets);
+    void SortByPieceCounts(const int num_targets);
+    //int GetNumRarest(const int num_targets);
+    //int GetTargetPieceNo(const int num_rarest);
+
+    bool IsDupReq(const IntSet& dest_peers, const int nid);
+    PieceReqMsg CreateReqMsg(const int target_piece_no, const bool is_last_piece);  // for Rarest First
+    void RefreshInfo();
 
     PieceCounts* piece_counts_info_;
 };

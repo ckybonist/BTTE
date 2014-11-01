@@ -2,6 +2,7 @@
 #define _PIECE_SELECTION_H
 
 #include <iostream>
+#include <vector>
 #include <set>
 
 #include "args.h"
@@ -13,9 +14,8 @@
 namespace btte_piece_selection
 {
 
-typedef std::set<int> iSet;
-typedef iSet::iterator iSetIter;
-
+typedef std::set<int> IntSet;
+typedef IntSet::iterator IntSetIter;
 
 typedef enum class TypePieceSelect
 {
@@ -24,20 +24,22 @@ typedef enum class TypePieceSelect
     USER_DEFINED_2,
 } PieceSelect_T;
 
+typedef std::vector<PieceReqMsg> PRMVec;
 
 class IPieceSelect
 {
 public:
     IPieceSelect(Args args);
     virtual ~IPieceSelect();
-    virtual int SelectTargetPiece(const int self_pid) = 0;
+    virtual PRMVec StartSelection(const int self_pid) = 0;
 
 protected:
-    void CheckNeighbors(const int self_pid);
-    void SetTargetPieces(const int self_pid);
-    iSet targets_set_;
+    void CheckNeighbors();
+    void SetTargetPieces();
 
+    IntSet targets_set_;
     Args args_;
+    int selector_pid_;
 };
 
 }

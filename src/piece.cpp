@@ -20,6 +20,13 @@ bool* AllocPieces(const int NUM_PIECE)
 
 }
 
+PieceReqMsg::PieceReqMsg()
+{
+    src_pid = -1;
+    dest_pid = -1;
+    piece_no = -1;
+}
+
 bool* MakePieces(const int NUM_PIECE)
 {
     bool* pieces = AllocPieces(NUM_PIECE);

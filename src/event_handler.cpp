@@ -227,14 +227,19 @@ void EventHandler::PeerListGetEvent(Event& e)
 
 void EventHandler::ReqPieceEvent(Event& e)
 {
-    // TODO: Need some debug test for Rarest First
     std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
-    const int req_piece = pm_->GetReqPiece(e.pid);
-    std::cout << "I want piece #" << req_piece
-              << "\n=========================\n\n";
 
-    // 暫時假設它直接拿到要求的 piece
-    g_peers[e.pid].pieces[req_piece] = true;
+    //const int req_piece = pm_->GetReqPiece(e.pid);
+    const auto req_msgs = pm_->GetPieceReqMsgs(e.pid);
+
+    for (auto it = req_msgs.begin(); it != req_msgs.end(); ++it)
+    {
+        auto msg = *it;
+        std::cout << "Send piece-req msg from peer #"
+                  << msg.src_pid << " to peer #"
+                  << msg.dest_pid << std::endl;
+        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
+    }
 
     // TODO
     // 2. 預先產生 Timeout request 事件，如果到時收到 piece
@@ -327,10 +332,9 @@ void EventInfo(const Event& head)
 
 void EventHandler::StartRoutine()
 {
+    //const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
+    //const int num_avg_peer = args_.NUM_PEER - aborigin;
     PushInitEvent();
-
-    const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
-    const int num_avg_peer = args_.NUM_PEER - aborigin;
 
     while(!event_list_.empty())
     {
