@@ -21,11 +21,9 @@ void Standard::RefreshInfo()
     candidates_ = nullptr;
 }
 
-void Standard::AssignNeighbors(Neighbor* const neighbors,
-                              const size_t cand_size,
-                              const int self_pid)
+void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
 {
-    //Peer& myself = g_peers[self_pid];
+    //Peer& myself = g_peers[selector_pid_];
     for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
         if ((size_t)i < cand_size)
@@ -40,32 +38,38 @@ void Standard::AssignNeighbors(Neighbor* const neighbors,
 
             // 2. assign propagation delay (pg_delay is steady)
             //float pg_delay = 0.0;
-            //if (IsNewNeighbor(self_pid, cand_pid))
+            //if (IsNewNeighbor(selector_pid_, cand_pid))
             //{
             //    pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
-            //    RecordPGDelay(self_pid, cand_pid, pg_delay);
+            //    RecordPGDelay(selector_pid_, cand_pid, pg_delay);
             //}
             //else
             //{
-            //    pg_delay = QueryPGDelay(self_pid, cand_pid);
+            //    pg_delay = QueryPGDelay(selector_pid_, cand_pid);
             //}
             //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers[cand_pid].neighbor_counts;
         }
+        else
+        {
+            break;
+        }
     }
 }
 
-Neighbor* Standard::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
+Neighbor* Standard::StartSelection(const int self_pid, const IntSet& in_swarm_set)
 {
+    selector_pid_ = self_pid;
+
     Neighbor* neighbors = AllocNeighbors();
 
-    size_t candidates_size = SetCandidates(self_pid, in_swarm_set, false);
+    size_t candidates_size = SetCandidates(in_swarm_set, false);
 
-    // randomly selected peers
+    // Randomly select peers
     Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);
 
-    AssignNeighbors(neighbors, candidates_size, self_pid);
+    AssignNeighbors(neighbors, candidates_size);
 
     // debug info
     std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;

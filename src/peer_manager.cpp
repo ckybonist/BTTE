@@ -63,11 +63,10 @@ void PeerManager::InitAbstractObj()
     switch (type_piece_select)
     {
         case PieceSelect_T::BUILTIN:
-            obj_pieceselect_ =
-                //static_cast<IPieceSelect*>(new RarestFirst(*args_));
-                static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
-            std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
-            //std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
+            //obj_pieceselect_ = static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
+            //std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
+            obj_pieceselect_ = static_cast<IPieceSelect*>(new RarestFirst(*args_));
+            std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
             break;
         case PieceSelect_T::USER_DEFINED_1:
             //obj_pieceselect_ =
@@ -184,24 +183,27 @@ void PeerManager::CheckInSwarm(const ISF isf, const int pid) {
 
 void PeerManager::AllotNeighbors(const int self_pid) const
 {
-    Neighbor* neighbors = obj_peerselect_->SelectNeighbors(self_pid, in_swarm_set_);
+    Neighbor* neighbors = obj_peerselect_->StartSelection(self_pid, in_swarm_set_);
     g_peers[self_pid].neighbors = neighbors;
 }
 
-int PeerManager::GetReqPiece(const int self_pid) const
+//int PeerManager::GetReqPiece(const int self_pid) const
+PRMVec PeerManager::GetPieceReqMsgs(const int self_pid)
 {
-    const int req_piece = obj_pieceselect_->SelectTargetPiece(self_pid);
-    return req_piece;
+    //const int req_piece = obj_pieceselect_->SelectTargetPiece(self_pid);
+    //return req_piece;
+    const auto req_msgs = obj_pieceselect_->StartSelection(self_pid);
+    return req_msgs;
 }
 
-void PeerManager::AllocPeersSpace()
-{
-    //g_peers = new Peer[args_->NUM_PEER];
-    //if (g_peers == nullptr)
-    //{
-    //    ExitError("Allocating memory of peers is fault!\n");
-    //}
-}
+//void PeerManager::AllocPeersSpace()
+//{
+//    g_peers = new Peer[args_->NUM_PEER];
+//    if (g_peers == nullptr)
+//    {
+//        ExitError("Allocating memory of peers is fault!\n");
+//    }
+//}
 
 void PeerManager::CreatePeers()
 {
@@ -352,7 +354,7 @@ void PeerManager::InitLeeches()
     // TODO: bugs in peer selection
     for(int pid = start; pid < end; pid++)
     {
-        Neighbor* neighbors = obj_peerselect_->SelectNeighbors(pid, in_swarm_set_);
+        Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
         g_peers[pid].neighbors = neighbors;
     }
 

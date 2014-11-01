@@ -12,7 +12,10 @@ bool* MakePieces(const int NUM_PIECE);
 
 struct PieceReqMsg
 {
-    int pid;
+    PieceReqMsg();
+
+    int src_pid;
+    int dest_pid;
     int piece_no;
 };
 

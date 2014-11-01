@@ -60,9 +60,7 @@ void LoadBalancing::SortCountsInfo(const size_t cand_size)
     std::cout << std::endl;
 }
 
-void LoadBalancing::AssignNeighbors(Neighbor* const neighbors,
-                                    const size_t cand_size,
-                                    const int self_pid)
+void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
 {
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
@@ -78,34 +76,40 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors,
 
             // 2. assign propagation delay (pg_delay is steady)
             //float pg_delay = 0.0;
-            //if (IsNewNeighbor(self_pid, cand_pid))
+            //if (IsNewNeighbor(selector_pid_, cand_pid))
             //{
             //    pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
-            //    RecordPGDelay(self_pid, cand_pid, pg_delay);
+            //    RecordPGDelay(selector_pid_, cand_pid, pg_delay);
             //}
             //else
             //{
-            //    pg_delay = QueryPGDelay(self_pid, cand_pid);
+            //    pg_delay = QueryPGDelay(selector_pid_, cand_pid);
             //}
             //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers[cand_pid].neighbor_counts;  // Important
         }
+        else
+        {
+            break;
+        }
     }
 }
 
-Neighbor* LoadBalancing::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
+Neighbor* LoadBalancing::StartSelection(const int self_pid, const IntSet& in_swarm_set)
 {
+    selector_pid_ = self_pid;
+
     Neighbor* neighbors = AllocNeighbors();
 
-    size_t candidates_size = SetCandidates(self_pid, in_swarm_set, false);
+    size_t candidates_size = SetCandidates(in_swarm_set, false);
 
     GatherNeighborCounts(candidates_size);
 
     // Sort neighbor counts (low to high)
     SortCountsInfo(candidates_size);
 
-    AssignNeighbors(neighbors, candidates_size, self_pid);
+    AssignNeighbors(neighbors, candidates_size);
 
     // debug info
     std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
