@@ -22,16 +22,13 @@ private:
         int counts;
     };
 
-    Neighbor* SelectNeighbors(const int self_pid,
-                              const iSet& in_swarm_set) override;
+    Neighbor* StartSelection(const int self_pid,
+                             const IntSet& in_swarm_set) override;
 
     void AllocNBCInfo(const size_t N);
     void GatherNeighborCounts(const size_t cand_size);
     void SortCountsInfo(const size_t cand_size);
-
-    void AssignNeighbors(Neighbor* const neighbors,
-                         const size_t cand_size,
-                         const int self_pid);
+    void AssignNeighbors(Neighbor* const neighbors, const size_t cand_size);
     void RefreshInfo();
 
     NBCountsInfo* nbc_info_;
