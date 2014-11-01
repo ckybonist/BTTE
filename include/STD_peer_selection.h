@@ -15,13 +15,11 @@ public:
     ~Standard();
 
 private:
-    Neighbor* SelectNeighbors(const int self_pid,
-                              const iSet& in_swarm_set) override;
-
-    void AssignNeighbors(Neighbor* const neighbors,
-                        const size_t cand_size,
-                        const int self_pid);
+    Neighbor* StartSelection(const int self_pid,
+                             const IntSet& in_swarm_set) override;
+    void AssignNeighbors(Neighbor* const neighbors, const size_t cand_size);
     void RefreshInfo();
+
     float* pg_delays_;
 };
 

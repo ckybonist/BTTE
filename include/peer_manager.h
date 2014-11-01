@@ -4,6 +4,7 @@
 #include <set>
 
 #include "args.h"
+#include "piece.h"
 #include "peer_level.h"
 #include "peer_selection.h"
 #include "piece_selection.h"
@@ -16,6 +17,10 @@ using namespace btte_piece_selection;
 class PeerManager
 {
 public:
+    typedef std::set<int> IntSet;
+    typedef IntSet::iterator IntSetIter;
+    typedef std::vector<PieceReqMsg> PRMVec;
+
     PeerManager();
     PeerManager(Args* const args);
     ~PeerManager();
@@ -23,16 +28,17 @@ public:
     //void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
     void NewPeer(const int id, const float start_time) const;  // for peer_join event
 
-    enum class InSwarmFlag
+    typedef enum class InSwarmFlag
     {
         LEAVE,
         JOIN
-    };
-    typedef InSwarmFlag ISF;
+    } ISF;
+
     void CheckInSwarm(const ISF isf, const int pid);
 
     void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
-    int GetReqPiece(const int self_pid) const;      // Piece Selection , for average peers
+    PRMVec GetPieceReqMsgs(const int self_pid);
+    //int GetReqPiece(const int self_pid) const;      // Piece Selection , for average peers
 
     void CreatePeers();
 
@@ -42,7 +48,7 @@ public:
     const float dummy_peers_rate = 0.1;
 
 private:
-    void AllocPeersSpace();
+    //void AllocPeersSpace();
     void DeployPeersLevel();
     void DeployClusterIDs();  // if use cluster-based
     void InitSeeds() const;
@@ -58,9 +64,7 @@ private:
 
     float* packet_time_4_peers_;  // pre-init, assign to peer after
 
-    typedef std::set<int> iSet;
-    typedef iSet::iterator iSetIter;
-    iSet in_swarm_set_;  // for peer selection
+    IntSet in_swarm_set_;  // for peer selection
 };
 
 #endif // for #ifndef _PEERMANAGER_H

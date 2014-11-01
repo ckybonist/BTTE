@@ -34,26 +34,13 @@ float ClusterBased::ComputePGDelayByCluster(const int self_cid, const int cand_c
     return pg_delay;
 }
 
-void ClusterBased::RefreshInfo()
+void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
+                                   const size_t cand_size,
+                                   const int self_cid)
 {
-    delete [] candidates_;
-    candidates_ = nullptr;
-}
-
-Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm_set)
-{
-    Neighbor* neighbors = AllocNeighbors();
-
-    const int self_cid = g_peers[self_pid].cid;
-
-    // Set parameter of sort_cid_flag to true, in order to get
-    // candidates (most part, not all) which have
-    // same cluster id as selector.
-    size_t candidates_size = SetCandidates(self_pid, in_swarm_set, true);
-
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
-        if ((size_t)i < candidates_size)
+        if ((size_t)i < cand_size)
         {
             const int cand_pid = candidates_[i];
             const int cand_cid = g_peers[cand_pid].cid;
@@ -84,6 +71,28 @@ Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm
             break;
         }
     }
+}
+
+void ClusterBased::RefreshInfo()
+{
+    delete [] candidates_;
+    candidates_ = nullptr;
+}
+
+Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swarm_set)
+{
+    selector_pid_ = self_pid;
+
+    Neighbor* neighbors = AllocNeighbors();
+
+    // Set parameter of sort_cid_flag to true, in order to get
+    // candidates (most part, not all) which have
+    // same cluster id as selector.
+    size_t candidates_size = SetCandidates(in_swarm_set, true);
+
+    const int self_cid = g_peers[self_pid].cid;
+    AssignNeighbors(neighbors, candidates_size, self_cid);
+
 
     // debug info
     std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
@@ -102,6 +111,7 @@ Neighbor* ClusterBased::SelectNeighbors(const int self_pid, const iSet& in_swarm
                   << g_peers[nei.id].cid << ",  "
                   << nei.pg_delay << ")" << std::endl;
     }
+
 
     RefreshInfo();
 
