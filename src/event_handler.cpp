@@ -229,13 +229,12 @@ void EventHandler::ReqPieceEvent(Event& e)
 {
     std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
 
-    //const int req_piece = pm_->GetReqPiece(e.pid);
     const auto req_msgs = pm_->GetPieceReqMsgs(e.pid);
 
     for (auto it = req_msgs.begin(); it != req_msgs.end(); ++it)
     {
         auto msg = *it;
-        std::cout << "Send piece-req msg from peer #"
+        std::cout << "Sending piece-req msg from peer #"
                   << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
         std::cout << "Wanted piece: " << msg.piece_no << "\n\n";

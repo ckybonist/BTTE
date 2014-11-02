@@ -64,9 +64,7 @@ bool RarestFirst::IsDupReq(const IntSet& dest_peers, const int nid)
     IntSetIter last = dest_peers.end();
     for (IntSetIter it = first; it != last; ++it)
     {
-        if (*it != nid)
-            continue;
-        else
+        if (*it == nid)
         {
             flag = true;
             break;
@@ -83,23 +81,25 @@ PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_l
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
         const Neighbor &nei = g_peers[selector_pid_].neighbors[i];
+        const int nid = nei.id;
+
         if (!nei.exist) continue;
 
-        const int nid = nei.id;
         const bool piece_exist = g_peers[nid].pieces[target_piece_no];
         if (piece_exist && !IsDupReq(dest_peers, nid))
         {
-            if (is_last_piece)
-                dest_peers.clear();
-            else
-                dest_peers.insert(nid);
-
             msg.src_pid = selector_pid_;
             msg.dest_pid = nid;
             msg.piece_no = target_piece_no;
-            //PieceReqMsg msg = {selector_pid_, nid, target_piece_no};
+
+            dest_peers.insert(nid);
+
+            break;
         }
     }
+
+    if (is_last_piece)
+        dest_peers.clear();
 
     return msg;
 }
@@ -154,7 +154,6 @@ void RarestFirst::RefreshInfo()
     targets_set_.clear();
 }
 
-//int RarestFirst::StartSelection(const int self_pid)
 PRMVec RarestFirst::StartSelection(const int self_pid)
 {
     selector_pid_ = self_pid;
