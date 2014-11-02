@@ -25,3 +25,6 @@ obj/dbg/*
 *.out
 *.app
 bin/*
+
+# Ctags
+tags
