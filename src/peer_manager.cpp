@@ -154,7 +154,7 @@ void PeerManager::NewPeer(const int pid,
     g_peers.push_back(peer);
 }
 
-void PeerManager::CheckInSwarm(const ISF isf, const int pid) {
+void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid) {
     if (g_in_swarm_set == nullptr)
     {
         g_in_swarm_set = new bool[args_->NUM_PEER];
@@ -194,6 +194,11 @@ PRMVec PeerManager::GetPieceReqMsgs(const int self_pid)
     //return req_piece;
     const auto req_msgs = obj_pieceselect_->StartSelection(self_pid);
     return req_msgs;
+}
+
+void PeerManager::GetUnchokedPeers(const int pid)
+{
+    std::cout << "\nPeer #" << pid << " is running choking algorithm now...\n";
 }
 
 //void PeerManager::AllocPeersSpace()
@@ -346,7 +351,7 @@ void PeerManager::InitLeeches()
                           prob_leech);
         g_peers.push_back(leech);
 
-        CheckInSwarm(ISF::JOIN, pid);
+        UpdateSwarmInfo(ISF::JOIN, pid);
 
         //std::cout << prob_leech << "\n";
     }
