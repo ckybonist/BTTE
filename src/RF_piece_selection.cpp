@@ -28,7 +28,7 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
         int counts = 0;
         for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
         {
-            if (neighbors[n].exist)  // ensure the neighbor is exist
+            if (neighbors[n].connected)  // ensure the neighbor is exist
             {
                 const int nid = neighbors[n].id;
                 bool is_get_piece = g_peers[nid].pieces[*it];
@@ -75,31 +75,30 @@ bool RarestFirst::IsDupReq(const IntSet& dest_peers, const int nid)
 
 PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
 {
-    static IntSet dest_peers;
+    static IntSet dest_peers;  // record peer-ids which existed in request msgs
     PieceReqMsg msg;
 
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
-        const Neighbor &nei = g_peers[selector_pid_].neighbors[i];
+        auto nei = g_peers[selector_pid_].neighbors[i];
+
+        if (!nei.connected) continue;
+
+        // peer id of neighbor
         const int nid = nei.id;
 
-        if (!nei.exist) continue;
-
-        const bool piece_exist = g_peers[nid].pieces[target_piece_no];
-        if (piece_exist && !IsDupReq(dest_peers, nid))
+        if (IsDownloadable(nei, target_piece_no) &&
+                !IsDupReq(dest_peers, nid))
         {
             msg.src_pid = selector_pid_;
             msg.dest_pid = nid;
             msg.piece_no = target_piece_no;
-
             dest_peers.insert(nid);
-
             break;
         }
     }
 
-    if (is_last_piece)
-        dest_peers.clear();
+    if (is_last_piece) dest_peers.clear();
 
     return msg;
 }

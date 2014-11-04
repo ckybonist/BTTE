@@ -30,7 +30,7 @@ void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size
         {
             const int cand_pid = candidates_[i];
             neighbors[i].id = cand_pid;
-            neighbors[i].exist = true;
+            neighbors[i].connected = true;
 
             // 1. assign propagation delay (pg_delay is various)
             float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);

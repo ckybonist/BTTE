@@ -34,17 +34,20 @@ public:
          const int NUM_PIECE);
 
     int pid;
-    int cid;              // cluster id :: { 1, 2, 3, 4 }
+    int cid;  // start from 1
+
     bool is_seed;
     bool is_leech;
     bool in_swarm;
 
+
     bool* pieces;
-    float time_packet; // download time of each piece
 
     std::vector<PieceReqMsg> msg_queue;
 
     const Neighbor* neighbors;
+
+    float time_packet; // download time of each piece
 
     // If pg_delay is steady (but need a large amount of space)
     //typedef std::map<int, float> Map_i2f;
@@ -56,6 +59,9 @@ public:
     // counts of being selected as an neighbor, this variable will use
     // in Load Balancing Peer Selection
     int neighbor_counts;  // counts of peer being served(selected) as neighbor
+
+private:
+    // TODO
 };
 
 //extern Peer* g_peers;

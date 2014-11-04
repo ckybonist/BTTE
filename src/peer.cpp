@@ -13,6 +13,7 @@ Peer::Peer()
     is_seed = false;
     is_leech = false;
     in_swarm = false;
+
     pid = -1;
     cid = -1;
 
@@ -44,6 +45,7 @@ Peer::Peer(const int pid,
     {
         pieces[i] = true;
     }
+
     neighbors = nullptr;
 
     this->time_packet = time_packet;

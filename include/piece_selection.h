@@ -36,6 +36,7 @@ public:
 protected:
     void CheckNeighbors();
     void SetTargetPieces();
+    bool IsDownloadable(Neighbor& nei, const int target_piece_no) const;
 
     IntSet targets_set_;
     Args args_;

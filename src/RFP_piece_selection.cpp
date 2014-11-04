@@ -11,15 +11,14 @@ PieceReqMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
 
     for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
-        const Neighbor &nei = g_peers[selector_pid_].neighbors[i];
-        if (!nei.exist) continue;
+        auto nei = g_peers[selector_pid_].neighbors[i];
 
-        const int nid = nei.id;
-        const bool piece_exist = g_peers[nid].pieces[target_piece_no];
-        if (piece_exist)
+        if (!nei.connected) continue;
+
+        if (IsDownloadable(nei, target_piece_no))
         {
             msg.src_pid = selector_pid_;
-            msg.dest_pid = nid;
+            msg.dest_pid = nei.id;
             msg.piece_no = target_piece_no;
         }
     }
