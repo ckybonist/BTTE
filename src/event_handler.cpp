@@ -140,32 +140,35 @@ float EventHandler::GetNextDepartureEventTime()
     return time;
 }
 
-
-void EventHandler::ProcessArrival(Event& e)
+void EventHandler::GetDerivedEvent(Event& e)
 {
-    total_sys_size_ += system_.size();
-
-    system_.push_back(e);
-
-    ///// 處理 System 的頭一個 BT 事件
-    (this->*event_map_[e.type_bt])(e);
-
-    ///// 如果不是 Peer Leave 事件, 就產生下一個相依事件
-    if (e.type_bt != Event::PEER_LEAVE &&
-            e.type_bt != Event::TIMEOUT_REQ_PIECE)
+    /// 如果不是 Peer Leave 事件, 就產生下一個相依事件
+    if (e.type_bt != Event::PEER_LEAVE)
     {
-        Event::Type4BT derived_tbt = event_deps_map_[e.type_bt];
+        Event::Type4BT derived_type_bt = event_deps_map_[e.type_bt];
         float time_packet = g_peers[e.pid].time_packet;
         float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time);
-        GetNextArrivalEvent(derived_tbt,
+
+        // prepare a timeout event
+        if (e.type_bt == Event::REQ_PIECE)
+        {
+            derived_type_bt = Event::REQ_PIECE;
+            time += kTimeout_;
+        }
+
+        GetNextArrivalEvent(derived_type_bt,
                             ++next_event_idx_,
                             e.pid,
                             time);
     }
-    event_list_.sort();
 
+    event_list_.sort();
+}
+
+void EventHandler::GetNextPeerJoinEvent(Event& e)
+{
     /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
-    //  (因為節點加入順序是按照要配合陣列索引）, 直到數量滿足 NUM_PEER
+    //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
     if(e.type_bt == Event::PEER_JOIN)
     {
         const size_t next_join_pid = e.pid + 1;
@@ -179,10 +182,32 @@ void EventHandler::ProcessArrival(Event& e)
                                 ++next_event_idx_,
                                 static_cast<int>(next_join_pid),
                                 time);
-            ++peer_join_counts_;
         }
     }
+
     event_list_.sort();
+
+}
+
+
+void EventHandler::ProcessArrival(Event& e)
+{
+    total_sys_size_ += system_.size();
+
+    system_.push_back(e);
+
+    /// 處理 System 的頭一個 BT 事件
+    (this->*event_map_[e.type_bt])(e);
+
+    /// 如果這個 request event 已經 timeout, 也就代表這個事件已經沒用,
+    //  所以不再產生衍生事件，直接跳出函式
+    if (e.type_bt == Event::REQ_PIECE && e.is_timeout) return;
+
+    // 產生此事件的衍生事件
+    GetDerivedEvent(e);
+
+    // 產生下一個節點加入的事件
+    GetNextPeerJoinEvent(e);
 
     if (system_.size() == 1)
     {

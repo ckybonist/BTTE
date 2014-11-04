@@ -27,6 +27,8 @@ public:
 
 
 private:
+    void GetDerivedEvent(Event& e);
+    void GetNextPeerJoinEvent(Event& e);
     void GetNextArrivalEvent(const Event::Type4BT next_tbt,
                              const int next_index,
                              const int next_pid,
