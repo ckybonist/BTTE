@@ -237,7 +237,7 @@ void EventHandler::ProcessDeparture(Event& e)
 void EventHandler::PeerJoinEvent(Event& e)
 {
     pm_->NewPeer(e.pid, e.time);
-    pm_->CheckInSwarm(PeerManager::ISF::JOIN, e.pid);
+    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, e.pid);
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& e)
@@ -297,7 +297,7 @@ void EventHandler::CompletedEvent(Event& e)
 void EventHandler::PeerLeaveEvent(Event& e)
 {
     g_peers[e.pid].in_swarm = false;
-    pm_->CheckInSwarm(PeerManager::ISF::LEAVE, e.pid);
+    pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, e.pid);
 }
 
 void EventHandler::ProcessEvent(Event& e)

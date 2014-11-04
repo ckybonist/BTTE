@@ -28,13 +28,7 @@ public:
     //void NewPeer(const int id, const int cid, const float start_time) const;  // for peer_join event
     void NewPeer(const int id, const float start_time) const;  // for peer_join event
 
-    typedef enum class InSwarmFlag
-    {
-        LEAVE,
-        JOIN
-    } ISF;
-
-    void CheckInSwarm(const ISF isf, const int pid);
+    void UpdateSwarmInfo(const ISF isf, const int pid);
 
     void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
     PRMVec GetPieceReqMsgs(const int self_pid);
