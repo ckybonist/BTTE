@@ -53,6 +53,7 @@ private:
 
     void PeerListGetEvent(Event& e);
 
+    bool ReqTimeout(Event& e);
     void ReqPieceEvent(Event& e);
 
     void PieceAdmitEvent(Event& e);
@@ -63,13 +64,10 @@ private:
 
     void PeerLeaveEvent(Event& e);
 
-    void MapEvent();
-    void MapEventDeps();
+    void MapEvents();
+    void CreateEventDependencies();
 
-    static int next_event_idx_;
-
-    // count hom many peer-join-event was generated
-    static int peer_join_counts_;
+    static const float kTimeout_;
 
     typedef void (EventHandler::*Fptr)(Event&);
     typedef std::map<Event::Type4BT, Fptr> FuncMap;
@@ -86,11 +84,11 @@ private:
     float lambda_;
     float mu_;
 
-    static const float kTimeout_;
-
     float total_sys_size_;
     float current_time_;
     float waiting_time_;
+
+    int next_event_idx_;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

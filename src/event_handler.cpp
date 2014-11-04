@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include <cmath>
 
 #include "random.h"
@@ -22,8 +23,7 @@ void EventInfo(const Event& head);
 
 const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth;
 const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
-int EventHandler::next_event_idx_ = 0;
-int EventHandler::peer_join_counts_ = 0;  // compare with number of average peer
+
 
 EventHandler::EventHandler(Args args, PeerManager* const pm, float lambda, float mu)
 {
@@ -33,9 +33,10 @@ EventHandler::EventHandler(Args args, PeerManager* const pm, float lambda, float
     mu_ = mu;
     current_time_ = 0.0;
     waiting_time_ = 0.0;
+    next_event_idx_ = 0;
 
-    MapEvent();
-    MapEventDeps();
+    MapEvents();
+    CreateEventDependencies();
 }
 
 EventHandler::~EventHandler()
@@ -43,27 +44,24 @@ EventHandler::~EventHandler()
     pm_ = nullptr;
 }
 
-void EventHandler::MapEvent()
+void EventHandler::MapEvents()
 {
     event_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
     event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
     event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
-
     event_map_[Event::REQ_PIECE] = &EventHandler::ReqPieceEvent;
-    event_map_[Event::TIMEOUT_REQ_PIECE] = &EventHandler::ReqPieceEvent;
-
     event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
     event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
     event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
     event_map_[Event::PEER_LEAVE] = &EventHandler::PeerLeaveEvent;
 }
 
-void EventHandler::MapEventDeps()
+void EventHandler::CreateEventDependencies()
 {
     event_deps_map_[Event::PEER_JOIN] = Event::PEERLIST_REQ_RECV;
     event_deps_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
     event_deps_map_[Event::PEERLIST_GET] = Event::REQ_PIECE;
-    event_deps_map_[Event::REQ_PIECE] = Event::PIECE_ADMIT;
+    //event_deps_map_[Event::REQ_PIECE] = Event::PIECE_ADMIT;
     event_deps_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
     event_deps_map_[Event::PIECE_GET] = Event::COMPLETED;
     event_deps_map_[Event::COMPLETED] = Event::PEER_LEAVE;
@@ -122,14 +120,9 @@ float EventHandler::GetNextArrivalEventTime(const Event::Type4BT orig_tbt,
 
     if (Event::PEER_JOIN == orig_tbt ||
             Event::PEER_LEAVE == orig_tbt)
-    {
-        float lambda_time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-        time = current_etime + lambda_time;
-    }
+        time = current_etime + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
     else
-    {
         time = current_etime + time_packet;
-    }
 
     return time;
 }
@@ -250,8 +243,25 @@ void EventHandler::PeerListGetEvent(Event& e)
     // TODO
 }
 
+bool EventHandler::ReqTimeout(Event& e)
+{
+    assert(current_time_ > e.time);
+    bool flag = false;
+    if (current_time_ - e.time >= kTimeout_)
+    {
+        std::cout << "This req-event is timeout, so dump it out of the system" << std::endl;
+        system_.pop_front();
+        flag = true;
+    }
+    return flag;
+}
+
 void EventHandler::ReqPieceEvent(Event& e)
 {
+    // 如果已經 timeout 就把這個事件移出系統
+    // 並忽略下面的執行程序
+    if (ReqTimeout(e)) return;
+
     std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
 
     const auto req_msgs = pm_->GetPieceReqMsgs(e.pid);
@@ -263,18 +273,11 @@ void EventHandler::ReqPieceEvent(Event& e)
                   << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
         std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
-    }
 
-    // TODO
-    // 2. 預先產生 Timeout request 事件，如果到時收到 piece
-    //    就把這個 timeout 事件移除
-    //float time_packet = g_peers[e.pid].time_packet;
-    //float time = GetNextArrivalEventTime(e.type_bt, time_packet, e.time) + kTimeout_;
-    //GetNextArrivalEvent(Event::TIMEOUT_REQ_PIECE,
-    //                    ++next_event_idx_,
-    //                    e.pid,
-    //                    time);
-    //event_list_.sort();
+        // send req and timeout-req to target peer
+        const int dest = msg.dest_pid;
+        g_peers[dest].msg_queue.push_back(msg);
+    }
 }
 
 void EventHandler::PieceAdmitEvent(Event& e)
@@ -322,7 +325,6 @@ void Event2Str(TBTmapStr &tbt2str)
     tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
     tbt2str[Event::PEERLIST_GET] = "Peer-List-Get Event";
     tbt2str[Event::REQ_PIECE] = "Req-Piece Event";
-    tbt2str[Event::TIMEOUT_REQ_PIECE] = "Req-Piece Event";
     tbt2str[Event::PIECE_ADMIT] = "Piece-Admit Event";
     tbt2str[Event::PIECE_GET] = "Piece-Get Event";
     tbt2str[Event::COMPLETED] = "Completed Event";
