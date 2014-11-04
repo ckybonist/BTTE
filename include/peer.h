@@ -42,6 +42,8 @@ public:
     bool* pieces;
     float time_packet; // download time of each piece
 
+    std::vector<PieceReqMsg> msg_queue;
+
     const Neighbor* neighbors;
 
     // If pg_delay is steady (but need a large amount of space)
