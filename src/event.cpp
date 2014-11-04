@@ -7,6 +7,7 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     index = idx;
     this->pid = pid;
     time = ti;
+    is_timeout = false;
 }
 
 bool Event::operator<(const Event& e)
