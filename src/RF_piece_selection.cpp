@@ -178,6 +178,7 @@ PRMVec RarestFirst::StartSelection(const int self_pid)
 
     // Create req-msg list
     PRMVec req_msgs;
+    req_msgs.reserve(num_targets);
     for (int i = 0; (size_t)i < num_targets; ++i)
     {
         const int piece_no = piece_counts_info_[i].piece_no;

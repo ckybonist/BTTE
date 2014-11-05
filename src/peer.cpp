@@ -6,7 +6,10 @@
 
 //Peer *g_peers = nullptr;
 std::vector<Peer> g_peers;
+
 bool* g_in_swarm_set = nullptr;
+
+
 
 Peer::Peer()
 {

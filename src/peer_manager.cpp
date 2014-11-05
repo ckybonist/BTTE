@@ -24,8 +24,6 @@ PeerManager::PeerManager()
     args_ = nullptr;
     packet_time_4_peers_ = nullptr;
     obj_peerselect_ = nullptr;
-
-    std::cout.precision(4);
 }
 
 void PeerManager::InitAbstractObj()
@@ -90,6 +88,9 @@ void PeerManager::InitAbstractObj()
 PeerManager::PeerManager(Args* const args)
 {
     this->args_ = args;
+
+    // Reserve spaces for vector
+    g_peers.reserve(args_->NUM_PEER + 1000);
 
     InitAbstractObj();
 
