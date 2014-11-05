@@ -122,8 +122,8 @@ PeerManager::~PeerManager()
 
     for (size_t pid = 0; (size_t)pid < args_->NUM_PEER; pid++)
     {
-        delete [] g_peers[pid].pieces;
-        g_peers[pid].pieces = nullptr;
+        delete [] g_peers.at(pid).pieces;
+        g_peers.at(pid).pieces = nullptr;
     }
 
     // also call the destructor to delete neighbors
@@ -185,7 +185,7 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid) {
 void PeerManager::AllotNeighbors(const int self_pid) const
 {
     Neighbor* neighbors = obj_peerselect_->StartSelection(self_pid, in_swarm_set_);
-    g_peers[self_pid].neighbors = neighbors;
+    g_peers.at(self_pid).neighbors = neighbors;
 }
 
 //int PeerManager::GetReqPiece(const int self_pid) const
@@ -232,7 +232,7 @@ void PeerManager::CreatePeers()
     for(int pid = args_->NUM_SEED; (size_t)pid < args_->NUM_LEECH; pid++)
     {
         for(int c = 0; (size_t)c < args_->NUM_PIECE; c++)
-            g_all_pieces_get &= g_peers[pid].pieces[c];
+            g_all_pieces_get &= g_peers.at(pid).pieces[c];
     }
 }
 
@@ -361,7 +361,7 @@ void PeerManager::InitLeeches()
     for(int pid = start; pid < end; pid++)
     {
         Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
-        g_peers[pid].neighbors = neighbors;
+        g_peers.at(pid).neighbors = neighbors;
     }
 
     std::cout << "============================\n";

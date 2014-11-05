@@ -276,7 +276,7 @@ void EventHandler::ReqPieceEvent(Event& e)
 
         // send req and timeout-req to target peer
         const int dest = msg.dest_pid;
-        g_peers[dest].msg_queue.push_back(msg);
+        g_peers.at(dest).msg_queue.push_back(msg);
     }
 }
 

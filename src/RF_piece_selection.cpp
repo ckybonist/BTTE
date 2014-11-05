@@ -20,7 +20,7 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
 {
     piece_counts_info_ = new PieceCounts[num_targets];
 
-    const Neighbor *neighbors = g_peers[selector_pid_].neighbors;
+    const Neighbor *neighbors = g_peers.at(selector_pid_).neighbors;
 
     int index = 0;
     for (IntSetIter it = targets_set_.begin(); it != targets_set_.end(); it++, index++)
@@ -31,7 +31,7 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
             if (neighbors[n].connected)  // ensure the neighbor is exist
             {
                 const int nid = neighbors[n].id;
-                bool is_get_piece = g_peers[nid].pieces[*it];
+                bool is_get_piece = g_peers.at(nid).pieces[*it];
                 if (is_get_piece) ++counts;
             }
         }
@@ -80,7 +80,7 @@ PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_l
 
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
-        auto nei = g_peers[selector_pid_].neighbors[i];
+        auto nei = g_peers.at(selector_pid_).neighbors[i];
 
         if (!nei.connected) continue;
 

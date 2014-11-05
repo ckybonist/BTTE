@@ -24,8 +24,8 @@ IPeerSelect::~IPeerSelect()
 
     for(int pid = args_.NUM_SEED; (size_t)pid < args_.NUM_PEER; pid++)
     {
-        delete [] g_peers[pid].neighbors;
-        g_peers[pid].neighbors = nullptr;
+        delete [] g_peers.at(pid).neighbors;
+        g_peers.at(pid).neighbors = nullptr;
     }
 }
 
@@ -105,11 +105,11 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
     {
         IntSet same_cluster_peers;
         IntSet diff_cluster_peers;
-        const int self_cid = g_peers[selector_pid_].cid;
+        const int self_cid = g_peers.at(selector_pid_).cid;
 
         for(IntSetIter pid = cand_pid_set.begin(); pid != cand_pid_set.end(); pid++)
         {
-            if (g_peers[*pid].cid == self_cid)
+            if (g_peers.at(*pid).cid == self_cid)
             {
                 same_cluster_peers.insert(*pid);
             }

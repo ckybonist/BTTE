@@ -49,7 +49,7 @@ void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size
             //}
             //neighbors[i].pg_delay = pg_delay;
 
-            ++g_peers[cand_pid].neighbor_counts;
+            ++g_peers.at(cand_pid).neighbor_counts;
         }
         else
         {
@@ -83,7 +83,7 @@ Neighbor* Standard::StartSelection(const int self_pid, const IntSet& in_swarm_se
             continue;
         }
         std::cout << "(" << nei.id << ",  "
-                  << g_peers[nei.id].cid << ",  "
+                  << g_peers.at(nei.id).cid << ",  "
                   << nei.pg_delay << ")" << std::endl;
     }
 

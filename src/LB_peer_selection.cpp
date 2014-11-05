@@ -35,7 +35,7 @@ void LoadBalancing::GatherNeighborCounts(const size_t cand_size)
     {
         const int cand_pid = candidates_[i];
         nbc_info_[i].pid = cand_pid;
-        nbc_info_[i].counts = g_peers[cand_pid].neighbor_counts;
+        nbc_info_[i].counts = g_peers.at(cand_pid).neighbor_counts;
     }
 }
 
@@ -68,7 +68,7 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand
         {
             const int cand_pid = nbc_info_[i].pid;
             neighbors[i].id = cand_pid;
-            neighbors[i].exist = true;
+            neighbors[i].connected = true;
 
             // 1. assign propagation delay (pg_delay is various)
             float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
@@ -87,7 +87,7 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand
             //}
             //neighbors[i].pg_delay = pg_delay;
 
-            ++g_peers[cand_pid].neighbor_counts;  // Important
+            ++g_peers.at(cand_pid).neighbor_counts;  // Important
         }
         else
         {
@@ -123,8 +123,8 @@ Neighbor* LoadBalancing::StartSelection(const int self_pid, const IntSet& in_swa
             continue;
         }
         std::cout << "(" << nei.id << ",  "
-                  << g_peers[nei.id].cid << ",  "
-                  << g_peers[nei.id].neighbor_counts << ",  "
+                  << g_peers.at(nei.id).cid << ",  "
+                  << g_peers.at(nei.id).neighbor_counts << ",  "
                   << nei.pg_delay << ")" << std::endl;
     }
     std::cout << std::endl;

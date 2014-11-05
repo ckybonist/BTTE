@@ -43,9 +43,9 @@ void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
         if ((size_t)i < cand_size)
         {
             const int cand_pid = candidates_[i];
-            const int cand_cid = g_peers[cand_pid].cid;
+            const int cand_cid = g_peers.at(cand_pid).cid;
             neighbors[i].id = cand_pid;
-            neighbors[i].exist = true;
+            neighbors[i].connected = true;
 
             // 1. assign propagation delay (pg_delay is various)
             float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
@@ -64,7 +64,7 @@ void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
             //}
             //neighbors[i].pg_delay = pg_delay;
 
-            ++g_peers[cand_pid].neighbor_counts;
+            ++g_peers.at(cand_pid).neighbor_counts;
         }
         else
         {
@@ -90,14 +90,14 @@ Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swar
     // same cluster id as selector.
     size_t candidates_size = SetCandidates(in_swarm_set, true);
 
-    const int self_cid = g_peers[self_pid].cid;
+    const int self_cid = g_peers.at(self_pid).cid;
     AssignNeighbors(neighbors, candidates_size, self_cid);
 
 
     // debug info
     std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
     std::cout << "Cluster ID of Peer #" << self_pid
-              << " : " << g_peers[self_pid].cid << std::endl;
+              << " : " << g_peers.at(self_pid).cid << std::endl;
     std::cout << "Info: (pid, cid, PG delay)\n";
     for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
     {
@@ -108,7 +108,7 @@ Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swar
             continue;
         }
         std::cout << "(" << nei.id << ",  "
-                  << g_peers[nei.id].cid << ",  "
+                  << g_peers.at(nei.id).cid << ",  "
                   << nei.pg_delay << ")" << std::endl;
     }
 

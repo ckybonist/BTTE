@@ -68,16 +68,16 @@ void PeerInfo(const size_t pid)
 {
     ////////////////////////
     // id info
-    cout << "Peer ID: " << g_peers[pid].pid << endl;
-    cout << "Cluster ID: " << g_peers[pid].cid << endl;
+    cout << "Peer ID: " << g_peers.at(pid).pid << endl;
+    cout << "Cluster ID: " << g_peers.at(pid).cid << endl;
 
-    cout << "\nJoin time (not yet): " << g_peers[pid].join_time << endl;
+    cout << "\nJoin time (not yet): " << g_peers.at(pid).join_time << endl;
 
-    if (g_peers[pid].is_seed)
+    if (g_peers.at(pid).is_seed)
     {
         cout << "Peer type: Seed" << endl;
     }
-    else if (g_peers[pid].is_leech)
+    else if (g_peers.at(pid).is_leech)
     {
         cout << "Peer type: Leech" << endl;
     }
@@ -86,7 +86,7 @@ void PeerInfo(const size_t pid)
         cout << "Peer type: Average" << endl;
     }
 
-    cout << "\nTime per packet: " << g_peers[pid].time_packet << endl;
+    cout << "\nTime per packet: " << g_peers.at(pid).time_packet << endl;
 }
 
 void PieceInfo(const size_t pid,
@@ -100,7 +100,7 @@ void PieceInfo(const size_t pid,
 
     for (int c = 0; (size_t)c < NUM_PIECE; c++)
     {
-        if (g_peers[pid].pieces[c])
+        if (g_peers.at(pid).pieces[c])
         {
             ++piece_count;
 
@@ -121,13 +121,13 @@ void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
     cout << "\nNeighbors info (pid, cid, neighbor_counts, pg_delay):\n";
     for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
     {
-        Neighbor neighbor = g_peers[pid].neighbors[k];
+        Neighbor neighbor = g_peers.at(pid).neighbors[k];
         const int nid = neighbor.id;
         if (nid != -1)
         {
             cout << "    (" << nid
-                 << ",  " << g_peers[nid].cid
-                 << ",  " << g_peers[nid].neighbor_counts
+                 << ",  " << g_peers.at(nid).cid
+                 << ",  " << g_peers.at(nid).neighbor_counts
                  << ",  " << neighbor.pg_delay
                  << ")" << endl;
         }
