@@ -18,6 +18,7 @@ public:
         PEERLIST_REQ_RECV,
         PEERLIST_GET,
         REQ_PIECE,
+        CHOKING,
         PIECE_ADMIT,
         PIECE_GET,
         COMPLETED,
@@ -34,7 +35,14 @@ public:
     int index;
     int pid;
     float time;
+    float pg_delay;    // propagation delay with associated neighbor
     bool is_timeout;
+
+    // Variables below not use when processing all type of events:
+    int piece_no;  // piece no which being admitted (or received)
+    // pid of piece requestor, this info will use
+    // when generate derived event of PIECE_ADMIT event
+    int requestor_pid;
 };
 
 

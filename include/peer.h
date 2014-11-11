@@ -2,6 +2,7 @@
 #define _PEER_H
 
 #include <map>
+#include <list>
 #include <vector>
 
 #include "piece.h"
@@ -16,13 +17,13 @@ public:
     // seed
     Peer(const int pid,
          const int cid,
-         const float time_packet,
+         const float trans_time,
          const int NUM_PIECE);
 
     // leech
     Peer(const int pid,
          const int cid,
-         const float time_packet,
+         const float trans_time,
          const int NUM_PIECE,
          const double prob_leech);
 
@@ -30,7 +31,7 @@ public:
     Peer(const int pid,
          const int cid,
          const float join_time,
-         const float time_packet,
+         const float trans_time,
          const int NUM_PIECE);
 
     int pid;
@@ -40,18 +41,16 @@ public:
     bool is_leech;
     bool in_swarm;
 
-
     bool* pieces;
 
-    std::vector<PieceReqMsg> msg_queue;
+    // 記錄上一次要求的 piece，如果這個要求沒有被 choking 而且尚未收到，
+    // 就不要選擇這個 piece 去要求
+    std::list<PieceMsg> send_msgs;
+    std::list<PieceMsg> recv_msgs;
 
     const Neighbor* neighbors;
 
-    float time_packet; // download time of each piece
-
-    // If pg_delay is steady (but need a large amount of space)
-    //typedef std::map<int, float> Map_i2f;
-    //Map_i2f pg_delay_records;
+    float trans_time; // transmission time of each piece
 
     float join_time;     // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded

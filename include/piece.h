@@ -1,7 +1,7 @@
 #ifndef _PIECE_H
 #define _PIECE_H
 
-//                         512      byte
+//                       512    byte
 const int g_kPieceSize = 512 * (1024 * 8);
 
 bool* MakePieces(const int NUM_PIECE);
@@ -10,15 +10,13 @@ bool* MakePieces(const int NUM_PIECE);
 //                    const double& prob_leech,
 //                    const int NUM_PIECE);
 
-struct PieceReqMsg
+struct PieceMsg
 {
-    PieceReqMsg();
+    PieceMsg();
 
     int src_pid;
     int dest_pid;
     int piece_no;
 };
-
-extern bool g_all_pieces_get;
 
 #endif // for #ifndef _PIECE_H

@@ -182,14 +182,28 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid) {
     }
 }
 
+bool PeerManager::AllPiecesDone(const int pid) const
+{
+    bool flag = true;
+    for (int c = 0; (size_t)c < args_->NUM_PIECE; ++c)
+    {
+        if (!g_peers.at(pid).pieces[c])
+        {
+            flag = false;
+            break;
+        }
+    }
+
+    return flag;
+}
+
 void PeerManager::AllotNeighbors(const int self_pid) const
 {
     Neighbor* neighbors = obj_peerselect_->StartSelection(self_pid, in_swarm_set_);
     g_peers.at(self_pid).neighbors = neighbors;
 }
 
-//int PeerManager::GetReqPiece(const int self_pid) const
-PRMVec PeerManager::GetPieceReqMsgs(const int self_pid)
+std::list<PieceMsg> PeerManager::GetPieceReqMsgs(const int self_pid)
 {
     //const int req_piece = obj_pieceselect_->SelectTargetPiece(self_pid);
     //return req_piece;
@@ -227,13 +241,6 @@ void PeerManager::CreatePeers()
     InitSeeds();
 
     InitLeeches();
-
-    /// A boolean value to check. All pieces are get if it's true
-    for(int pid = args_->NUM_SEED; (size_t)pid < args_->NUM_LEECH; pid++)
-    {
-        for(int c = 0; (size_t)c < args_->NUM_PIECE; c++)
-            g_all_pieces_get &= g_peers.at(pid).pieces[c];
-    }
 }
 
 void PeerManager::DeployPeersLevel()

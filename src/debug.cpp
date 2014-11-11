@@ -86,7 +86,7 @@ void PeerInfo(const size_t pid)
         cout << "Peer type: Average" << endl;
     }
 
-    cout << "\nTime per packet: " << g_peers.at(pid).time_packet << endl;
+    cout << "\nTime per packet: " << g_peers.at(pid).trans_time << endl;
 }
 
 void PieceInfo(const size_t pid,

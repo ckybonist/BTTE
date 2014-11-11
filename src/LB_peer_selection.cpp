@@ -70,22 +70,8 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand
             neighbors[i].id = cand_pid;
             neighbors[i].connected = true;
 
-            // 1. assign propagation delay (pg_delay is various)
             float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
             neighbors[i].pg_delay = pg_delay;
-
-            // 2. assign propagation delay (pg_delay is steady)
-            //float pg_delay = 0.0;
-            //if (IsNewNeighbor(selector_pid_, cand_pid))
-            //{
-            //    pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
-            //    RecordPGDelay(selector_pid_, cand_pid, pg_delay);
-            //}
-            //else
-            //{
-            //    pg_delay = QueryPGDelay(selector_pid_, cand_pid);
-            //}
-            //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers.at(cand_pid).neighbor_counts;  // Important
         }

@@ -31,30 +31,34 @@ private:
     void GetNextPeerJoinEvent(Event& e);
     void GetNextArrivalEvent(const Event::Type4BT next_tbt,
                              const int next_index,
-                             const int next_pid,
-                             const float next_etime);
+                             const int pid,
+                             const float next_time);
 
-    void GetNextDepartureEvent(const Event::Type4BT orig_tbt,
+    void GetNextDepartureEvent(const Event::Type4BT type_bt,
                                const int next_index,
-                               const int orig_pid);
+                               const int pid);
 
-    float GetNextArrivalEventTime(const Event::Type4BT t_bt,
-                                  float time_packet,
-                                  const float current_arrival_etime);
+    float ComputeArrivalEventTime(const Event& e,
+                                  const Event::Type4BT derived_type_bt);
 
-    float GetNextDepartureEventTime();
+    float ComputeDepartureEventTime();
+
+    bool ReqTimeout(Event& e);
+
+    void MapEvents();
+    void CreateSingleFlowDependencies();
 
 
-    void GetNextDepartureEvent(const Event &);
-
+private:
     void PeerJoinEvent(Event& e);
 
     void PeerListReqRecvEvent(Event& e);
 
     void PeerListGetEvent(Event& e);
 
-    bool ReqTimeout(Event& e);
     void ReqPieceEvent(Event& e);
+
+    void ChokingEvent(Event& e);
 
     void PieceAdmitEvent(Event& e);
 
@@ -64,13 +68,11 @@ private:
 
     void PeerLeaveEvent(Event& e);
 
-    void MapEvents();
-    void CreateEventDependencies();
 
-    static const float kTimeout_;
-
+private:
     typedef void (EventHandler::*Fptr)(Event&);
     typedef std::map<Event::Type4BT, Fptr> FuncMap;
+
     FuncMap event_map_;
     std::map<Event::Type4BT, Event::Type4BT> event_deps_map_;
 
@@ -89,6 +91,8 @@ private:
     float waiting_time_;
 
     int next_event_idx_;
+
+    static const float kTimeout_;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

@@ -41,51 +41,14 @@ Neighbor* IPeerSelect::AllocNeighbors()
     return neighbors;
 }
 
-
-//bool IPeerSelect::IsNewNeighbor(const int selector_pid_, const int cand_pid)
-//{
-//    bool flag = false;
-//
-//    try  // key found
-//    {
-//        const Peer& myself = g_peers[selector_pid_];
-//
-//        // don't use [] accessor of STL map. It will automatically
-//        // insert a new pair(key, value). This operation will cause
-//        // original propagation delay become 0
-//        const float unused_val = myself.pg_delay_records.at(cand_pid);
-//    }
-//    catch (const std::out_of_range& oor)  // key not found exception
-//    {
-//        flag = true;
-//    }
-//
-//    return flag;
-//}
-
-//void IPeerSelect::RecordPGDelay(const int selector_pid_,
-//                                const int cand_pid,
-//                                const float pg_delay)
-//{
-//    Peer &myself = g_peers[selector_pid_];
-//    std::pair<int, float> record(cand_pid, pg_delay);
-//    //myself.pg_delay_records.insert(std::pair<int, float>(cand_pid, new_pg_delay));
-//    myself.pg_delay_records.insert(record);
-//}
-//
-//float IPeerSelect::QueryPGDelay(const int selector_pid_, const int cand_pid)
-//{
-//    Peer &myself = g_peers[selector_pid_];
-//    return myself.pg_delay_records[cand_pid];
-//}
-
 // The peer-info of swarm which exclude selector itself
 IntSet IPeerSelect::ExcludeSelf(const IntSet& in_swarm_set)
 {
     IntSet cand_pid_set(in_swarm_set);
     cand_pid_set.erase(cand_pid_set.find(selector_pid_));
 
-    return cand_pid_set; }
+    return cand_pid_set;
+}
 
 // return size of candidates
 // NOTE: if sort_cid_flag is true, then put peers that have

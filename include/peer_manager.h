@@ -19,7 +19,6 @@ class PeerManager
 public:
     typedef std::set<int> IntSet;
     typedef IntSet::iterator IntSetIter;
-    typedef std::vector<PieceReqMsg> PRMVec;
     typedef enum class InSwarmFlag
     {
         LEAVE,
@@ -35,11 +34,11 @@ public:
     void NewPeer(const int id, const float start_time) const;  // for peer_join event
 
     void UpdateSwarmInfo(const ISF isf, const int pid);
+    bool AllPiecesDone(const int pid) const;
 
     void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
-    PRMVec GetPieceReqMsgs(const int self_pid);     // get the result of Piece Selection
+    std::list<PieceMsg> GetPieceReqMsgs(const int self_pid);     // get the result of Piece Selection
     void GetUnchokedPeers(const int pid);
-    //int GetReqPiece(const int self_pid) const;      // Piece Selection , for average peers
 
     void CreatePeers();
 

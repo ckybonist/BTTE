@@ -36,11 +36,29 @@ bool IPieceSelect::IsDownloadable(Neighbor& nei, const int target_piece_no) cons
 {
     const int nid = nei.id;
     auto conn_states = nei.conn_states;
+
     const bool have_piece = g_peers.at(nid).pieces[target_piece_no];
     conn_states.am_interested = (have_piece && !conn_states.am_choking) ? true : false;
 
-    // Check the neighbor can share with selector and selector is interested with neighbor
-    const bool allow_download = conn_states.am_interested && !conn_states.peer_choking;
+    // check the piece has requested but not get it
+    bool still_download = false;
+    auto selector = g_peers.at(selector_pid_);
+    auto begin = selector.send_msgs.begin();
+    auto end = selector.send_msgs.end();
+    for (auto it = begin; it != end; ++it)
+    {
+        if ((*it).piece_no == target_piece_no)
+        {
+            still_download = true;
+            break;
+        }
+    }
+
+    // Check the neighbor not choke the selector and the selector is interested with neighbor
+    // Finally, this request is not send ever
+    const bool allow_download = conn_states.am_interested &&
+                                    !conn_states.peer_choking &&
+                                    !still_download;
 
     return allow_download;
 }

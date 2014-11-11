@@ -20,7 +20,7 @@ bool* AllocPieces(const int NUM_PIECE)
 
 }
 
-PieceReqMsg::PieceReqMsg()
+PieceMsg::PieceMsg()
 {
     src_pid = -1;
     dest_pid = -1;

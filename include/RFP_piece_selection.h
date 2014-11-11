@@ -13,8 +13,8 @@ public:
     RandomFirstPiece(Args args) : IPieceSelect(args) {};
 
 private:
-    PRMVec StartSelection(const int self_pid) override;
-    PieceReqMsg CreateReqMsg(const int target_piece_no);  // for Random First Piece
+    PMList StartSelection(const int self_pid) override;
+    PieceMsg CreateReqMsg(const int target_piece_no);  // for Random First Piece
     void RefreshInfo();
 };
 

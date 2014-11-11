@@ -24,7 +24,7 @@ Peer::Peer()
 
     neighbors = nullptr;
 
-    time_packet = 0.0;
+    trans_time = 0.0;
     join_time = 0.0;
     end_time = 0.0;
     neighbor_counts = 0;
@@ -33,7 +33,7 @@ Peer::Peer()
 // seed
 Peer::Peer(const int pid,
            const int cid,
-           const float time_packet,
+           const float trans_time,
            const int NUM_PIECE)
 {
     in_swarm = true;
@@ -51,7 +51,7 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->time_packet = time_packet;
+    this->trans_time = trans_time;
     join_time = 0.0;
     end_time = 0.0;
 
@@ -61,7 +61,7 @@ Peer::Peer(const int pid,
 // leech
 Peer::Peer(const int pid,
            const int cid,
-           const float time_packet,
+           const float trans_time,
            const int NUM_PIECE,
            const double prob_leech)
 {
@@ -82,7 +82,7 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->time_packet = time_packet;
+    this->trans_time = trans_time;
     join_time = 0.0;
     end_time = 0.0;
 
@@ -94,7 +94,7 @@ Peer::Peer(const int pid,
 Peer::Peer(const int pid,
            const int cid,
            const float join_time,
-           const float time_packet,
+           const float trans_time,
            const int NUM_PIECE)
 {
     in_swarm = true;
@@ -108,7 +108,7 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->time_packet = time_packet;
+    this->trans_time = trans_time;
     this->join_time = join_time;
     end_time = 0.0;
     neighbor_counts = 0;

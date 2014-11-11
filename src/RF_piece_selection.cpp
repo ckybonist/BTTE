@@ -73,10 +73,10 @@ bool RarestFirst::IsDupReq(const IntSet& dest_peers, const int nid)
     return flag;
 }
 
-PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
+PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
 {
     static IntSet dest_peers;  // record peer-ids which existed in request msgs
-    PieceReqMsg msg;
+    PieceMsg msg;
 
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
@@ -88,7 +88,8 @@ PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_l
         const int nid = nei.id;
 
         if (IsDownloadable(nei, target_piece_no) &&
-                !IsDupReq(dest_peers, nid))
+               !IsDupReq(dest_peers, nid))
+        //if (!IsDupReq(dest_peers, nid))
         {
             msg.src_pid = selector_pid_;
             msg.dest_pid = nid;
@@ -103,49 +104,6 @@ PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_l
     return msg;
 }
 
-//int RarestFirst::GetNumRarest(const int num_targets)
-//{
-//    int num_rarest = 0;
-//
-//    for (int c = 0; c < num_targets; c++)
-//    {
-//        const int first = piece_counts_info_[c].counts;
-//        const int second = piece_counts_info_[c + 1].counts;
-//        if (first - second < 0)
-//        {
-//            num_rarest = c + 1;
-//            break;
-//        }
-//        else if (c == c - 2 &&
-//                 first - second == 0)
-//        {
-//            num_rarest = num_targets;
-//            break;
-//        }
-//    }
-//
-//    std::cout << "Number of rarest piece: " << num_rarest << "\n";
-//
-//    return num_rarest;
-//}
-
-//int RarestFirst::GetTargetPieceNo(const int num_rarest)
-//{
-//    int target_no = 0;
-//
-//    if (num_rarest == 1)
-//    {
-//        target_no = piece_counts_info_[0].piece_no;
-//    }
-//    else
-//    {
-//        int index = Roll<int>(RSC::RF_PIECESELECT, 0, num_rarest - 1);
-//        target_no = piece_counts_info_[index].piece_no;
-//    }
-//
-//    return target_no;
-//}
-
 void RarestFirst::RefreshInfo()
 {
     delete [] piece_counts_info_;
@@ -153,7 +111,7 @@ void RarestFirst::RefreshInfo()
     targets_set_.clear();
 }
 
-PRMVec RarestFirst::StartSelection(const int self_pid)
+PMList RarestFirst::StartSelection(const int self_pid)
 {
     selector_pid_ = self_pid;
 
@@ -177,12 +135,11 @@ PRMVec RarestFirst::StartSelection(const int self_pid)
     std::cout << std::endl;
 
     // Create req-msg list
-    PRMVec req_msgs;
-    req_msgs.reserve(num_targets);
+    PMList req_msgs;
     for (int i = 0; (size_t)i < num_targets; ++i)
     {
         const int piece_no = piece_counts_info_[i].piece_no;
-        const PieceReqMsg msg = CreateReqMsg(piece_no, ((size_t)i == num_targets - 1));
+        const PieceMsg msg = CreateReqMsg(piece_no, ((size_t)i == num_targets - 1));
         if (msg.dest_pid != -1)
             req_msgs.push_back(msg);
     }

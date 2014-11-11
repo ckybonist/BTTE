@@ -5,9 +5,9 @@ using namespace uniformrand;
 namespace btte_piece_selection
 {
 
-PieceReqMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
+PieceMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
 {
-    PieceReqMsg msg;
+    PieceMsg msg;
 
     for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
@@ -31,7 +31,7 @@ void RandomFirstPiece::RefreshInfo()
     targets_set_.clear();
 }
 
-PRMVec RandomFirstPiece::StartSelection(const int self_pid)
+PMList RandomFirstPiece::StartSelection(const int self_pid)
 {
     selector_pid_ = self_pid;
 
@@ -46,8 +46,8 @@ PRMVec RandomFirstPiece::StartSelection(const int self_pid)
     int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_targets;
     for(; rand_offset != 0; --rand_offset) ++piece_no;
 
-    std::vector<PieceReqMsg> req_msgs;
-    const PieceReqMsg msg = CreateReqMsg(*piece_no);
+    std::list<PieceMsg> req_msgs;
+    const PieceMsg msg = CreateReqMsg(*piece_no);
     if (msg.dest_pid != -1)
         req_msgs.push_back(msg);
 

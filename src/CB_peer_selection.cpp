@@ -47,22 +47,8 @@ void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
             neighbors[i].id = cand_pid;
             neighbors[i].connected = true;
 
-            // 1. assign propagation delay (pg_delay is various)
             float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
             neighbors[i].pg_delay = pg_delay;
-
-            // 2. assign propagation delay (pg_delay is steady)
-            //float pg_delay = 0.0;
-            //if (IsNewNeighbor(self_pid, cand_pid))
-            //{
-            //    pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
-            //    RecordPGDelay(self_pid, cand_pid, pg_delay);
-            //}
-            //else
-            //{
-            //    pg_delay = QueryPGDelay(self_pid, cand_pid);
-            //}
-            //neighbors[i].pg_delay = pg_delay;
 
             ++g_peers.at(cand_pid).neighbor_counts;
         }
@@ -111,7 +97,6 @@ Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swar
                   << g_peers.at(nei.id).cid << ",  "
                   << nei.pg_delay << ")" << std::endl;
     }
-
 
     RefreshInfo();
 
