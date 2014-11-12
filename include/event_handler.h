@@ -58,8 +58,6 @@ private:
 
     void ReqPieceEvent(Event& e);
 
-    void ChokingEvent(Event& e);
-
     void PieceAdmitEvent(Event& e);
 
     void PieceGetEvent(Event& e);

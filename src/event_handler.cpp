@@ -51,7 +51,6 @@ void EventHandler::MapEvents()
     event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
     event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
     event_map_[Event::REQ_PIECE] = &EventHandler::ReqPieceEvent;
-    event_map_[Event::CHOKING] = &EventHandler::ChokingEvent;
     event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
     event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
     event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
@@ -265,22 +264,6 @@ void EventHandler::ProcessDeparture(Event& e)
     event_list_.sort();
 }
 
-void EventHandler::PeerJoinEvent(Event& e)
-{
-    pm_->NewPeer(e.pid, e.time);
-    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, e.pid);
-}
-
-void EventHandler::PeerListReqRecvEvent(Event& e)
-{
-    pm_->AllotNeighbors(e.pid);
-}
-
-void EventHandler::PeerListGetEvent(Event& e)
-{
-    // TODO
-}
-
 bool EventHandler::ReqTimeout(Event& e)
 {
     assert(current_time_ > e.time);
@@ -296,8 +279,30 @@ bool EventHandler::ReqTimeout(Event& e)
     return flag;
 }
 
+void EventHandler::PeerJoinEvent(Event& e)
+{
+    pm_->NewPeer(e.pid, e.time);
+    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, e.pid);
+}
+
+void EventHandler::PeerListReqRecvEvent(Event& e)
+{
+    pm_->AllotNeighbors(e.pid);
+}
+
+void EventHandler::PeerListGetEvent(Event& e)
+{
+    // TODO
+    // 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
+    // 執行第一次 choking，每個 neighbor 會選出 4 or 5 個可連線對象
+    // 並紀錄起來。
+}
+
 void EventHandler::ReqPieceEvent(Event& e)
 {
+    // TODO
+    // 檢查是否有被對方 choking，如果沒有就產生 PieceAdmit 事件
+    //
     // 如果已經 timeout 就把這個事件移出系統
     // 並忽略下面的執行程序
     //if (ReqTimeout(e)) return;
@@ -324,14 +329,12 @@ void EventHandler::ReqPieceEvent(Event& e)
     }
 }
 
-void EventHandler::ChokingEvent(Event& e)
-{
-    // TODO
-}
-
 void EventHandler::PieceAdmitEvent(Event& e)
 {
     // TODO
+    // 將 admit 的 piece 傳給要求者
+    // 並產生 PieceGet 事件
+    //
     //auto examiner = g_peers.at(e.pid);
     //auto begin = examiner.recv_msgs.begin();
     //auto end = examiner.recv_msgs.end();
@@ -355,6 +358,12 @@ void EventHandler::PieceAdmitEvent(Event& e)
 void EventHandler::PieceGetEvent(Event& e)
 {
     // TODO
+    // 每取得一個 piece 後，執行 Piece Selection。產生 ReqPiece 事件
+    // 接著，每取得一個 piece，代表接收者 (收到 client #e.pid 要求的 peer)
+    // 空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
+    // 來決定這個接收者下一個要處理的要求。
+
+
     //auto receiver = g_peers.at(e.pid);
     //auto begin = receiver.send_msgs.begin();
     //auto end = receiver.send_msgs.end();
