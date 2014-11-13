@@ -5,9 +5,9 @@
 
 /**
  * Peer Level:
- *	   @level 1 : 10 (Mbps)   30 % of peers
- *	   @level 2 : 128 (Kbps)  50 % of peers
- *	   @level 3 : 56 (Kbps)   20 % of peers
+ *	   @level 1 : 10 (Mbps)(bi-directinal)         30% of peers
+ *	   @level 2 : Up: 128 (Kbps), Down: 1.5(Mbps)  50% of peers
+ *	   @level 3 : 56 (Kbps)(bi-directinal)         20% of peers
  *
  * */
 
