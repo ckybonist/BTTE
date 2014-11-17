@@ -17,6 +17,8 @@ struct PieceMsg
     int src_pid;
     int dest_pid;
     int piece_no;
+    float src_up_bw;  // upload bandwidth
+
 };
 
 #endif // for #ifndef _PIECE_H
