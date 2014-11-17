@@ -13,10 +13,16 @@
 
 const int g_kNumLevel = 3;
 
+struct Bandwidth
+{
+    float uplink;
+    float downlink;
+};
+
 struct PeerLevel
 {
     float dist_rate;
-    float bandwidth;
+    Bandwidth bw;
 };
 
 const PeerLevel g_kPeerLevel[g_kNumLevel] =
@@ -24,19 +30,28 @@ const PeerLevel g_kPeerLevel[g_kNumLevel] =
     // fatest
     {
         0.3,
-        10 * 1024 * 1024
+        {
+            10 * 1024 * 1024,
+            10 * 1024 * 1024
+        }
     },
 
     // average
     {
         0.5,
-        128 * 1024
+        {
+            128 * 1024,
+            1.5 * 1024 * 1024
+        }
     },
 
     // slowest
     {
         0.2,
-        56 * 1024
+        {
+            56 * 1024,
+            56 * 1024
+        }
     },
 };
 
