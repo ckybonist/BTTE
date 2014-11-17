@@ -55,7 +55,7 @@ public:
     std::list<PieceMsg> send_msgs;
     std::list<PieceMsg> recv_msgs;
 
-    const Neighbor* neighbors;
+    Neighbor* neighbors;
 
     Bandwidth bw;
 
@@ -65,6 +65,8 @@ public:
     // counts of being selected as an neighbor, this variable will use
     // in Load Balancing Peer Selection
     int neighbor_counts;  // counts of peer being served(selected) as neighbor
+
+    int unchoke_counts;
 
 private:
     // TODO

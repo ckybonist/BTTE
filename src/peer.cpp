@@ -46,6 +46,7 @@ Peer::Peer(const int pid,
     end_time = 0.0;
 
     neighbor_counts = 0;
+    unchoke_counts = 0;
 }
 
 // leech
@@ -75,6 +76,7 @@ Peer::Peer(const int pid,
     end_time = 0.0;
 
     neighbor_counts = 0;
+    unchoke_counts = 0;
 }
 
 
@@ -98,4 +100,5 @@ Peer::Peer(const int pid,
     this->join_time = join_time;
     end_time = 0.0;
     neighbor_counts = 0;
+    unchoke_counts = 0;
 }
