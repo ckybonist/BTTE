@@ -50,7 +50,7 @@ void EventHandler::MapEvents()
     event_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
     event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
     event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
-    event_map_[Event::REQ_PIECE] = &EventHandler::ReqPieceEvent;
+    event_map_[Event::PIECE_REQ_RECV] = &EventHandler::PieceReqRecvEvent;
     event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
     event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
     event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
@@ -61,9 +61,9 @@ void EventHandler::CreateSingleFlowDependencies()
 {
     event_deps_map_[Event::PEER_JOIN] = Event::PEERLIST_REQ_RECV;
     event_deps_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
-    event_deps_map_[Event::PEERLIST_GET] = Event::REQ_PIECE;
+    event_deps_map_[Event::PEERLIST_GET] = Event::PIECE_REQ_RECV;
     // TODO: The derived event of REQ_PIECE needs to fix
-    event_deps_map_[Event::REQ_PIECE] = Event::PIECE_ADMIT;
+    event_deps_map_[Event::PIECE_REQ_RECV] = Event::PIECE_ADMIT;
     event_deps_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
     event_deps_map_[Event::PIECE_GET] = Event::COMPLETED;
     event_deps_map_[Event::COMPLETED] = Event::PEER_LEAVE;
@@ -73,14 +73,14 @@ void EventHandler::PushInitEvent()
 {
     float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
-    const int initial_index = 1;
-    next_event_idx_ = initial_index;  // init next event index
+    const int initial_idx = 1;
+    next_event_idx_ = initial_idx;  // init next event index
 
     const int initial_pid = args_.NUM_SEED + args_.NUM_LEECH;
 
     Event first_event(Event::Type::ARRIVAL,
                       Event::PEER_JOIN,
-                      initial_index,
+                      initial_idx,
                       initial_pid,
                       time);
 
@@ -121,8 +121,7 @@ void EventHandler::GetNextDepartureEvent(const Event::Type4BT type_bt,
 }
 
 
-float EventHandler::ComputeArrivalEventTime(const Event& e,
-                                            const Event::Type4BT derived_type_bt)
+float EventHandler::ComputeArrivalEventTime(const Event& e, const Event::Type4BT derived_type_bt)
 {
     float time = e.time;
     Event::Type4BT dtbt = derived_type_bt;
@@ -142,7 +141,7 @@ float EventHandler::ComputeArrivalEventTime(const Event& e,
         const float trans_time = g_kPieceSize / g_peers.at(e.pid).bw.downlink;
         time += trans_time;
     }
-    else if (dtbt == Event::REQ_PIECE ||
+    else if (dtbt == Event::PIECE_REQ_RECV ||
              dtbt == Event::PIECE_GET)
     {
         time += e.pg_delay;
@@ -157,6 +156,7 @@ float EventHandler::ComputeDepartureEventTime()
     return time;
 }
 
+// TODO: 將以下函式做的事情分散到各個事件中
 void EventHandler::GetDerivedEvent(Event& e)
 {
     int pid = e.pid;
@@ -165,11 +165,12 @@ void EventHandler::GetDerivedEvent(Event& e)
 
     /* Three Special cases below: */
     // 1. Prepare a timeout event in advance
-    //if (e.type_bt == Event::REQ_PIECE)
-    //{
-    //    derived_type_bt = Event::REQ_PIECE;
-    //    time += kTimeout_;
-    //}
+    if (e.type_bt == Event::PIECE_REQ_RECV &&
+            !e.am_choking)
+    {
+        derived_type_bt = Event::PIECE_REQ_RECV;
+        time += kTimeout_;
+    }
 
     //// 2. The pid of event will be the piece requestor,
     ////    not the receiver
@@ -293,25 +294,9 @@ void EventHandler::PeerListReqRecvEvent(Event& e)
 
 void EventHandler::PeerListGetEvent(Event& e)
 {
-    // TODO
-    // 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
-    // 執行第一次 choking，每個 neighbor 會選出 4 or 5 個可連線對象
-    // 並紀錄起來。
-}
-
-void EventHandler::ReqPieceEvent(Event& e)
-{
-    // TODO
-    // 檢查是否有被對方 choking，如果沒有就產生 PieceAdmit 事件
-    //
-    // 如果已經 timeout 就把這個事件移出系統
-    // 並忽略下面的執行程序
-    //if (ReqTimeout(e)) return;
-
+    // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
-
     const auto req_msgs = pm_->GetPieceReqMsgs(e.pid);
-
     for (auto it = req_msgs.begin(); it != req_msgs.end(); ++it)
     {
         auto msg = *it;
@@ -322,12 +307,42 @@ void EventHandler::ReqPieceEvent(Event& e)
         sender.send_msgs.push_back(msg);
         receiver.recv_msgs.push_back(msg);
 
+        // generate piece-req-recv event
+        //GetNextArrivalEvent();
+
         std::cout << "Sending piece-req msg from peer #"
                   << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
         std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
-
     }
+
+    event_list_.sort();
+
+    // TODO
+    // 2. 執行第一次 choking，每個 neighbor 會選出 4 or 5 個連線對象
+    //    並紀錄起來。
+    //Choking();
+}
+
+void EventHandler::PieceReqRecvEvent(Event& e)
+{
+    // 如果已經 timeout 就把這個事件移出系統
+    // 並忽略下面的執行程序
+    //if (ReqTimeout(e)) return;
+
+    // TODO
+    // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件
+    auto receiver = g_peers.at(e.pid);
+
+    for (int i = 0; i < args_.NUM_PEERLIST; i++)
+    {
+        if (e.requestor_pid == i)
+        {
+            auto nei = receiver.neighbors[i];
+            e.am_choking = nei.conn_states.am_choking;
+        }
+    }
+
 }
 
 void EventHandler::PieceAdmitEvent(Event& e)
@@ -359,10 +374,10 @@ void EventHandler::PieceAdmitEvent(Event& e)
 void EventHandler::PieceGetEvent(Event& e)
 {
     // TODO
-    // 每取得一個 piece 後，執行 Piece Selection。產生 ReqPiece 事件
-    // 接著，每取得一個 piece，代表接收者 (收到 client #e.pid 要求的 peer)
+    // 1. 每取得一個 piece 後，執行 Piece Selection。產生 ReqPiece 事件
+    // 2. 取得一個 piece，代表接收者 (收到 client #e.pid 要求的 peer)
     // 空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
-    // 來決定這個接收者下一個要處理的要求。
+    // 來決定下一個要處理的要求。
 
 
     //auto receiver = g_peers.at(e.pid);
@@ -419,7 +434,7 @@ void Event2Str(TBTmapStr &tbt2str)
     tbt2str[Event::PEER_JOIN] = "Peer-Join Event";
     tbt2str[Event::PEERLIST_REQ_RECV] = "Peer-List-Req-Recv Event";
     tbt2str[Event::PEERLIST_GET] = "Peer-List-Get Event";
-    tbt2str[Event::REQ_PIECE] = "Req-Piece Event";
+    tbt2str[Event::PIECE_REQ_RECV] = "Piece-Req-Recv Event";
     tbt2str[Event::PIECE_ADMIT] = "Piece-Admit Event";
     tbt2str[Event::PIECE_GET] = "Piece-Get Event";
     tbt2str[Event::COMPLETED] = "Completed Event";

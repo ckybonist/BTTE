@@ -38,8 +38,7 @@ private:
                                const int next_index,
                                const int pid);
 
-    float ComputeArrivalEventTime(const Event& e,
-                                  const Event::Type4BT derived_type_bt);
+    float ComputeArrivalEventTime(const Event& e, const Event::Type4BT derived_type_bt);
 
     float ComputeDepartureEventTime();
 
@@ -56,7 +55,7 @@ private:
 
     void PeerListGetEvent(Event& e);
 
-    void ReqPieceEvent(Event& e);
+    void PieceReqRecvEvent(Event& e);
 
     void PieceAdmitEvent(Event& e);
 
