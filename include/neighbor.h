@@ -42,7 +42,7 @@ struct Neighbor
     float pg_delay;
     // This var is use to check each neighbor is exist in peer list,
     // however, not the meaning of connection between neighbor by network
-    bool connected;
+    bool exist;
     ConnStates conn_states;
 };
 
