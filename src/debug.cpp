@@ -34,7 +34,6 @@ void ShowDbgInfo(const Args &args)
     }
 
     cout.precision(3);
-
     cout << "\n\n\n\n@ Peer Info: \n\n";
 
     for (int pid = 0; (size_t)pid < args.NUM_PEER; pid++)
@@ -55,7 +54,6 @@ void ShowDbgInfo(const Args &args)
     //    cout << "Piece #" << i << " : "
     //         << piece_own_counter[i] << endl;
     //}
-
     cout << endl;
 
     delete [] piece_own_counter;
@@ -70,14 +68,15 @@ void PeerInfo(const size_t pid)
     // id info
     cout << "Peer ID: " << g_peers.at(pid).pid << endl;
     cout << "Cluster ID: " << g_peers.at(pid).cid << endl;
-
     cout << "\nJoin time (not yet): " << g_peers.at(pid).join_time << endl;
 
-    if (g_peers.at(pid).is_seed)
+    auto peer = g_peers.at(pid);
+
+    if (peer.type == SEED)
     {
         cout << "Peer type: Seed" << endl;
     }
-    else if (g_peers.at(pid).is_leech)
+    else if (peer.type == LEECH)
     {
         cout << "Peer type: Leech" << endl;
     }
@@ -86,7 +85,8 @@ void PeerInfo(const size_t pid)
         cout << "Peer type: Average" << endl;
     }
 
-    cout << "\nTime per packet: " << g_peers.at(pid).trans_time << endl;
+    cout << "Upload Bandwidth: " << peer.bw.uplink << endl;
+    cout << "Download Bandwidth: " << peer.bw.downlink << endl;
 }
 
 void PieceInfo(const size_t pid,

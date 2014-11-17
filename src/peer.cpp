@@ -13,18 +13,11 @@ bool* g_in_swarm_set = nullptr;
 
 Peer::Peer()
 {
-    is_seed = false;
-    is_leech = false;
     in_swarm = false;
-
     pid = -1;
     cid = -1;
-
     pieces = nullptr;
-
     neighbors = nullptr;
-
-    trans_time = 0.0;
     join_time = 0.0;
     end_time = 0.0;
     neighbor_counts = 0;
@@ -33,25 +26,22 @@ Peer::Peer()
 // seed
 Peer::Peer(const int pid,
            const int cid,
-           const float trans_time,
-           const int NUM_PIECE)
+           const int NUM_PIECE,
+           const Bandwidth bw)
 {
     in_swarm = true;
-    is_seed = true;
-    is_leech = false;
-
+    type = SEED;
     this->pid = pid;
     this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
     for (int i = 0; i < NUM_PIECE; i++)
-    {
         pieces[i] = true;
-    }
 
     neighbors = nullptr;
 
-    this->trans_time = trans_time;
+    this->bw = bw;
+
     join_time = 0.0;
     end_time = 0.0;
 
@@ -61,19 +51,16 @@ Peer::Peer(const int pid,
 // leech
 Peer::Peer(const int pid,
            const int cid,
-           const float trans_time,
            const int NUM_PIECE,
-           const double prob_leech)
+           const double prob_leech,
+           const Bandwidth bw)
 {
     in_swarm = true;
-    is_leech = true;
-    is_seed = false;
-
+    type = LEECH;
     this->pid = pid;
     this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
-
     for (int i = 0; i < NUM_PIECE; i++)
     {
         double prob_piece = uniformrand::Rand(RSC::PROB_PIECE) / (double)RAND_MAX;
@@ -82,7 +69,8 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->trans_time = trans_time;
+    this->bw = bw;
+
     join_time = 0.0;
     end_time = 0.0;
 
@@ -93,22 +81,20 @@ Peer::Peer(const int pid,
 // average peer
 Peer::Peer(const int pid,
            const int cid,
+           const int NUM_PIECE,
            const float join_time,
-           const float trans_time,
-           const int NUM_PIECE)
+           const Bandwidth bw)
 {
     in_swarm = true;
-    is_seed = false;
-    is_leech = false;
-
+    type = NORMAL;
     this->pid = pid;
     this->cid = cid;
 
     pieces = MakePieces(NUM_PIECE);
-
     neighbors = nullptr;
 
-    this->trans_time = trans_time;
+    this->bw = bw;
+
     this->join_time = join_time;
     end_time = 0.0;
     neighbor_counts = 0;

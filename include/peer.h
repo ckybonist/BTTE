@@ -7,7 +7,15 @@
 
 #include "piece.h"
 #include "neighbor.h"
+#include "peer_level.h"
 
+
+enum PeerType
+{
+    SEED,
+    LEECH,
+    NORMAL,
+};
 
 class Peer
 {
@@ -17,28 +25,27 @@ public:
     // seed
     Peer(const int pid,
          const int cid,
-         const float trans_time,
-         const int NUM_PIECE);
+         const int NUM_PIECE,
+         const Bandwidth bw);
 
     // leech
     Peer(const int pid,
          const int cid,
-         const float trans_time,
          const int NUM_PIECE,
-         const double prob_leech);
+         const double prob_leech,
+         const Bandwidth bw);
 
     // average peer
     Peer(const int pid,
          const int cid,
+         const int NUM_PIECE,
          const float join_time,
-         const float trans_time,
-         const int NUM_PIECE);
+         const Bandwidth bw);
 
     int pid;
     int cid;  // start from 1
 
-    bool is_seed;
-    bool is_leech;
+    PeerType type;
     bool in_swarm;
 
     bool* pieces;
@@ -50,7 +57,7 @@ public:
 
     const Neighbor* neighbors;
 
-    float trans_time; // transmission time of each piece
+    Bandwidth bw;
 
     float join_time;     // start time of peer run the routine
     float end_time;      // end time of all pieces have been downloaded

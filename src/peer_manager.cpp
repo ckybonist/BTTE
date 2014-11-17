@@ -22,7 +22,8 @@ using namespace uniformrand;
 PeerManager::PeerManager()
 {
     args_ = nullptr;
-    packet_time_4_peers_ = nullptr;
+    reserved_cids_ = nullptr;
+    reserved_peer_levels_ = nullptr;
     obj_peerselect_ = nullptr;
 }
 
@@ -94,13 +95,13 @@ PeerManager::PeerManager(Args* const args)
 
     InitAbstractObj();
 
-    packet_time_4_peers_ = new float[args->NUM_PEER];
-    if (nullptr == packet_time_4_peers_)
+    reserved_peer_levels_ = new int[args->NUM_PEER];
+    if (nullptr == reserved_peer_levels_)
         ExitError("Memory Allocation Fault");
     DeployPeersLevel();
 
-    cluster_ids_ = new int[args->NUM_PEER];
-    if (nullptr == cluster_ids_)
+    reserved_cids_ = new int[args->NUM_PEER];
+    if (nullptr == reserved_cids_)
         ExitError("Memory Allocation Fault");
     DeployClusterIDs();
 
@@ -114,16 +115,16 @@ PeerManager::~PeerManager()
 {
     std::cout << "\nDestructor of PeerManager\n";
 
-    delete [] packet_time_4_peers_;
-    packet_time_4_peers_ = nullptr;
+    delete [] reserved_peer_levels_;
+    reserved_peer_levels_ = nullptr;
 
-    delete [] cluster_ids_;
-    cluster_ids_ = nullptr;
+    delete [] reserved_cids_;
+    reserved_cids_ = nullptr;
 
-    for (size_t pid = 0; (size_t)pid < args_->NUM_PEER; pid++)
+    for (size_t p = 0; (size_t)p < args_->NUM_PEER; p++)
     {
-        delete [] g_peers.at(pid).pieces;
-        g_peers.at(pid).pieces = nullptr;
+        delete [] g_peers.at(p).pieces;
+        g_peers.at(p).pieces = nullptr;
     }
 
     // also call the destructor to delete neighbors
@@ -143,19 +144,44 @@ PeerManager::~PeerManager()
     args_ = nullptr;
 }
 
-
-void PeerManager::NewPeer(const int pid,
-                          const float join_time) const
+void PeerManager::NewPeerData(PeerType type, const int pid, const float join_time, double prob_leech) const
 {
-    Peer peer(pid,
-              cluster_ids_[pid],
-              join_time,
-              packet_time_4_peers_[pid],
-              args_->NUM_PIECE);
+    const int level = reserved_peer_levels_[pid];
+    Bandwidth bw = g_kPeerLevel[level].bw;
+    const int cid = reserved_cids_[pid];
+    const int NUM_PIECE = args_->NUM_PIECE;
+
+    Peer peer;
+
+    switch (type)
+    {
+        case SEED:
+            peer = Peer(pid, cid, NUM_PIECE, bw);
+            break;
+
+        case LEECH:
+            peer = Peer(pid, cid, NUM_PIECE, prob_leech, bw);
+            break;
+
+        case NORMAL:
+            peer = Peer(pid, cid, NUM_PIECE, join_time, bw);
+            break;
+
+        default:
+            ExitError("Error in NewPeerData(...)");
+    }
+
     g_peers.push_back(peer);
 }
 
-void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid) {
+
+void PeerManager::NewPeer(const int pid, const float join_time) const
+{
+    NewPeerData(NORMAL, pid, join_time);
+}
+
+void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
+{
     if (g_in_swarm_set == nullptr)
     {
         g_in_swarm_set = new bool[args_->NUM_PEER];
@@ -175,17 +201,17 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid) {
         in_swarm_set_.insert(pid);
         g_in_swarm_set[pid] = true;
     }
-    else if (isf == ISF::LEAVE)
+    else
     {
         in_swarm_set_.erase(pid);
         g_in_swarm_set[pid] = false;
     }
 }
 
-bool PeerManager::AllPiecesDone(const int pid) const
+bool PeerManager::CheckAllPiecesGet(const int pid) const
 {
     bool flag = true;
-    for (int c = 0; (size_t)c < args_->NUM_PIECE; ++c)
+    for (int c = 0; (size_t)c < args_->NUM_PIECE; c++)
     {
         if (!g_peers.at(pid).pieces[c])
         {
@@ -197,23 +223,16 @@ bool PeerManager::AllPiecesDone(const int pid) const
     return flag;
 }
 
-void PeerManager::AllotNeighbors(const int self_pid) const
+void PeerManager::AllotNeighbors(const int pid) const
 {
-    Neighbor* neighbors = obj_peerselect_->StartSelection(self_pid, in_swarm_set_);
-    g_peers.at(self_pid).neighbors = neighbors;
+    Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
+    g_peers.at(pid).neighbors = neighbors;
 }
 
 std::list<PieceMsg> PeerManager::GetPieceReqMsgs(const int self_pid)
 {
-    //const int req_piece = obj_pieceselect_->SelectTargetPiece(self_pid);
-    //return req_piece;
     const auto req_msgs = obj_pieceselect_->StartSelection(self_pid);
     return req_msgs;
-}
-
-void PeerManager::GetUnchokedPeers(const int pid)
-{
-    std::cout << "\nPeer #" << pid << " is running choking algorithm now...\n";
 }
 
 //void PeerManager::AllocPeersSpace()
@@ -231,7 +250,7 @@ void PeerManager::CreatePeers()
     for(int i = 0; i < g_kNumLevel; i++)
     {
         std::cout << "Transmission Time of level "<< i << " : "
-                  << g_kPieceSize / g_kPeerLevel[i].bandwidth << "\n";
+                  << g_kPieceSize / g_kPeerLevel[i].bw.downlink << "\n";
     }
     std::cout << "\n\n\n";
 
@@ -249,20 +268,13 @@ void PeerManager::DeployPeersLevel()
 
 	int count[g_kNumLevel] = { 0 };
 	int exclude_set[g_kNumLevel] = { 0 };
-    float time_piece[g_kNumLevel] = { 0 };
 
-    for (int i = 0; i < g_kNumLevel; i++)
-    {
-        time_piece[i] = (float)g_kPieceSize / g_kPeerLevel[i].bandwidth;
-    }
-
-	for (int pid = 0; (size_t)pid < NUM_PEER; pid++)
+	for (int p = 0; (size_t)p < NUM_PEER; p++)
     {
         int level = RangeRandNumExceptEx<int, g_kNumLevel>(RSC::PEER_LEVEL, exclude_set);
-
         const int idx = level - 1;
 
-        packet_time_4_peers_[pid] = time_piece[idx];
+        reserved_peer_levels_[p] = idx;
 
 		++count[idx];
 
@@ -292,12 +304,12 @@ void PeerManager::DeployClusterIDs()
 
     // assing a cid to each peer, and don't exceed
     // the volume (NUM_PEER / g_kNumClusters) of cluster
-    for (int pid = 0; (size_t)pid < args_->NUM_PEER; pid++)
+    for (int p = 0; (size_t)p < args_->NUM_PEER; p++)
     {
         int cid = RangeRandNumExceptEx<int, g_kNumClusters>(RSC::CB_PEERSELECT, exclude_set);
         const int idx = cid - 1;
 
-        cluster_ids_[pid] = cid;
+        reserved_cids_[p] = cid;
 
 		++count[idx];
 
@@ -314,15 +326,8 @@ void PeerManager::DeployClusterIDs()
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds() const
 {
-    for (int pid = 0; (size_t)pid < args_->NUM_SEED; pid++)
-    {
-        //g_peers[pid] = Peer(pid, args_->NUM_PIECE);
-        Peer seed(pid,
-                  cluster_ids_[pid],
-                  packet_time_4_peers_[pid],
-                  args_->NUM_PIECE);
-        g_peers.push_back(seed);
-    }
+    for (int p = 0; (size_t)p < args_->NUM_SEED; p++)
+        NewPeerData(SEED, p, 0.0);
 }
 
 /*
@@ -347,29 +352,14 @@ void PeerManager::InitLeeches()
     //std::cout.precision(3);
     //std::cout << "Prob. of each leech: \n";
 
-    for (int pid = start; pid < end; pid++)
+    for (int p = start; p < end; p++)
     {
-        double prob_leech = Roll<double>(RSC::PROB_LEECH,
-                                         0.1,
-                                         0.9);
-        Peer leech = Peer(pid,
-                          cluster_ids_[pid],
-                          packet_time_4_peers_[pid],
-                          args_->NUM_PIECE,
-                          prob_leech);
-        g_peers.push_back(leech);
-
-        UpdateSwarmInfo(ISF::JOIN, pid);
-
-        //std::cout << prob_leech << "\n";
+        double prob_leech = Roll<double>(RSC::PROB_LEECH, 0.1, 0.9);
+        NewPeerData(LEECH, p, 0.0, prob_leech);
+        UpdateSwarmInfo(ISF::JOIN, p);
     }
 
-    // TODO: bugs in peer selection
-    for(int pid = start; pid < end; pid++)
-    {
-        Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
-        g_peers.at(pid).neighbors = neighbors;
-    }
+    for(int p = start; p < end; p++) AllotNeighbors(p);
 
     std::cout << "============================\n";
 }

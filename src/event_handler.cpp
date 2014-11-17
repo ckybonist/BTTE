@@ -22,7 +22,7 @@ void EventInfo(const Event& head);
 
 }
 
-const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth;
+const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bw.downlink;
 const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 
 
@@ -139,7 +139,8 @@ float EventHandler::ComputeArrivalEventTime(const Event& e,
     }
     else if (dtbt == Event::PIECE_ADMIT)
     {
-        time += g_peers.at(e.pid).trans_time;
+        const float trans_time = g_kPieceSize / g_peers.at(e.pid).bw.downlink;
+        time += trans_time;
     }
     else if (dtbt == Event::REQ_PIECE ||
              dtbt == Event::PIECE_GET)
@@ -200,7 +201,7 @@ void EventHandler::GetNextPeerJoinEvent(Event& e)
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
     const int next_join_pid = e.pid + 1;
 
-    if (next_join_pid < args_.NUM_PEER &&
+    if ((size_t)next_join_pid < args_.NUM_PEER &&
             !g_in_swarm_set[next_join_pid])
     {
         float time = ComputeArrivalEventTime(e, Event::PEER_JOIN);
@@ -376,7 +377,7 @@ void EventHandler::PieceGetEvent(Event& e)
     //    }
     //}
 
-    //if (pm_->AllPiecesDone(e.pid))
+    //if (pm_->CheckAllPiecesGet(e.pid))
     //{
     //    auto peer = g_peers.at(e.pid);
     //    if (peer.is_leech)
