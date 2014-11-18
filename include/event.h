@@ -40,7 +40,7 @@ public:
     // 1. Piece-related
     int piece_no;       // piece no which being admitted (or received)
     int requestor_pid;  // use when generate derived event of PIECE_ADMIT
-    bool req_timeout;
+    //bool req_timeout;
     bool am_choking;    // PieceReqRecv event
 };
 

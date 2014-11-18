@@ -13,7 +13,7 @@ PieceMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
     {
         auto nei = g_peers[selector_pid_].neighbors[i];
 
-        if (!nei.connected) continue;
+        if (!nei.exist) continue;
 
         if (IsDownloadable(nei, target_piece_no))
         {

@@ -68,7 +68,7 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand
         {
             const int cand_pid = nbc_info_[i].pid;
             neighbors[i].id = cand_pid;
-            neighbors[i].connected = true;
+            neighbors[i].exist = true;
 
             float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
             neighbors[i].pg_delay = pg_delay;

@@ -4,7 +4,7 @@ Neighbor::Neighbor()
 {
     id = -1;
     pg_delay = 0.0;
-    connected = false;
+    exist = false;
 }
 
 Neighbor::Neighbor(const int pid,
@@ -12,5 +12,5 @@ Neighbor::Neighbor(const int pid,
 {
     id = pid;
     this->pg_delay = pg_delay;
-    connected = true;
+    exist = true;
 }

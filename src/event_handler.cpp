@@ -18,7 +18,7 @@ namespace
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
-void EventInfo(const Event& head);
+void EventInfo(const Event& head, float cur_sys_time);
 
 }
 
@@ -165,12 +165,12 @@ void EventHandler::GetDerivedEvent(Event& e)
 
     /* Three Special cases below: */
     // 1. Prepare a timeout event in advance
-    if (e.type_bt == Event::PIECE_REQ_RECV &&
-            !e.am_choking)
-    {
-        derived_type_bt = Event::PIECE_REQ_RECV;
-        time += kTimeout_;
-    }
+    //if (e.type_bt == Event::PIECE_REQ_RECV &&
+    //        !e.am_choking)
+    //{
+    //    derived_type_bt = Event::PIECE_REQ_RECV;
+    //    time += kTimeout_;
+    //}
 
     //// 2. The pid of event will be the piece requestor,
     ////    not the receiver
@@ -254,13 +254,11 @@ void EventHandler::ProcessDeparture(Event& e)
 
     if (system_.size() != 0)
     {
-        Event sys_head = system_.front();
+        Event head = system_.front();
         current_time_ = e.time;
-        waiting_time_ = waiting_time_ + (current_time_ - sys_head.time);
+        waiting_time_ = waiting_time_ + (current_time_ - head.time);
 
-        GetNextDepartureEvent(sys_head.type_bt,
-                              ++next_event_idx_,
-                              sys_head.pid);
+        GetNextDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
     }
 
     event_list_.sort();
@@ -317,7 +315,6 @@ void EventHandler::PeerListGetEvent(Event& e)
     }
 
     event_list_.sort();
-
     // TODO
     // 2. 執行第一次 choking，每個 neighbor 會選出 4 or 5 個連線對象
     //    並紀錄起來。
@@ -342,7 +339,6 @@ void EventHandler::PieceReqRecvEvent(Event& e)
             e.am_choking = nei.conn_states.am_choking;
         }
     }
-
 }
 
 void EventHandler::PieceAdmitEvent(Event& e)
@@ -441,7 +437,7 @@ void Event2Str(TBTmapStr &tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
-void EventInfo(const Event& head)
+void EventInfo(const Event& head, float sys_cur_time)
 {
     std::cout.precision(5);
 
@@ -452,12 +448,16 @@ void EventInfo(const Event& head)
     if(head.type == Event::Type::ARRIVAL)
     {
         std::cout << "\nEvent #" << head.index << " arrival at "
-                  << head.time << "\n";
+                  << head.time;
+        std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
+        if (sys_cur_time > head.time) std::cout << "Timeout";
+        else std::cout << "In time";
     }
     else
     {
         std::cout << "\nEvent #" << head.index << " departure at "
-                  << head.time << "\n";
+                  << head.time;
+        std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];
     std::cout << "\nThis is event belongs to peer #" << head.pid
@@ -480,6 +480,6 @@ void EventHandler::StartRoutine()
 
         ProcessEvent(head);
 
-        EventInfo(head);
+        EventInfo(head, current_time_);
     }
 }

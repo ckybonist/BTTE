@@ -45,7 +45,7 @@ void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
             const int cand_pid = candidates_[i];
             const int cand_cid = g_peers.at(cand_pid).cid;
             neighbors[i].id = cand_pid;
-            neighbors[i].connected = true;
+            neighbors[i].exist = true;
 
             float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
             neighbors[i].pg_delay = pg_delay;

@@ -28,7 +28,7 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
         int counts = 0;
         for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
         {
-            if (neighbors[n].connected)  // ensure the neighbor is exist
+            if (neighbors[n].exist)  // ensure the neighbor is exist
             {
                 const int nid = neighbors[n].id;
                 bool is_get_piece = g_peers.at(nid).pieces[*it];
@@ -82,7 +82,7 @@ PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last
     {
         auto nei = g_peers.at(selector_pid_).neighbors[i];
 
-        if (!nei.connected) continue;
+        if (!nei.exist) continue;
 
         // peer id of neighbor
         const int nid = nei.id;

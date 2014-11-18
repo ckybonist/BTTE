@@ -10,7 +10,7 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     time = ti;
     pg_delay = 0.0;
 
-    is_timeout = false;
+    //req_timeout = false;
 
     // not for all type of events
     requestor_pid = -1;
