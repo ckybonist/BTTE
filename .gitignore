@@ -28,4 +28,6 @@ bin/*
 
 # Ctags
 tags
-*.cscope
+
+# CScope
+*.cscope.*
