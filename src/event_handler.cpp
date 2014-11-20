@@ -229,16 +229,10 @@ void EventHandler::ProcessArrival(Event& e)
     //if (e.type_bt == Event::REQ_PIECE && e.is_timeout) return;
 
     // 如果是節點加入事件，就再產生下一個
-    if (e.type_bt == Event::PEER_JOIN)
-    {
-        GetNextPeerJoinEvent(e);
-    }
+    if (e.type_bt == Event::PEER_JOIN) { GetNextPeerJoinEvent(e); }
 
     /// 只要不是 Peer Leave 事件，就產生此事件的衍生事件
-    if (e.type_bt != Event::PEER_LEAVE)
-    {
-        GetDerivedEvent(e);
-    }
+    if (e.type_bt != Event::PEER_LEAVE) { GetDerivedEvent(e); }
 
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
@@ -269,6 +263,8 @@ bool EventHandler::ReqTimeout(Event& e)
     assert(current_time_ > e.time);
 
     bool flag = false;
+    // TODO: 紀錄送出要求的時間(prev_cur_time)，將現在時間(cur_time)減掉 prev_cur_time
+    //       如果大於等於 kTimeout 就視為 Timeout
     if (current_time_ - e.time >= kTimeout_)
     {
         std::cout << "This req-event is timeout, so dump it out of the system" << std::endl;
@@ -298,9 +294,8 @@ void EventHandler::PeerListGetEvent(Event& e)
     for (auto it = req_msgs.begin(); it != req_msgs.end(); ++it)
     {
         auto msg = *it;
-        const int dest = msg.dest_pid;
         auto sender = g_peers.at(e.pid);
-        auto receiver = g_peers.at(dest);
+        auto receiver = g_peers.at(msg.dest_pid);
 
         sender.send_msgs.push_back(msg);
         receiver.recv_msgs.push_back(msg);
