@@ -85,14 +85,14 @@ void PeerInfo(const size_t pid)
         cout << "Peer type: Average" << endl;
     }
 
-    cout << "Upload Bandwidth: " << peer.bw.uplink << endl;
-    cout << "Download Bandwidth: " << peer.bw.downlink << endl;
+    cout << "Upload Bandwidth: " << peer.bandwidth.uplink << endl;
+    cout << "Download Bandwidth: " << peer.bandwidth.downlink << endl;
 }
 
 void PieceInfo(const size_t pid,
-                      const size_t NUM_PIECE,
-                      const size_t NUM_SEED,
-                      int* counter)
+               const size_t NUM_PIECE,
+               const size_t NUM_SEED,
+               int* counter)
 {
     ///////////////////
     // pieces info

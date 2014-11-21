@@ -13,7 +13,7 @@ public:
     RandomFirstPiece(Args args) : IPieceSelect(args) {};
 
 private:
-    PMList StartSelection(const int self_pid) override;
+    MsgQueue StartSelection(const int self_pid) override;
     PieceMsg CreateReqMsg(const int target_piece_no);  // for Random First Piece
     void RefreshInfo();
 };

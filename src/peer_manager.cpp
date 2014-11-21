@@ -147,7 +147,7 @@ PeerManager::~PeerManager()
 void PeerManager::NewPeerData(PeerType type, const int pid, const float join_time, double prob_leech) const
 {
     const int level = reserved_peer_levels_[pid];
-    Bandwidth bw = g_kPeerLevel[level].bw;
+    Bandwidth bw = g_kPeerLevel[level].bandwidth;
     const int cid = reserved_cids_[pid];
     const int NUM_PIECE = args_->NUM_PIECE;
 
@@ -229,7 +229,7 @@ void PeerManager::AllotNeighbors(const int pid) const
     g_peers.at(pid).neighbors = neighbors;
 }
 
-std::list<PieceMsg> PeerManager::GetPieceReqMsgs(const int self_pid)
+std::deque<PieceMsg> PeerManager::GetPieceReqMsgs(const int self_pid)
 {
     const auto req_msgs = obj_pieceselect_->StartSelection(self_pid);
     return req_msgs;
@@ -250,7 +250,7 @@ void PeerManager::CreatePeers()
     for(int i = 0; i < g_kNumLevel; i++)
     {
         std::cout << "Transmission Time of level "<< i << " : "
-                  << g_kPieceSize / g_kPeerLevel[i].bw.downlink << "\n";
+                  << g_kPieceSize / g_kPeerLevel[i].bandwidth.downlink << "\n";
     }
     std::cout << "\n\n\n";
 

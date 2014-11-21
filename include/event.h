@@ -38,10 +38,10 @@ public:
 
     /* Variables below not use when processing all type of events: */
     // 1. Piece-related
+    bool am_choking;    // PieceReqRecv event
     int piece_no;       // piece no which being admitted (or received)
     int requestor_pid;  // use when generate derived event of PIECE_ADMIT
-    //bool req_timeout;
-    bool am_choking;    // PieceReqRecv event
+    float time_req_send;
 };
 
 

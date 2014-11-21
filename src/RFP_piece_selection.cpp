@@ -31,7 +31,7 @@ void RandomFirstPiece::RefreshInfo()
     targets_set_.clear();
 }
 
-PMList RandomFirstPiece::StartSelection(const int self_pid)
+MsgQueue RandomFirstPiece::StartSelection(const int self_pid)
 {
     selector_pid_ = self_pid;
 
@@ -46,7 +46,7 @@ PMList RandomFirstPiece::StartSelection(const int self_pid)
     int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_targets;
     for(; rand_offset != 0; --rand_offset) ++piece_no;
 
-    std::list<PieceMsg> req_msgs;
+    std::deque<PieceMsg> req_msgs;
     const PieceMsg msg = CreateReqMsg(*piece_no);
     if (msg.dest_pid != -1)
         req_msgs.push_back(msg);

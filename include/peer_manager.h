@@ -36,7 +36,7 @@ public:
     bool CheckAllPiecesGet(const int pid) const;
 
     void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
-    std::list<PieceMsg> GetPieceReqMsgs(const int self_pid);     // get the result of Piece Selection
+    std::deque<PieceMsg> GetPieceReqMsgs(const int self_pid);     // get the result of Piece Selection
 
     void CreatePeers();
 

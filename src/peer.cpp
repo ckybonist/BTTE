@@ -19,7 +19,7 @@ Peer::Peer()
     pieces = nullptr;
     neighbors = nullptr;
     join_time = 0.0;
-    end_time = 0.0;
+    leave_time = 0.0;
     neighbor_counts = 0;
 }
 
@@ -27,7 +27,7 @@ Peer::Peer()
 Peer::Peer(const int pid,
            const int cid,
            const int NUM_PIECE,
-           const Bandwidth bw)
+           const Bandwidth bandwidth)
 {
     in_swarm = true;
     type = SEED;
@@ -40,10 +40,10 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->bw = bw;
+    this->bandwidth = bandwidth;
 
     join_time = 0.0;
-    end_time = 0.0;
+    leave_time = 0.0;
 
     neighbor_counts = 0;
     unchoke_counts = 0;
@@ -54,7 +54,7 @@ Peer::Peer(const int pid,
            const int cid,
            const int NUM_PIECE,
            const double prob_leech,
-           const Bandwidth bw)
+           const Bandwidth bandwidth)
 {
     in_swarm = true;
     type = LEECH;
@@ -70,10 +70,10 @@ Peer::Peer(const int pid,
 
     neighbors = nullptr;
 
-    this->bw = bw;
+    this->bandwidth = bandwidth;
 
     join_time = 0.0;
-    end_time = 0.0;
+    leave_time = 0.0;
 
     neighbor_counts = 0;
     unchoke_counts = 0;
@@ -85,7 +85,7 @@ Peer::Peer(const int pid,
            const int cid,
            const int NUM_PIECE,
            const float join_time,
-           const Bandwidth bw)
+           const Bandwidth bandwidth)
 {
     in_swarm = true;
     type = NORMAL;
@@ -95,10 +95,10 @@ Peer::Peer(const int pid,
     pieces = MakePieces(NUM_PIECE);
     neighbors = nullptr;
 
-    this->bw = bw;
+    this->bandwidth = bandwidth;
 
     this->join_time = join_time;
-    end_time = 0.0;
+    leave_time = 0.0;
     neighbor_counts = 0;
     unchoke_counts = 0;
 }

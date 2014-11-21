@@ -24,14 +24,14 @@ typedef enum class TypePieceSelect
     USER_DEFINED_2,
 } PieceSelect_T;
 
-typedef std::list<PieceMsg> PMList;
+typedef std::deque<PieceMsg> MsgQueue;
 
 class IPieceSelect
 {
 public:
     IPieceSelect(Args args);
     virtual ~IPieceSelect();
-    virtual PMList StartSelection(const int self_pid) = 0;
+    virtual MsgQueue StartSelection(const int self_pid) = 0;
 
 protected:
     void CheckNeighbors();

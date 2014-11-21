@@ -2,11 +2,11 @@
 #include <cassert>
 #include <cmath>
 
-#include "random.h"
 #include "peer.h"
+#include "piece.h"
+#include "random.h"
 #include "pg_delay.h"
 #include "peer_level.h"
-#include "piece.h"
 #include "event_handler.h"
 
 using namespace uniformrand;
@@ -22,7 +22,7 @@ void EventInfo(const Event& head, float cur_sys_time);
 
 }
 
-const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bw.downlink;
+const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth.downlink;
 const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 
 
@@ -87,7 +87,7 @@ void EventHandler::PushInitEvent()
     event_list_.push_back(first_event);
 }
 
-void EventHandler::GetNextArrivalEvent(const Event::Type4BT type_bt,
+void EventHandler::PushArrivalEvent(const Event::Type4BT type_bt,
                                        const int next_index,
                                        const int pid,
                                        const float next_time)
@@ -103,7 +103,7 @@ void EventHandler::GetNextArrivalEvent(const Event::Type4BT type_bt,
     event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
 }
 
-void EventHandler::GetNextDepartureEvent(const Event::Type4BT type_bt,
+void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                                          const int next_index,
                                          const int pid)
 {
@@ -138,7 +138,7 @@ float EventHandler::ComputeArrivalEventTime(const Event& e, const Event::Type4BT
     }
     else if (dtbt == Event::PIECE_ADMIT)
     {
-        const float trans_time = g_kPieceSize / g_peers.at(e.pid).bw.downlink;
+        const float trans_time = g_kPieceSize / g_peers.at(e.pid).bandwidth.downlink;
         time += trans_time;
     }
     else if (dtbt == Event::PIECE_REQ_RECV ||
@@ -157,7 +157,7 @@ float EventHandler::ComputeDepartureEventTime()
 }
 
 // TODO: 將以下函式做的事情分散到各個事件中
-void EventHandler::GetDerivedEvent(Event& e)
+void EventHandler::PushDerivedEvent(Event& e)
 {
     int pid = e.pid;
     Event::Type4BT derived_type_bt = event_deps_map_[e.type_bt];
@@ -188,7 +188,7 @@ void EventHandler::GetDerivedEvent(Event& e)
     //    derived_type_bt = Event::REQ_PIECE;
     //}
 
-    GetNextArrivalEvent(derived_type_bt,
+    PushArrivalEvent(derived_type_bt,
                         ++next_event_idx_,
                         pid,
                         time);
@@ -196,7 +196,7 @@ void EventHandler::GetDerivedEvent(Event& e)
     event_list_.sort();
 }
 
-void EventHandler::GetNextPeerJoinEvent(Event& e)
+void EventHandler::PushPeerJoinEvent(Event& e)
 {
     /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
@@ -206,7 +206,7 @@ void EventHandler::GetNextPeerJoinEvent(Event& e)
             !g_in_swarm_set[next_join_pid])
     {
         float time = ComputeArrivalEventTime(e, Event::PEER_JOIN);
-        GetNextArrivalEvent(Event::PEER_JOIN,
+        PushArrivalEvent(Event::PEER_JOIN,
                             ++next_event_idx_,
                             next_join_pid,
                             time);
@@ -229,16 +229,16 @@ void EventHandler::ProcessArrival(Event& e)
     //if (e.type_bt == Event::REQ_PIECE && e.is_timeout) return;
 
     // 如果是節點加入事件，就再產生下一個
-    if (e.type_bt == Event::PEER_JOIN) { GetNextPeerJoinEvent(e); }
+    if (e.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(e); }
 
     /// 只要不是 Peer Leave 事件，就產生此事件的衍生事件
-    if (e.type_bt != Event::PEER_LEAVE) { GetDerivedEvent(e); }
+    if (e.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(e); }
 
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
     {
         current_time_ = e.time;
-        GetNextDepartureEvent(e.type_bt, next_event_idx_, e.pid);
+        PushDepartureEvent(e.type_bt, next_event_idx_, e.pid);
     }
 }
 
@@ -252,7 +252,7 @@ void EventHandler::ProcessDeparture(Event& e)
         current_time_ = e.time;
         waiting_time_ = waiting_time_ + (current_time_ - head.time);
 
-        GetNextDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
+        PushDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
     }
 
     event_list_.sort();
@@ -260,15 +260,16 @@ void EventHandler::ProcessDeparture(Event& e)
 
 bool EventHandler::ReqTimeout(Event& e)
 {
-    assert(current_time_ > e.time);
+    //assert(current_time_ > e.time_req_send);
 
     bool flag = false;
-    // TODO: 紀錄送出要求的時間(prev_cur_time)，將現在時間(cur_time)減掉 prev_cur_time
+    // TODO: 紀錄送出要求的時間(time_req_send)(產生要求事件的系統時的 current-time)，
+    //       並且將現在時間(cur_time)減掉 time_req_send
     //       如果大於等於 kTimeout 就視為 Timeout
-    if (current_time_ - e.time >= kTimeout_)
+    if (current_time_ - e.time_req_send >= kTimeout_)
     {
         std::cout << "This req-event is timeout, so dump it out of the system" << std::endl;
-        system_.pop_front();
+        system_.pop_back();
         flag = true;
     }
 
@@ -297,11 +298,11 @@ void EventHandler::PeerListGetEvent(Event& e)
         auto sender = g_peers.at(e.pid);
         auto receiver = g_peers.at(msg.dest_pid);
 
-        sender.send_msgs.push_back(msg);
-        receiver.recv_msgs.push_back(msg);
+        sender.send_msg_buf.push_back(msg);
+        receiver.recv_msg_buf.push_back(msg);
 
         // generate piece-req-recv event
-        //GetNextArrivalEvent();
+        //PushArrivalEvent();
 
         std::cout << "Sending piece-req msg from peer #"
                   << msg.src_pid << " to peer #"
@@ -401,21 +402,15 @@ void EventHandler::CompletedEvent(Event& e)
 void EventHandler::PeerLeaveEvent(Event& e)
 {
     g_peers.at(e.pid).in_swarm = false;
+    g_peers.at(e.pid).leave_time = current_time_;
     pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, e.pid);
 }
 
 void EventHandler::ProcessEvent(Event& e)
 {
-    if (e.type == Event::Type::ARRIVAL)
-    {
-        ProcessArrival(e);
-    }
-    else if (e.type == Event::Type::DEPARTURE)
-    {
-        ProcessDeparture(e);
-    }
+    if (e.type == Event::Type::ARRIVAL) ProcessArrival(e);
+    else ProcessDeparture(e);
 }
-
 
 namespace
 {
@@ -442,16 +437,14 @@ void EventInfo(const Event& head, float sys_cur_time)
     std::cout << std::flush;
     if(head.type == Event::Type::ARRIVAL)
     {
-        std::cout << "\nEvent #" << head.index << " arrival at "
-                  << head.time;
+        std::cout << "\nEvent #" << head.index << " arrival at " << head.time;
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
         if (sys_cur_time > head.time) std::cout << "Timeout";
         else std::cout << "In time";
     }
     else
     {
-        std::cout << "\nEvent #" << head.index << " departure at "
-                  << head.time;
+        std::cout << "\nEvent #" << head.index << " departure at " << head.time;
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];

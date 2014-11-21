@@ -15,54 +15,44 @@ class EventHandler
 public:
     EventHandler(Args args, PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
-
-    void PushInitEvent();
-    void ProcessArrival(Event& e);
-    void ProcessDeparture(Event& e);
-    void ProcessEvent(Event& e);
     void StartRoutine();
-
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
-
 private:
-    void GetDerivedEvent(Event& e);
-    void GetNextPeerJoinEvent(Event& e);
-    void GetNextArrivalEvent(const Event::Type4BT next_tbt,
-                             const int next_index,
-                             const int pid,
-                             const float next_time);
+    void PushInitEvent();
+    void PushDerivedEvent(Event& e);
+    void PushPeerJoinEvent(Event& e);
+    void PushArrivalEvent(const Event::Type4BT next_tbt,
+                          const int next_index,
+                          const int pid,
+                          const float next_time);
 
-    void GetNextDepartureEvent(const Event::Type4BT type_bt,
-                               const int next_index,
-                               const int pid);
+    void ProcessArrival(Event& e);
+    void ProcessDeparture(Event& e);
+    void ProcessEvent(Event& e);
+
+    void PushDepartureEvent(const Event::Type4BT type_bt,
+                            const int next_index,
+                            const int pid);
 
     float ComputeArrivalEventTime(const Event& e, const Event::Type4BT derived_type_bt);
-
     float ComputeDepartureEventTime();
-
-    bool ReqTimeout(Event& e);
 
     void MapEvents();
     void CreateSingleFlowDependencies();
 
 
 private:
+    bool ReqTimeout(Event& e);
+
     void PeerJoinEvent(Event& e);
-
     void PeerListReqRecvEvent(Event& e);
-
     void PeerListGetEvent(Event& e);
-
     void PieceReqRecvEvent(Event& e);
-
     void PieceAdmitEvent(Event& e);
-
     void PieceGetEvent(Event& e);
-
     void CompletedEvent(Event& e);
-
     void PeerLeaveEvent(Event& e);
 
 

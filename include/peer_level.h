@@ -22,7 +22,7 @@ struct Bandwidth
 struct PeerLevel
 {
     float dist_rate;
-    Bandwidth bw;
+    Bandwidth bandwidth;
 };
 
 const PeerLevel g_kPeerLevel[g_kNumLevel] =

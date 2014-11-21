@@ -111,7 +111,7 @@ void RarestFirst::RefreshInfo()
     targets_set_.clear();
 }
 
-PMList RarestFirst::StartSelection(const int self_pid)
+MsgQueue RarestFirst::StartSelection(const int self_pid)
 {
     selector_pid_ = self_pid;
 
@@ -135,7 +135,7 @@ PMList RarestFirst::StartSelection(const int self_pid)
     std::cout << std::endl;
 
     // Create req-msg list
-    PMList req_msgs;
+    MsgQueue req_msgs;
     for (int i = 0; (size_t)i < num_targets; ++i)
     {
         const int piece_no = piece_counts_info_[i].piece_no;

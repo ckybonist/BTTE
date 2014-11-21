@@ -20,7 +20,7 @@ private:
         int counts;
     };
 
-    PMList StartSelection(const int self_pid) override;
+    MsgQueue StartSelection(const int self_pid) override;
 
     void CountNumPeerOwnPiece(const size_t num_targets);
     void SortByPieceCounts(const int num_targets);

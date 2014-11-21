@@ -1,9 +1,8 @@
 #ifndef _PEER_H
 #define _PEER_H
 
-#include <map>
-#include <list>
 #include <vector>
+#include <deque>
 
 #include "piece.h"
 #include "neighbor.h"
@@ -42,34 +41,26 @@ public:
          const float join_time,
          const Bandwidth bw);
 
+public:
+    bool in_swarm;
     int pid;
     int cid;  // start from 1
-
     PeerType type;
-    bool in_swarm;
 
     bool* pieces;
+    Neighbor* neighbors;
+    int neighbor_counts;  // counts of peer being served(selected) as neighbor
+    int unchoke_counts;
 
     // 記錄上一次要求的 piece，如果這個要求沒有被 choking 而且尚未收到，
     // 就不要選擇這個 piece 去要求
-    std::list<PieceMsg> send_msgs;
-    std::list<PieceMsg> recv_msgs;
+    std::deque<PieceMsg> send_msg_buf;
+    std::deque<PieceMsg> recv_msg_buf;
 
-    Neighbor* neighbors;
-
-    Bandwidth bw;
+    Bandwidth bandwidth;
 
     float join_time;     // start time of peer run the routine
-    float end_time;      // end time of all pieces have been downloaded
-
-    // counts of being selected as an neighbor, this variable will use
-    // in Load Balancing Peer Selection
-    int neighbor_counts;  // counts of peer being served(selected) as neighbor
-
-    int unchoke_counts;
-
-private:
-    // TODO
+    float leave_time;      // end time of all pieces have been downloaded
 };
 
 //extern Peer* g_peers;

@@ -43,8 +43,8 @@ bool IPieceSelect::IsDownloadable(Neighbor& nei, const int target_piece_no) cons
     // check the piece has requested but not get it
     bool still_download = false;
     auto selector = g_peers.at(selector_pid_);
-    auto begin = selector.send_msgs.begin();
-    auto end = selector.send_msgs.end();
+    auto begin = selector.send_msg_buf.begin();
+    auto end = selector.send_msg_buf.end();
     for (auto it = begin; it != end; ++it)
     {
         if ((*it).piece_no == target_piece_no)
