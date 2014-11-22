@@ -2,7 +2,6 @@ REL=$(notdir $(CURDIR))
 BETA=$(REL)g
 
 SRC = src
-INC = include
 ALGORITHM = algorithm
 
 OBJ = obj/bin
@@ -10,7 +9,7 @@ DBG = obj/dbg
 LIB = lib
 OUT = bin
 
-INCLUDES=-I. -I$(INC) -I$(ALGORITHM)
+INCLUDES=-I. -I$(wildcard $(SRC)/%.h) -I$(ALGORITHM)
 LIBS=
 #LIBS=-lstdc++
 
@@ -41,10 +40,10 @@ DBG_OBJS = $(addprefix $(DBG)/,$(OBJS))
 .SUFFIXES: .o .cpp .tpp
 
 # Create object files
-$(OBJ)/%.o: $(SRC)/%.cpp $(INC)/%.h
+$(OBJ)/%.o: $(SRC)/%.cpp $(SRC)/%.h
 	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
 
-$(DBG)/%.o: $(SRC)/%.cpp $(INC)/%.h
+$(DBG)/%.o: $(SRC)/%.cpp $(SRC)/%.h
 	$(CXX) -o $@ -c $< $(CFLAGS) $(INCLUDES)
 
 all: release debug

@@ -23,10 +23,7 @@ private:
     void PushInitEvent();
     void PushDerivedEvent(Event& e);
     void PushPeerJoinEvent(Event& e);
-    void PushArrivalEvent(const Event::Type4BT next_tbt,
-                          const int next_index,
-                          const int pid,
-                          const float next_time);
+    void PushArrivalEvent(const Event& e);
 
     void ProcessArrival(Event& e);
     void ProcessDeparture(Event& e);
@@ -66,13 +63,12 @@ private:
     std::list<Event> event_list_;
     std::list<Event> system_;
 
+    // external
     Args args_;
-
     PeerManager* pm_;
 
     float lambda_;
     float mu_;
-
     float total_sys_size_;
     float current_time_;
     float waiting_time_;

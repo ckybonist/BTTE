@@ -17,6 +17,11 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     piece_no = -1;
 }
 
+Event::~Event()
+{
+    req_msgs = nullptr;
+}
+
 bool Event::operator<(const Event& e)
 {
     return time < e.time;

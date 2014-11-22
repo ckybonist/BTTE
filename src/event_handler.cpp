@@ -62,8 +62,10 @@ void EventHandler::CreateSingleFlowDependencies()
     event_deps_map_[Event::PEER_JOIN] = Event::PEERLIST_REQ_RECV;
     event_deps_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
     event_deps_map_[Event::PEERLIST_GET] = Event::PIECE_REQ_RECV;
+
     // TODO: The derived event of REQ_PIECE needs to fix
     event_deps_map_[Event::PIECE_REQ_RECV] = Event::PIECE_ADMIT;
+
     event_deps_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
     event_deps_map_[Event::PIECE_GET] = Event::COMPLETED;
     event_deps_map_[Event::COMPLETED] = Event::PEER_LEAVE;
@@ -71,12 +73,11 @@ void EventHandler::CreateSingleFlowDependencies()
 
 void EventHandler::PushInitEvent()
 {
-    float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-
+    const int initial_pid = args_.NUM_SEED + args_.NUM_LEECH;
     const int initial_idx = 1;
     next_event_idx_ = initial_idx;  // init next event index
 
-    const int initial_pid = args_.NUM_SEED + args_.NUM_LEECH;
+    float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
     Event first_event(Event::Type::ARRIVAL,
                       Event::PEER_JOIN,
@@ -87,19 +88,9 @@ void EventHandler::PushInitEvent()
     event_list_.push_back(first_event);
 }
 
-void EventHandler::PushArrivalEvent(const Event::Type4BT type_bt,
-                                       const int next_index,
-                                       const int pid,
-                                       const float next_time)
+void EventHandler::PushArrivalEvent(const Event& ev)
 {
-    Event new_event(Event::Type::ARRIVAL,
-                    type_bt,
-                    next_index,
-                    pid,
-                    next_time);
-
-    event_list_.push_back(new_event);
-
+    event_list_.push_back(ev);
     event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
 }
 
@@ -113,17 +104,15 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                        type_bt,
                        next_index,
                        pid,
-
                        next_etime);
     event_list_.push_back(depart_event);
-
     event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
 }
 
 
-float EventHandler::ComputeArrivalEventTime(const Event& e, const Event::Type4BT derived_type_bt)
+float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt)
 {
-    float time = e.time;
+    float time = ev.time;
     Event::Type4BT dtbt = derived_type_bt;
 
     if (dtbt == Event::PEERLIST_REQ_RECV ||
@@ -138,13 +127,13 @@ float EventHandler::ComputeArrivalEventTime(const Event& e, const Event::Type4BT
     }
     else if (dtbt == Event::PIECE_ADMIT)
     {
-        const float trans_time = g_kPieceSize / g_peers.at(e.pid).bandwidth.downlink;
+        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).bandwidth.downlink;
         time += trans_time;
     }
     else if (dtbt == Event::PIECE_REQ_RECV ||
              dtbt == Event::PIECE_GET)
     {
-        time += e.pg_delay;
+        time += ev.pg_delay;
     }
 
     return time;
@@ -157,107 +146,107 @@ float EventHandler::ComputeDepartureEventTime()
 }
 
 // TODO: 將以下函式做的事情分散到各個事件中
-void EventHandler::PushDerivedEvent(Event& e)
+void EventHandler::PushDerivedEvent(Event& ev)
 {
-    int ev_pid = e.pid;
-    Event::Type4BT derived_type_bt = event_deps_map_[e.type_bt];
-    float time = ComputeArrivalEventTime(e, derived_type_bt);
+    int pid = ev.pid;
+    Event::Type4BT derived_tbt = event_deps_map_[ev.type_bt];  // tbt == type_bt
+    float time = ComputeArrivalEventTime(ev, derived_tbt);
 
     ////  Prepare a timeout event in advance
-    //if (e.type_bt == Event::PIECE_REQ_RECV &&
-    //    !e.am_choking)
-    //{
-    //    derived_type_bt = Event::PIECE_REQ_RECV;
-    //    time += kTimeout_;
-    //}
+    if (ev.type_bt == Event::PIECE_REQ_RECV)
+    {
 
-    ////  The pid of event will be the piece requestor,
-    ////    not the receiver
-    //if (e.type_bt == Event::PIECE_ADMIT)
-    //{
-    //    ev_pid = e.requestor_pid;
-    //}
+        //derived_tbt = Event::PIECE_REQ_RECV;
+        //time += kTimeout_;
+    }
 
-    //// After receiving one piece, checking the peer was seed or not
-    //// if true, then do nothing and generate COMPLETED event
-    //// else, generate next REQ_PIECE event
-    //if (e.type_bt == Event::PIECE_GET &&
-    //        !g_peers.at(e.pid).type == SEED)
-    //{
-    //    derived_type_bt = Event::PIECE_REQ_RECV;
-    //}
+    //  The pid of event will be the piece requestor,
+    //    not the receiver
+    if (ev.type_bt == Event::PIECE_ADMIT)
+    {
+        pid = ev.requestor_pid;
+    }
 
-    PushArrivalEvent(derived_type_bt,
+    // After receiving one piece, checking the peer was seed or not
+    // if true, then do nothing and generate COMPLETED event
+    // else, generate next REQ_PIECE event
+    if (ev.type_bt == Event::PIECE_GET &&
+            !g_peers.at(pid).type == SEED)
+    {
+        derived_tbt = Event::PIECE_REQ_RECV;
+    }
+
+    Event next_event(Event::Type::ARRIVAL,
+                     derived_tbt,
                      ++next_event_idx_,
-                     ev_pid,
+                     pid,
                      time);
 
-    event_list_.sort();
+    PushArrivalEvent(next_event);
 }
 
-void EventHandler::PushPeerJoinEvent(Event& e)
+void EventHandler::PushPeerJoinEvent(Event& ev)
 {
     /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
-    const int next_join_pid = e.pid + 1;
+    const int next_join_pid = ev.pid + 1;
 
     if ((size_t)next_join_pid < args_.NUM_PEER &&
             !g_in_swarm_set[next_join_pid])
     {
-        float time = ComputeArrivalEventTime(e, Event::PEER_JOIN);
-        PushArrivalEvent(Event::PEER_JOIN,
-                         ++next_event_idx_,
-                         next_join_pid,
-                         time);
+        float time = ComputeArrivalEventTime(ev, Event::PEER_JOIN);
+        Event event = Event(Event::Type::ARRIVAL,
+                            Event::PEER_JOIN,
+                            ++next_event_idx_,
+                            next_join_pid,
+                            time);
+        PushArrivalEvent(event);
     }
-
-    event_list_.sort();
 }
 
-void EventHandler::ProcessArrival(Event& e)
+void EventHandler::ProcessArrival(Event& ev)
 {
     total_sys_size_ += system_.size();
 
-    system_.push_back(e);
+    system_.push_back(ev);
 
     /// 處理 System 的頭一個 BT 事件
-    (this->*event_map_[e.type_bt])(e);
+    (this->*event_map_[ev.type_bt])(ev);
 
     /// 如果這個 request event 已經 timeout, 也就代表這個事件已經沒用,
     //  所以不再產生衍生事件，直接跳出函式
     //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout) return;
 
     // 如果是節點加入事件，就再產生下一個
-    if (e.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(e); }
+    if (ev.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(ev); }
 
-    /// 只要不是 Peer Leave 事件，就產生此事件的衍生事件
-    if (e.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(e); }
+    /// 只要不是 Peer Leave 事件，就產生衍生事件
+    if (ev.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(ev); }
 
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
     {
-        current_time_ = e.time;
-        PushDepartureEvent(e.type_bt, next_event_idx_, e.pid);
+        current_time_ = ev.time;
+        PushDepartureEvent(ev.type_bt, next_event_idx_, ev.pid);
     }
 }
 
-void EventHandler::ProcessDeparture(Event& e)
+void EventHandler::ProcessDeparture(Event& ev)
 {
     system_.pop_front();
 
     if (system_.size() != 0)
     {
         Event head = system_.front();
-        current_time_ = e.time;
+        current_time_ = ev.time;
         waiting_time_ = waiting_time_ + (current_time_ - head.time);
-
         PushDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
     }
 
     event_list_.sort();
 }
 
-bool EventHandler::ReqTimeout(Event& e)
+bool EventHandler::ReqTimeout(Event& ev)
 {
     //assert(current_time_ > e.time_req_send);
 
@@ -265,7 +254,7 @@ bool EventHandler::ReqTimeout(Event& e)
     // TODO: 紀錄送出要求的時間(time_req_send)(產生要求事件的系統時的 current-time)，
     //       並且將現在時間(cur_time)減掉 time_req_send
     //       如果大於等於 kTimeout 就視為 Timeout
-    if (current_time_ - e.time_req_send >= kTimeout_)
+    if (current_time_ - ev.time_req_send >= kTimeout_)
     {
         std::cout << "This req-event is timeout, so dump it out of the system" << std::endl;
         system_.pop_back();
@@ -275,35 +264,35 @@ bool EventHandler::ReqTimeout(Event& e)
     return flag;
 }
 
-void EventHandler::PeerJoinEvent(Event& e)
+void EventHandler::PeerJoinEvent(Event& ev)
 {
-    pm_->NewPeer(e.pid, e.time);
-    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, e.pid);
-
-    //PushPeerJoinEvent(e);
+    pm_->NewPeer(ev.pid, ev.time);
+    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
 }
 
-void EventHandler::PeerListReqRecvEvent(Event& e)
+void EventHandler::PeerListReqRecvEvent(Event& ev)
 {
-    pm_->AllotNeighbors(e.pid);
+    pm_->AllotNeighbors(ev.pid);
 }
 
-void EventHandler::PeerListGetEvent(Event& e)
+void EventHandler::PeerListGetEvent(Event& ev)
 {
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
-    std::cout << "Peer #" << e.pid << " execute Piece Selection" << "\n";
-    const auto req_msgs = pm_->GetPieceReqMsgs(e.pid);
-    for (auto it = req_msgs.begin(); it != req_msgs.end(); ++it)
+    std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
+
+    std::deque<PieceMsg> msgs = pm_->GetPieceReqMsgs(ev.pid);
+    ev.req_msgs = &msgs;  // reference to event for other usage
+
+    for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
     {
         auto msg = *it;
-        auto sender = g_peers.at(e.pid);
+        auto sender = g_peers.at(ev.pid);
         auto receiver = g_peers.at(msg.dest_pid);
 
         sender.send_msg_buf.push_back(msg);
         receiver.recv_msg_buf.push_back(msg);
 
-        std::cout << "Sending piece-req msg from peer #"
-                  << msg.src_pid << " to peer #"
+        std::cout << "Sending piece-req msg from peer #" << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
         std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
     }
@@ -314,7 +303,7 @@ void EventHandler::PeerListGetEvent(Event& e)
     //Choking();
 }
 
-void EventHandler::PieceReqRecvEvent(Event& e)
+void EventHandler::PieceReqRecvEvent(Event& ev)
 {
     // 如果已經 timeout 就把這個事件移出系統
     // 並忽略下面的執行程序
@@ -322,19 +311,19 @@ void EventHandler::PieceReqRecvEvent(Event& e)
 
     // TODO
     // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件
-    auto receiver = g_peers.at(e.pid);
+    auto receiver = g_peers.at(ev.pid);
 
     for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
-        if (e.requestor_pid == i)
+        if (ev.requestor_pid == i)
         {
             auto nei = receiver.neighbors[i];
-            e.am_choking = nei.conn_states.am_choking;
+            ev.am_choking = nei.conn_states.am_choking;
         }
     }
 }
 
-void EventHandler::PieceAdmitEvent(Event& e)
+void EventHandler::PieceAdmitEvent(Event& ev)
 {
     // TODO
     // 將 admit 的 piece 傳給要求者
@@ -360,14 +349,13 @@ void EventHandler::PieceAdmitEvent(Event& e)
 
 }
 
-void EventHandler::PieceGetEvent(Event& e)
+void EventHandler::PieceGetEvent(Event& ev)
 {
     // TODO
     // 1. 每取得一個 piece 後，執行 Piece Selection。產生 ReqPiece 事件
     // 2. 取得一個 piece，代表接收者 (收到 client #e.pid 要求的 peer)
     // 空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
     // 來決定下一個要處理的要求。
-
 
     //auto receiver = g_peers.at(e.pid);
     //auto begin = receiver.send_msgs.begin();
@@ -390,23 +378,25 @@ void EventHandler::PieceGetEvent(Event& e)
     //}
 }
 
-void EventHandler::CompletedEvent(Event& e)
+void EventHandler::CompletedEvent(Event& ev)
 {
     // After random time, this peer will leave.
     // Now, nothing to do
 }
 
-void EventHandler::PeerLeaveEvent(Event& e)
+void EventHandler::PeerLeaveEvent(Event& ev)
 {
-    g_peers.at(e.pid).in_swarm = false;
-    g_peers.at(e.pid).leave_time = current_time_;
-    pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, e.pid);
+    g_peers.at(ev.pid).in_swarm = false;
+    g_peers.at(ev.pid).leave_time = current_time_;
+    pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, ev.pid);
 }
 
-void EventHandler::ProcessEvent(Event& e)
+void EventHandler::ProcessEvent(Event& ev)
 {
-    if (e.type == Event::Type::ARRIVAL) ProcessArrival(e);
-    else ProcessDeparture(e);
+    if (ev.type == Event::Type::ARRIVAL)
+        ProcessArrival(ev);
+    else
+        ProcessDeparture(ev);
 }
 
 namespace
