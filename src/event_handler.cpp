@@ -104,8 +104,8 @@ void EventHandler::PushArrivalEvent(const Event::Type4BT type_bt,
 }
 
 void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
-                                         const int next_index,
-                                         const int pid)
+                                      const int next_index,
+                                      const int pid)
 {
     float next_etime = ComputeDepartureEventTime();
 
@@ -159,39 +159,38 @@ float EventHandler::ComputeDepartureEventTime()
 // TODO: 將以下函式做的事情分散到各個事件中
 void EventHandler::PushDerivedEvent(Event& e)
 {
-    int pid = e.pid;
+    int ev_pid = e.pid;
     Event::Type4BT derived_type_bt = event_deps_map_[e.type_bt];
     float time = ComputeArrivalEventTime(e, derived_type_bt);
 
-    /* Three Special cases below: */
-    // 1. Prepare a timeout event in advance
+    ////  Prepare a timeout event in advance
     //if (e.type_bt == Event::PIECE_REQ_RECV &&
-    //        !e.am_choking)
+    //    !e.am_choking)
     //{
     //    derived_type_bt = Event::PIECE_REQ_RECV;
     //    time += kTimeout_;
     //}
 
-    //// 2. The pid of event will be the piece requestor,
+    ////  The pid of event will be the piece requestor,
     ////    not the receiver
     //if (e.type_bt == Event::PIECE_ADMIT)
     //{
-    //    pid = e.requestor_pid;
+    //    ev_pid = e.requestor_pid;
     //}
 
-    //// 3. After receiving one piece, checking the peer was seed or not
-    //// if it is, then do nothing and generate COMPLETED event
+    //// After receiving one piece, checking the peer was seed or not
+    //// if true, then do nothing and generate COMPLETED event
     //// else, generate next REQ_PIECE event
     //if (e.type_bt == Event::PIECE_GET &&
-    //        !g_peers.at(e.pid).is_seed)
+    //        !g_peers.at(e.pid).type == SEED)
     //{
-    //    derived_type_bt = Event::REQ_PIECE;
+    //    derived_type_bt = Event::PIECE_REQ_RECV;
     //}
 
     PushArrivalEvent(derived_type_bt,
-                        ++next_event_idx_,
-                        pid,
-                        time);
+                     ++next_event_idx_,
+                     ev_pid,
+                     time);
 
     event_list_.sort();
 }
@@ -207,9 +206,9 @@ void EventHandler::PushPeerJoinEvent(Event& e)
     {
         float time = ComputeArrivalEventTime(e, Event::PEER_JOIN);
         PushArrivalEvent(Event::PEER_JOIN,
-                            ++next_event_idx_,
-                            next_join_pid,
-                            time);
+                         ++next_event_idx_,
+                         next_join_pid,
+                         time);
     }
 
     event_list_.sort();
@@ -226,7 +225,7 @@ void EventHandler::ProcessArrival(Event& e)
 
     /// 如果這個 request event 已經 timeout, 也就代表這個事件已經沒用,
     //  所以不再產生衍生事件，直接跳出函式
-    //if (e.type_bt == Event::REQ_PIECE && e.is_timeout) return;
+    //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout) return;
 
     // 如果是節點加入事件，就再產生下一個
     if (e.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(e); }
@@ -280,6 +279,8 @@ void EventHandler::PeerJoinEvent(Event& e)
 {
     pm_->NewPeer(e.pid, e.time);
     pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, e.pid);
+
+    //PushPeerJoinEvent(e);
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& e)
@@ -301,16 +302,12 @@ void EventHandler::PeerListGetEvent(Event& e)
         sender.send_msg_buf.push_back(msg);
         receiver.recv_msg_buf.push_back(msg);
 
-        // generate piece-req-recv event
-        //PushArrivalEvent();
-
         std::cout << "Sending piece-req msg from peer #"
                   << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
         std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
     }
 
-    event_list_.sort();
     // TODO
     // 2. 執行第一次 choking，每個 neighbor 會選出 4 or 5 個連線對象
     //    並紀錄起來。
@@ -327,7 +324,7 @@ void EventHandler::PieceReqRecvEvent(Event& e)
     // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件
     auto receiver = g_peers.at(e.pid);
 
-    for (int i = 0; i < args_.NUM_PEERLIST; i++)
+    for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
     {
         if (e.requestor_pid == i)
         {
