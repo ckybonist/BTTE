@@ -28,7 +28,6 @@ public:
     };
 
     Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
-    ~Event();
     bool operator<(const Event& e);
 
     Type type;  // arrival or departure
@@ -41,7 +40,7 @@ public:
 
     /* Variables below not use when processing all type of events: */
     // 1. Piece-related
-    std::deque<PieceMsg> const* req_msgs;
+    std::deque<PieceMsg> tmp_req_msgs;
     bool am_choking;    // PieceReqRecv event
     int piece_no;       // piece no which being admitted (or received)
     int requestor_pid;  // use when generate derived event of PIECE_ADMIT

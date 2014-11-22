@@ -280,12 +280,11 @@ void EventHandler::PeerListGetEvent(Event& ev)
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
 
-    std::deque<PieceMsg> msgs = pm_->GetPieceReqMsgs(ev.pid);
-    ev.req_msgs = &msgs;  // reference to event for other usage
+    ev.tmp_req_msgs = pm_->GetPieceReqMsgs(ev.pid);
 
-    for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
+    //for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
+    for (const PieceMsg& msg : ev.tmp_req_msgs)
     {
-        auto msg = *it;
         auto sender = g_peers.at(ev.pid);
         auto receiver = g_peers.at(msg.dest_pid);
 
