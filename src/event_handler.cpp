@@ -146,46 +146,54 @@ float EventHandler::ComputeDepartureEventTime()
 }
 
 // TODO: 將以下函式做的事情分散到各個事件中
-void EventHandler::PushDerivedEvent(Event& ev)
+void EventHandler::PushDerivedEvent(const Event& ev)
 {
     int pid = ev.pid;
+    Event::Type base_etype = Event::Type::ARRIVAL;
     Event::Type4BT derived_tbt = event_deps_map_[ev.type_bt];  // tbt == type_bt
     float time = ComputeArrivalEventTime(ev, derived_tbt);
 
-    ////  Prepare a timeout event in advance
-    if (ev.type_bt == Event::PIECE_REQ_RECV)
+    Event next_event = Event(base_etype, derived_tbt, ++next_event_idx_, pid, time);
+
+    switch (ev.type_bt)
     {
+        case Event::PEERLIST_GET:  // generate initial piece-req events
+            for (const PieceMsg& msg : ev.tmp_req_msgs)
+            {
+                next_event.client_pid = msg.src_pid;
+                next_event.pid = msg.dest_pid;
+                PushArrivalEvent(next_event);
+                // prepare another request for timeout situation
+                //derived_tbt = Event::PIECE_REQ_RECV;
+                //time += kTimeout_;
+            }
+            return;  // already generate derived events
+            break;
 
-        //derived_tbt = Event::PIECE_REQ_RECV;
-        //time += kTimeout_;
+        case Event::PIECE_REQ_RECV:
+            if (ev.am_choking)
+                return;
+            else
+                next_event.client_pid = ev.client_pid;
+            break;
+
+        case Event::PIECE_ADMIT:
+            next_event.pid = ev.client_pid;
+            break;
+
+        case Event::PIECE_GET:  // if get one piece, generate another piece-req event
+            if (!g_peers.at(pid).type == SEED)
+                derived_tbt = Event::PIECE_REQ_RECV;
+            break;
+
+        default:
+            break;
     }
-
-    //  The pid of event will be the piece requestor,
-    //    not the receiver
-    if (ev.type_bt == Event::PIECE_ADMIT)
-    {
-        pid = ev.requestor_pid;
-    }
-
-    // After receiving one piece, checking the peer was seed or not
-    // if true, then do nothing and generate COMPLETED event
-    // else, generate next REQ_PIECE event
-    if (ev.type_bt == Event::PIECE_GET &&
-            !g_peers.at(pid).type == SEED)
-    {
-        derived_tbt = Event::PIECE_REQ_RECV;
-    }
-
-    Event next_event(Event::Type::ARRIVAL,
-                     derived_tbt,
-                     ++next_event_idx_,
-                     pid,
-                     time);
 
     PushArrivalEvent(next_event);
 }
 
-void EventHandler::PushPeerJoinEvent(Event& ev)
+void EventHandler::PushPeerJoinEvent(const Event& ev)
 {
     /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
@@ -231,7 +239,7 @@ void EventHandler::ProcessArrival(Event& ev)
     }
 }
 
-void EventHandler::ProcessDeparture(Event& ev)
+void EventHandler::ProcessDeparture(const Event& ev)
 {
     system_.pop_front();
 
@@ -246,7 +254,7 @@ void EventHandler::ProcessDeparture(Event& ev)
     event_list_.sort();
 }
 
-bool EventHandler::ReqTimeout(Event& ev)
+bool EventHandler::ReqTimeout(const Event& ev)
 {
     //assert(current_time_ > e.time_req_send);
 
@@ -285,11 +293,10 @@ void EventHandler::PeerListGetEvent(Event& ev)
     //for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
     for (const PieceMsg& msg : ev.tmp_req_msgs)
     {
-        auto sender = g_peers.at(ev.pid);
-        auto receiver = g_peers.at(msg.dest_pid);
-
-        sender.send_msg_buf.push_back(msg);
-        receiver.recv_msg_buf.push_back(msg);
+        Peer& client = g_peers.at(ev.pid);      // self peer
+        Peer& peer = g_peers.at(msg.dest_pid);  // other peer
+        client.pieces_on_req.insert(msg.piece_no);
+        peer.recv_msg_buf.push_back(msg);
 
         std::cout << "Sending piece-req msg from peer #" << msg.src_pid << " to peer #"
                   << msg.dest_pid << std::endl;
@@ -297,8 +304,8 @@ void EventHandler::PeerListGetEvent(Event& ev)
     }
 
     // TODO
-    // 2. 執行第一次 choking，每個 neighbor 會選出 4 or 5 個連線對象
-    //    並紀錄起來。
+    // 2. 執行第一次 choking，每個 neighbor
+    //    會選出 4 or 5 個連線對象並紀錄起來。
     //Choking();
 }
 
@@ -310,42 +317,35 @@ void EventHandler::PieceReqRecvEvent(Event& ev)
 
     // TODO
     // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件
-    auto receiver = g_peers.at(ev.pid);
-
-    for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    for (int i = 0; i < args_.NUM_PEERLIST; ++i)
     {
-        if (ev.requestor_pid == i)
+        auto nei = g_peers.at(ev.pid).neighbors[i];
+        if (nei.id == ev.client_pid &&
+                nei.conn_states.am_choking)
         {
-            auto nei = receiver.neighbors[i];
-            ev.am_choking = nei.conn_states.am_choking;
+            ev.am_choking = true;
         }
     }
 }
 
 void EventHandler::PieceAdmitEvent(Event& ev)
 {
-    // TODO
-    // 將 admit 的 piece 傳給要求者
-    // 並產生 PieceGet 事件
-    //
-    //auto examiner = g_peers.at(e.pid);
-    //auto begin = examiner.recv_msgs.begin();
-    //auto end = examiner.recv_msgs.end();
-    //for (auto msg = begin; msg != end; ++msg)
-    //{
-    //    if ((*msg).piece_no == e.piece_no)
-    //    {
-    //        // send piece to requestor
-    //        g_peers.at((*msg).src_pid).pieces[(*msg).piece_no] = true;
-
-    //        // set pid of requestor into event body
-    //        e.requestor_pid = (*msg).src_pid;
-
-    //        examiner.recv_msgs.erase(msg);
-    //        break;
-    //    }
-    //}
-
+    // TODO : 將 piece 送給要求者並產生 PieceGet 事件
+    const Peer& peer = g_peers.at(ev.pid);
+    //auto begin = receiver.recv_msg_buf.begin();
+    //auto end = receiver.recv_msg_buf.end();
+    for (const PieceMsg& msg : peer.recv_msg_buf)
+    {
+        if (msg.piece_no == ev.piece_no)
+        {
+            // send piece to requestor
+            Peer& client = g_peers.at(msg.src_pid);
+            client.pieces[msg.piece_no] = true;
+            // set pid of requestor into event body
+            ev.client_pid = msg.src_pid;
+            break;
+        }
+    }
 }
 
 void EventHandler::PieceGetEvent(Event& ev)
@@ -356,25 +356,21 @@ void EventHandler::PieceGetEvent(Event& ev)
     // 空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
     // 來決定下一個要處理的要求。
 
-    //auto receiver = g_peers.at(e.pid);
+    Peer& client = g_peers.at(ev.pid);
     //auto begin = receiver.send_msgs.begin();
     //auto end = receiver.send_msgs.end();
     //for (auto msg = begin; msg != end; ++msg)
-    //{
-    //    if ((*msg).piece_no == e.piece_no)
-    //    {
-    //        receiver.send_msgs.erase(msg);
-    //        break;
-    //    }
-    //}
+    for (const PieceMsg& msg : client.recv_msg_buf)
+    {
+        if (msg.piece_no == ev.piece_no)
+        {
+            client.pieces_on_req.erase(msg.piece_no);
+            break;
+        }
+    }
 
-    //if (pm_->CheckAllPiecesGet(e.pid))
-    //{
-    //    auto peer = g_peers.at(e.pid);
-    //    if (peer.is_leech)
-    //        peer.is_leech = false;
-    //    g_peers.at(e.pid).is_seed = true;
-    //}
+    if (pm_->CheckAllPiecesGet(ev.pid))
+        client.type = SEED;
 }
 
 void EventHandler::CompletedEvent(Event& ev)

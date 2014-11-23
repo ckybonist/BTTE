@@ -21,19 +21,19 @@ public:
 
 private:
     void PushInitEvent();
-    void PushDerivedEvent(Event& e);
-    void PushPeerJoinEvent(Event& e);
-    void PushArrivalEvent(const Event& e);
+    void PushDerivedEvent(const Event& ev);
+    void PushPeerJoinEvent(const Event& ev);
+    void PushArrivalEvent(const Event& ev);
 
-    void ProcessArrival(Event& e);
-    void ProcessDeparture(Event& e);
-    void ProcessEvent(Event& e);
+    void ProcessArrival(Event& ev);
+    void ProcessDeparture(const Event& ev);
+    void ProcessEvent(Event& ev);
 
     void PushDepartureEvent(const Event::Type4BT type_bt,
                             const int next_index,
                             const int pid);
 
-    float ComputeArrivalEventTime(const Event& e, const Event::Type4BT derived_type_bt);
+    float ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt);
     float ComputeDepartureEventTime();
 
     void MapEvents();
@@ -41,16 +41,16 @@ private:
 
 
 private:
-    bool ReqTimeout(Event& e);
+    bool ReqTimeout(const Event& ev);
 
-    void PeerJoinEvent(Event& e);
-    void PeerListReqRecvEvent(Event& e);
-    void PeerListGetEvent(Event& e);
-    void PieceReqRecvEvent(Event& e);
-    void PieceAdmitEvent(Event& e);
-    void PieceGetEvent(Event& e);
-    void CompletedEvent(Event& e);
-    void PeerLeaveEvent(Event& e);
+    void PeerJoinEvent(Event& ev);
+    void PeerListReqRecvEvent(Event& ev);
+    void PeerListGetEvent(Event& ev);
+    void PieceReqRecvEvent(Event& ev);
+    void PieceAdmitEvent(Event& ev);
+    void PieceGetEvent(Event& ev);
+    void CompletedEvent(Event& ev);
+    void PeerLeaveEvent(Event& ev);
 
 
 private:
