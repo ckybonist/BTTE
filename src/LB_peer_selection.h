@@ -22,7 +22,7 @@ private:
         int counts;
     };
 
-    Neighbor* StartSelection(const int self_pid,
+    Neighbor* StartSelection(const int client_pid,
                              const IntSet& in_swarm_set) override;
 
     void AllocNBCInfo(const size_t N);

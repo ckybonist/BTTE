@@ -29,7 +29,7 @@ class IPeerSelect
 public:
     IPeerSelect(Args args);
     virtual ~IPeerSelect();  // ensuring destructor of derived class will be invoked
-    virtual Neighbor* StartSelection(const int self_pid, const IntSet& in_swarm_set) = 0;
+    virtual Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) = 0;
 
 protected:
     Neighbor* AllocNeighbors();

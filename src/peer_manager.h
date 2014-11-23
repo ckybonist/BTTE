@@ -35,8 +35,8 @@ public:
     void UpdateSwarmInfo(const ISF isf, const int pid);
     bool CheckAllPiecesGet(const int pid) const;
 
-    void AllotNeighbors(const int self_pid) const;  // Peer Selection, for average peers
-    std::deque<PieceMsg> GetPieceReqMsgs(const int self_pid);     // get the result of Piece Selection
+    void AllotNeighbors(const int client_pid) const;  // Peer Selection, for average peers
+    std::deque<PieceMsg> GetPieceReqMsgs(const int client_pid);     // get the result of Piece Selection
 
     void CreatePeers();
 

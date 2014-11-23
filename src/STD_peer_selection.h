@@ -15,7 +15,7 @@ public:
     ~Standard();
 
 private:
-    Neighbor* StartSelection(const int self_pid,
+    Neighbor* StartSelection(const int client_pid,
                              const IntSet& in_swarm_set) override;
     void AssignNeighbors(Neighbor* const neighbors, const size_t cand_size);
     void RefreshInfo();

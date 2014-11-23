@@ -1,8 +1,9 @@
 #ifndef _PEER_H
 #define _PEER_H
 
-#include <vector>
+#include <set>
 #include <deque>
+#include <vector>
 
 #include "piece.h"
 #include "neighbor.h"
@@ -54,7 +55,7 @@ public:
 
     // 記錄上一次要求的 piece，如果這個要求沒有被 choking 而且尚未收到，
     // 就不要選擇這個 piece 去要求
-    std::deque<PieceMsg> send_msg_buf;
+    std::set<int> pieces_on_req;
     std::deque<PieceMsg> recv_msg_buf;
 
     Bandwidth bandwidth;

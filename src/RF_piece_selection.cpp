@@ -57,12 +57,12 @@ void RarestFirst::SortByPieceCounts(const int num_targets)
           func_comp);
 }
 
-bool RarestFirst::IsDupReq(const IntSet& dest_peers, const int nid)
+bool RarestFirst::IsDupDest(const IntSet& dest_peers, const int nid)
 {
     bool flag = false;
-    IntSetIter first = dest_peers.begin();
-    IntSetIter last = dest_peers.end();
-    for (IntSetIter it = first; it != last; ++it)
+    IntSetIter begin = dest_peers.begin();
+    IntSetIter end = dest_peers.end();
+    for (IntSetIter it = begin; it != end; ++it)
     {
         if (*it == nid)
         {
@@ -84,17 +84,14 @@ PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last
 
         if (!nei.exist) continue;
 
-        // peer id of neighbor
-        const int nid = nei.id;
-
         if (IsDownloadable(nei, target_piece_no) &&
-               !IsDupReq(dest_peers, nid))
+            !IsDupDest(dest_peers, nei.id))
         //if (!IsDupReq(dest_peers, nid))
         {
             msg.src_pid = selector_pid_;
-            msg.dest_pid = nid;
+            msg.dest_pid = nei.id;
             msg.piece_no = target_piece_no;
-            dest_peers.insert(nid);
+            dest_peers.insert(nei.id);
             break;
         }
     }
@@ -111,9 +108,9 @@ void RarestFirst::RefreshInfo()
     targets_set_.clear();
 }
 
-MsgQueue RarestFirst::StartSelection(const int self_pid)
+MsgQueue RarestFirst::StartSelection(const int client_pid)
 {
-    selector_pid_ = self_pid;
+    selector_pid_ = client_pid;
 
     CheckNeighbors();
 

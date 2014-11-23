@@ -44,9 +44,9 @@ void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size
     }
 }
 
-Neighbor* Standard::StartSelection(const int self_pid, const IntSet& in_swarm_set)
+Neighbor* Standard::StartSelection(const int client_pid, const IntSet& in_swarm_set)
 {
-    selector_pid_ = self_pid;
+    selector_pid_ = client_pid;
 
     Neighbor* neighbors = AllocNeighbors();
 
@@ -58,7 +58,7 @@ Neighbor* Standard::StartSelection(const int self_pid, const IntSet& in_swarm_se
     AssignNeighbors(neighbors, candidates_size);
 
     // debug info
-    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
+    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
     std::cout << "Info: (pid, cid, PG delay)\n";
     for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
     {

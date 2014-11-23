@@ -229,9 +229,9 @@ void PeerManager::AllotNeighbors(const int pid) const
     g_peers.at(pid).neighbors = neighbors;
 }
 
-std::deque<PieceMsg> PeerManager::GetPieceReqMsgs(const int self_pid)
+std::deque<PieceMsg> PeerManager::GetPieceReqMsgs(const int client_pid)
 {
-    const auto req_msgs = obj_pieceselect_->StartSelection(self_pid);
+    const auto req_msgs = obj_pieceselect_->StartSelection(client_pid);
     return req_msgs;
 }
 

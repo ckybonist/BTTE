@@ -20,11 +20,11 @@ private:
         int counts;
     };
 
-    MsgQueue StartSelection(const int self_pid) override;
+    MsgQueue StartSelection(const int client_pid) override;
 
     void CountNumPeerOwnPiece(const size_t num_targets);
     void SortByPieceCounts(const int num_targets);
-    bool IsDupReq(const IntSet& dest_peers, const int nid);
+    bool IsDupDest(const IntSet& dest_peers, const int nid);
     PieceMsg CreateReqMsg(const int target_piece_no, const bool is_last_piece);  // for Rarest First
     void RefreshInfo();
 

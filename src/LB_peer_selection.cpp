@@ -82,9 +82,9 @@ void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand
     }
 }
 
-Neighbor* LoadBalancing::StartSelection(const int self_pid, const IntSet& in_swarm_set)
+Neighbor* LoadBalancing::StartSelection(const int client_pid, const IntSet& in_swarm_set)
 {
-    selector_pid_ = self_pid;
+    selector_pid_ = client_pid;
 
     Neighbor* neighbors = AllocNeighbors();
 
@@ -98,7 +98,7 @@ Neighbor* LoadBalancing::StartSelection(const int self_pid, const IntSet& in_swa
     AssignNeighbors(neighbors, candidates_size);
 
     // debug info
-    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
+    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
     std::cout << "Info: (pid, cid, neighbor counts, PG delay)\n";
     for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
     {

@@ -65,9 +65,9 @@ void ClusterBased::RefreshInfo()
     candidates_ = nullptr;
 }
 
-Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swarm_set)
+Neighbor* ClusterBased::StartSelection(const int client_pid, const IntSet& in_swarm_set)
 {
-    selector_pid_ = self_pid;
+    selector_pid_ = client_pid;
 
     Neighbor* neighbors = AllocNeighbors();
 
@@ -76,14 +76,14 @@ Neighbor* ClusterBased::StartSelection(const int self_pid, const IntSet& in_swar
     // same cluster id as selector.
     size_t candidates_size = SetCandidates(in_swarm_set, true);
 
-    const int self_cid = g_peers.at(self_pid).cid;
+    const int self_cid = g_peers.at(client_pid).cid;
     AssignNeighbors(neighbors, candidates_size, self_cid);
 
 
     // debug info
-    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
-    std::cout << "Cluster ID of Peer #" << self_pid
-              << " : " << g_peers.at(self_pid).cid << std::endl;
+    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
+    std::cout << "Cluster ID of Peer #" << client_pid
+              << " : " << g_peers.at(client_pid).cid << std::endl;
     std::cout << "Info: (pid, cid, PG delay)\n";
     for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
     {

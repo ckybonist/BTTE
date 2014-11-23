@@ -31,9 +31,9 @@ void RandomFirstPiece::RefreshInfo()
     targets_set_.clear();
 }
 
-MsgQueue RandomFirstPiece::StartSelection(const int self_pid)
+MsgQueue RandomFirstPiece::StartSelection(const int client_pid)
 {
-    selector_pid_ = self_pid;
+    selector_pid_ = client_pid;
 
     CheckNeighbors();
 
