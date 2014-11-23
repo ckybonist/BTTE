@@ -37,6 +37,7 @@ struct Neighbor
 {
     Neighbor();
     Neighbor(const int id, const float pg_delay);
+    bool IsConnected() const;
 
     int id;
     float pg_delay;
