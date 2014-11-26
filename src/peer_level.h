@@ -1,7 +1,8 @@
 #ifndef _PEER_LEVEL_H
 #define _PEER_LEVEL_H
 
-//#include "piece.h"
+#include <cstring>
+#include "bandwidth.h"
 
 /**
  * Peer Level:
@@ -11,20 +12,13 @@
  *
  * */
 
-const int g_kNumLevel = 3;
-
-struct Bandwidth
-{
-    float uplink;
-    float downlink;
-};
-
 struct PeerLevel
 {
     float dist_rate;
     Bandwidth bandwidth;
 };
 
+const int g_kNumLevel = 3;
 const PeerLevel g_kPeerLevel[g_kNumLevel] =
 {
     // fatest

@@ -23,7 +23,7 @@ Peer::Peer()
 }
 
 Peer::Peer(const Type type,
-           const int id,
+           const int pid,
            const int cid,
            const Bandwidth bandwidth)
 {

@@ -5,13 +5,13 @@
 
 bool g_all_pieces_get = false;
 
-PieceMsg::PieceMsg()
-{
-    src_pid = -1;
-    dest_pid = -1;
-    piece_no = -1;
-    src_up_bw = 0.0;
-}
+//PieceMsg::PieceMsg()
+//{
+//    src_pid = -1;
+//    dest_pid = -1;
+//    piece_no = -1;
+//    src_up_bw = 0.0;
+//}
 
 namespace  // enclosing in compile unit
 {

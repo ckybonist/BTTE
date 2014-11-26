@@ -1,6 +1,7 @@
 #ifndef _RF_PIECE_SELECTION_H
 #define _RF_PIECE_SELECTION_H
 
+#include <deque>
 #include "piece_selection.h"
 
 
@@ -16,11 +17,14 @@ public:
 private:
     MsgQueue StartSelection(const int client_pid) override;
 
-    void CountNumPeerOwnPiece(const size_t num_targets);
-    void SortByPieceCounts(const int num_targets);
+    void CountNumPeerOwnPiece(const size_t num_target);
+    void SortByPieceCounts(const int num_target);
     bool IsDupDest(const IntSet& dest_peers, const int nid);
-    //PieceMsg CreateReqMsg(const int target_piece_no, const bool is_last_piece);  // for Rarest First
-    PieceMsg CreateReqMsg(const int target_piece_no, IntSet& dest_peers);  // for Rarest First
+    IntSet GetFinalTargetPieces(const int num_target) const;
+    //void PushReqMsg(MsgQueue& req_msgs, IntSet& dest_peers, const int target_piece_no);  // for Rarest First
+    MsgQueue CreateReqMsgQ(IntSet const& final_target_pieces);
+                           //IntSet& dest_peers,
+                           //const int target_piece_no);  // for Rarest First
     void RefreshInfo();
 
     struct PeerOwnCounts

@@ -7,7 +7,7 @@
 
 #include "piece.h"
 #include "neighbor.h"
-#include "peer_level.h"
+#include "bandwidth.h"
 
 
 typedef std::map<int, Neighbor> NeighborMap;
