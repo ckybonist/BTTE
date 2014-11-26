@@ -2,9 +2,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "peer.h"
 #include "piece.h"
-//#include "random.h"
 #include "random.h"
 #include "pg_delay.h"
 #include "peer_level.h"
