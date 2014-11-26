@@ -13,7 +13,7 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     //req_timeout = false;
 
     // not for all type of events
-    requestor_pid = -1;
+    client_pid = -1;
     piece_no = -1;
 }
 

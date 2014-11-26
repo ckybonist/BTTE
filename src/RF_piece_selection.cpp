@@ -1,4 +1,5 @@
 #include <cstdlib>
+//#include <algorithm>
 
 #include "RF_piece_selection.h"
 
@@ -9,52 +10,61 @@ namespace btte_piece_selection
 
 RarestFirst::~RarestFirst()
 {
-    if (piece_counts_info_ != nullptr)
+    if (counts_info_ != nullptr)
     {
-        delete [] piece_counts_info_;
-        piece_counts_info_ = nullptr;
+        delete [] counts_info_;
+        counts_info_ = nullptr;
     }
 }
 
 void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
 {
-    piece_counts_info_ = new PieceCounts[num_targets];
+    counts_info_ = new PeerOwnCounts[num_targets];
 
-    const Neighbor *neighbors = g_peers.at(selector_pid_).neighbors;
+    //const Neighbor *neighbors = g_peers.at(selector_pid_).neighbors;
+    auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
-    for (IntSetIter it = targets_set_.begin(); it != targets_set_.end(); it++, index++)
+    for (IntSetIter p_no = targets_set_.begin(); p_no != targets_set_.end(); p_no++, index++)
     {
         int counts = 0;
-        for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+        for (auto& nei : neighbors)
         {
-            if (neighbors[n].exist)  // ensure the neighbor is exist
+            if (HavePiece(nei.first, *p_no))
             {
-                const int nid = neighbors[n].id;
-                bool is_get_piece = g_peers.at(nid).pieces[*it];
-                if (is_get_piece) ++counts;
+                ++counts;
+                piece_owner_set_[*p_no].insert(nei.first);
             }
         }
-        piece_counts_info_[index].piece_no = *it;
-        piece_counts_info_[index].counts = counts;
+        //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+        //{
+        //    if (neighbors[n].exist)  // ensure the neighbor is exist
+        //    {
+        //        const int nid = neighbors[n].id;
+        //        bool is_get_piece = g_peers.at(nid).pieces[*it];
+        //        if (is_get_piece) ++counts;
+        //    }
+        //}
+        counts_info_[index].piece_no = *p_no;
+        counts_info_[index].counts = counts;
     }
 
-    neighbors = nullptr;
+    //neighbors = nullptr;
 }
 
 void RarestFirst::SortByPieceCounts(const int num_targets)
 {
-    auto func_comp = [] (const void* a, const void* b) {
-                           const PieceCounts* obj_a = (PieceCounts*)a;
-                           const PieceCounts* obj_b = (PieceCounts*)b;
-                           return obj_a->counts - obj_b->counts;
-                        };
+    auto cmp = [] (const void* l, const void* r) {
+                      const PeerOwnCounts* myl = (PeerOwnCounts*)l;
+                      const PeerOwnCounts* myr = (PeerOwnCounts*)r;
+                      return myl->counts - myr->counts;
+                  };
 
     // sort pieces counts info
-    qsort(piece_counts_info_,
+    qsort(counts_info_,
           num_targets,
-          sizeof(PieceCounts),
-          func_comp);
+          sizeof(PeerOwnCounts),
+          cmp);
 }
 
 bool RarestFirst::IsDupDest(const IntSet& dest_peers, const int nid)
@@ -73,38 +83,63 @@ bool RarestFirst::IsDupDest(const IntSet& dest_peers, const int nid)
     return flag;
 }
 
-PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
+//PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
+PieceMsg RarestFirst::CreateReqMsg(const int target_piece_no, IntSet& dest_peers)
 {
-    static IntSet dest_peers;  // record peer-ids which existed in request msgs
+    //static IntSet dest_peers;  // record peer-ids which existed in request msgs
     PieceMsg msg;
 
-    for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
+    const int size = neighbors.size();
+    //for (int i = 0; i < size; i++)
+    //{
+    //if (which_have_set.size() == 0) continue;
+
+    // If more than one neighbors having this piece,
+    // then randomly choose one neighbor to request.
+    IntSet const& owners = piece_owner_set_.at(target_piece_no);
+    const int rand_pos = Rand(RSC::RF_PIECESELECT) % owners.size();
+    auto it = owners.begin();
+    for (int i = 0; i < rand_pos; ++i, ++it);
+    const int dest = *it;
+
+    if (!IsDupDest(dest_peers, dest))
     {
-        auto nei = g_peers.at(selector_pid_).neighbors[i];
-
-        if (!nei.exist) continue;
-
-        if (IsDownloadable(nei, target_piece_no) &&
-            !IsDupDest(dest_peers, nei.id))
-        //if (!IsDupReq(dest_peers, nid))
-        {
-            msg.src_pid = selector_pid_;
-            msg.dest_pid = nei.id;
-            msg.piece_no = target_piece_no;
-            dest_peers.insert(nei.id);
-            break;
-        }
+        msg.src_pid = selector_pid_;
+        msg.dest_pid = dest;
+        msg.piece_no = target_piece_no;
+        msg.src_up_bw = g_peers.at(selector_pid_).get_bandwidth().uplink;
+        dest_peers.insert(dest);
+        //break;
     }
+    //}
 
-    if (is_last_piece) dest_peers.clear();
+    //for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    //{
+    //    auto nei = g_peers.at(selector_pid_).neighbors[i];
+
+    //    if (!nei.exist) continue;
+
+    //    if (IsDownloadable(nei, target_piece_no) &&
+    //        !IsDupDest(dest_peers, nei.id))
+    //    //if (!IsDupReq(dest_peers, nid))
+    //    {
+    //        msg.src_pid = selector_pid_;
+    //        msg.dest_pid = nei.id;
+    //        msg.piece_no = target_piece_no;
+    //        dest_peers.insert(nei.id);
+    //        break;
+    //    }
+    //}
+    //if (is_last_piece) dest_peers.clear();
 
     return msg;
 }
 
 void RarestFirst::RefreshInfo()
 {
-    delete [] piece_counts_info_;
-    piece_counts_info_ = nullptr;  // important !!!
+    delete [] counts_info_;
+    counts_info_ = nullptr;  // important !!!
     targets_set_.clear();
 }
 
@@ -124,23 +159,49 @@ MsgQueue RarestFirst::StartSelection(const int client_pid)
 
     // debug info
     std::cout << "\nPiece Count Info (piece-no, counts) :\n";
-    for (int i = 0; (size_t)i < num_targets; ++i)
+    for (size_t i = 0; i < num_targets; ++i)
     {
-        std::cout << "(" << piece_counts_info_[i].piece_no << ",   "
-                  << piece_counts_info_[i].counts << ")\n";
+        std::cout << "(" << counts_info_[i].piece_no << ",   "
+                  << counts_info_[i].counts << ")\n";
     }
     std::cout << std::endl;
 
     // Create req-msg list
+    int num_same_counts = 0;
+    int total_piece_counts = 0;
+    IntSet pieces_same_counts;
     MsgQueue req_msgs;
-    for (int i = 0; (size_t)i < num_targets; ++i)
+
+    for (size_t i = 0; i < num_targets; ++i)
     {
-        const int piece_no = piece_counts_info_[i].piece_no;
-        const PieceMsg msg = CreateReqMsg(piece_no, ((size_t)i == num_targets - 1));
-        if (msg.dest_pid != -1)
-            req_msgs.push_back(msg);
+        IntSet dest_peers;
+        const int piece_no = counts_info_[i].piece_no;
+        const int piece_counts = counts_info_[i].counts;
+
+        //if (msg.dest_pid != -1)
+        //    req_msgs.push_back(msg);
+        //const PieceMsg msg = CreateReqMsg(piece_no, ((size_t)i == num_targets - 1));
+        PieceMsg const& msg = CreateReqMsg(piece_no, dest_peers);
+        req_msgs.push_back(msg);
+
+        if (i == num_targets - 1)
+            dest_peers.clear();
     }
 
+    std::cout << "\nhaha\n";
+
+    for (const PieceMsg& msg : req_msgs)
+    {
+        Peer& client = g_peers.at(selector_pid_);      // self peer
+        Peer& peer = g_peers.at(msg.dest_pid);         // other peer
+        //client.pieces_on_req.insert(msg.piece_no);
+        client.push_req_msg(msg);
+        peer.push_recv_msg(msg);
+
+        std::cout << "Sending piece-req msg from peer #" << msg.src_pid << " to peer #"
+                  << msg.dest_pid << std::endl;
+        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
+    }
     RefreshInfo();
 
     return req_msgs;

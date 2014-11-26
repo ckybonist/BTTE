@@ -3,16 +3,14 @@
 
 #include <set>
 
-#include "args.h"
-#include "piece.h"
-#include "peer_level.h"
+//#include "args.h"
+//#include "piece.h"
+//#include "peer_level.h"
 #include "peer_selection.h"
 #include "piece_selection.h"
 
-
 using namespace btte_peer_selection;
 using namespace btte_piece_selection;
-
 
 class PeerManager
 {
@@ -30,7 +28,7 @@ public:
     PeerManager(Args* const args);
     ~PeerManager();
 
-    void NewPeer(const int id, const float start_time) const;  // for peer_join event
+    void NewPeer(const int pid) const;  // for peer_join event
 
     void UpdateSwarmInfo(const ISF isf, const int pid);
     bool CheckAllPiecesGet(const int pid) const;
@@ -47,14 +45,17 @@ public:
 
 private:
     //void AllocPeersSpace();
-    void NewPeerData(PeerType type, const int pid, const float join_time, double prob_leech = 0.1) const;
+    void NewPeerData(Peer::Type type,
+                     const int pid,
+                     //const float join_time,
+                     double prob_leech = 0.1) const;
     void DeployPeersLevel();
     void DeployClusterIDs();  // if use cluster-based
     void InitSeeds() const;
     void InitLeeches();
     void InitAbstractObj();
 
-    Args *args_;  // don't use pointer
+    Args *args_;
 
     IPeerSelect* obj_peerselect_;
     IPieceSelect* obj_pieceselect_;

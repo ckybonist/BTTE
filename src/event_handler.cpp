@@ -4,6 +4,7 @@
 
 #include "peer.h"
 #include "piece.h"
+//#include "random.h"
 #include "random.h"
 #include "pg_delay.h"
 #include "peer_level.h"
@@ -127,7 +128,7 @@ float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4B
     }
     else if (dtbt == Event::PIECE_ADMIT)
     {
-        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).bandwidth.downlink;
+        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).get_bandwidth().downlink;
         time += trans_time;
     }
     else if (dtbt == Event::PIECE_REQ_RECV ||
@@ -155,40 +156,40 @@ void EventHandler::PushDerivedEvent(const Event& ev)
 
     Event next_event = Event(base_etype, derived_tbt, ++next_event_idx_, pid, time);
 
-    switch (ev.type_bt)
-    {
-        case Event::PEERLIST_GET:  // generate initial piece-req events
-            for (const PieceMsg& msg : ev.tmp_req_msgs)
-            {
-                next_event.client_pid = msg.src_pid;
-                next_event.pid = msg.dest_pid;
-                PushArrivalEvent(next_event);
-                // prepare another request for timeout situation
-                //derived_tbt = Event::PIECE_REQ_RECV;
-                //time += kTimeout_;
-            }
-            return;  // already generate derived events
-            break;
+    //switch (ev.type_bt)
+    //{
+    //    case Event::PEERLIST_GET:  // generate initial piece-req events
+    //        for (const PieceMsg& msg : ev.tmp_req_msgs)
+    //        {
+    //            next_event.client_pid = msg.src_pid;
+    //            next_event.pid = msg.dest_pid;
+    //            PushArrivalEvent(next_event);
+    //            // prepare another request for timeout situation
+    //            //derived_tbt = Event::PIECE_REQ_RECV;
+    //            //time += kTimeout_;
+    //        }
+    //        return;  // already generate derived events
+    //        break;
 
-        case Event::PIECE_REQ_RECV:
-            if (ev.am_choking)
-                return;
-            else
-                next_event.client_pid = ev.client_pid;
-            break;
+    //    case Event::PIECE_REQ_RECV:
+    //        if (ev.am_choking)
+    //            return;
+    //        else
+    //            next_event.client_pid = ev.client_pid;
+    //        break;
 
-        case Event::PIECE_ADMIT:
-            next_event.pid = ev.client_pid;
-            break;
+    //    case Event::PIECE_ADMIT:
+    //        next_event.pid = ev.client_pid;
+    //        break;
 
-        case Event::PIECE_GET:  // if get one piece, generate another piece-req event
-            if (!g_peers.at(pid).type == SEED)
-                derived_tbt = Event::PIECE_REQ_RECV;
-            break;
+    //    case Event::PIECE_GET:  // if get one piece, generate another piece-req event
+    //        if (!g_peers.at(pid).type == SEED)
+    //            derived_tbt = Event::PIECE_REQ_RECV;
+    //        break;
 
-        default:
-            break;
-    }
+    //    default:
+    //        break;
+    //}
 
     PushArrivalEvent(next_event);
 }
@@ -274,7 +275,9 @@ bool EventHandler::ReqTimeout(const Event& ev)
 
 void EventHandler::PeerJoinEvent(Event& ev)
 {
-    pm_->NewPeer(ev.pid, ev.time);
+    //pm_->NewPeer(ev.pid, ev.time);
+    pm_->NewPeer(ev.pid);
+    g_peers.at(ev.pid).set_join_time(current_time_);
     pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
 }
 
@@ -290,18 +293,18 @@ void EventHandler::PeerListGetEvent(Event& ev)
 
     ev.tmp_req_msgs = pm_->GetPieceReqMsgs(ev.pid);
 
-    //for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
-    for (const PieceMsg& msg : ev.tmp_req_msgs)
-    {
-        Peer& client = g_peers.at(ev.pid);      // self peer
-        Peer& peer = g_peers.at(msg.dest_pid);  // other peer
-        client.pieces_on_req.insert(msg.piece_no);
-        peer.recv_msg_buf.push_back(msg);
+    ////for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
+    //for (const PieceMsg& msg : ev.tmp_req_msgs)
+    //{
+    //    Peer& client = g_peers.at(ev.pid);      // self peer
+    //    Peer& peer = g_peers.at(msg.dest_pid);  // other peer
+    //    client.pieces_on_req.insert(msg.piece_no);
+    //    peer.recv_msg_buf.push_back(msg);
 
-        std::cout << "Sending piece-req msg from peer #" << msg.src_pid << " to peer #"
-                  << msg.dest_pid << std::endl;
-        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
-    }
+    //    std::cout << "Sending piece-req msg from peer #" << msg.src_pid << " to peer #"
+    //              << msg.dest_pid << std::endl;
+    //    std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
+    //}
 
     // TODO
     // 2. 執行第一次 choking，每個 neighbor
@@ -317,15 +320,14 @@ void EventHandler::PieceReqRecvEvent(Event& ev)
 
     // TODO
     // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件
-    for (int i = 0; i < args_.NUM_PEERLIST; ++i)
-    {
-        auto nei = g_peers.at(ev.pid).neighbors[i];
-        if (nei.id == ev.client_pid &&
-                nei.conn_states.am_choking)
-        {
-            ev.am_choking = true;
-        }
-    }
+    //for (int i = 0; i < args_.NUM_PEERLIST; ++i)
+    //{
+    //    const Neighbor& nei = g_peers.at(ev.pid).neighbors[i];
+    //    if (nei.first == ev.client_pid)
+    //    {
+    //        ev.am_choking = nei.conn_states.am_choking;
+    //    }
+    //}
 }
 
 void EventHandler::PieceAdmitEvent(Event& ev)
@@ -334,13 +336,14 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     const Peer& peer = g_peers.at(ev.pid);
     //auto begin = receiver.recv_msg_buf.begin();
     //auto end = receiver.recv_msg_buf.end();
-    for (const PieceMsg& msg : peer.recv_msg_buf)
+    auto& msg_buf = peer.get_recv_msg_buf();
+    for (const PieceMsg& msg : msg_buf)
     {
         if (msg.piece_no == ev.piece_no)
         {
             // send piece to requestor
             Peer& client = g_peers.at(msg.src_pid);
-            client.pieces[msg.piece_no] = true;
+            client.set_nth_piece(msg.piece_no);
             // set pid of requestor into event body
             ev.client_pid = msg.src_pid;
             break;
@@ -353,24 +356,24 @@ void EventHandler::PieceGetEvent(Event& ev)
     // TODO
     // 1. 每取得一個 piece 後，執行 Piece Selection。產生 ReqPiece 事件
     // 2. 取得一個 piece，代表接收者 (收到 client #e.pid 要求的 peer)
-    // 空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
-    // 來決定下一個要處理的要求。
+    //    空出一個連線，這時就可以執行 Choking 和 Optimistic Unchokinig，
+    //    來決定下一個要處理的要求。
 
     Peer& client = g_peers.at(ev.pid);
     //auto begin = receiver.send_msgs.begin();
     //auto end = receiver.send_msgs.end();
     //for (auto msg = begin; msg != end; ++msg)
-    for (const PieceMsg& msg : client.recv_msg_buf)
-    {
-        if (msg.piece_no == ev.piece_no)
-        {
-            client.pieces_on_req.erase(msg.piece_no);
-            break;
-        }
-    }
+    //for (const PieceMsg& msg : client.recv_msg_buf)
+    //{
+    //    if (msg.piece_no == ev.piece_no)
+    //    {
+    //        client.pieces_on_req.erase(msg.piece_no);
+    //        break;
+    //    }
+    //}
 
-    if (pm_->CheckAllPiecesGet(ev.pid))
-        client.type = SEED;
+    //if (pm_->CheckAllPiecesGet(ev.pid))
+    //    client.type = SEED;
 }
 
 void EventHandler::CompletedEvent(Event& ev)
@@ -381,8 +384,8 @@ void EventHandler::CompletedEvent(Event& ev)
 
 void EventHandler::PeerLeaveEvent(Event& ev)
 {
-    g_peers.at(ev.pid).in_swarm = false;
-    g_peers.at(ev.pid).leave_time = current_time_;
+    g_peers.at(ev.pid).set_in_swarm(false);
+    g_peers.at(ev.pid).set_leave_time(current_time_);
     pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, ev.pid);
 }
 

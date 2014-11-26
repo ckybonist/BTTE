@@ -8,6 +8,7 @@
 
 #include "error.h"
 
+
 //const long long g_kRandMax = 2147483647;  // C++ RAND_MAX Macro
 
 /*
@@ -50,11 +51,6 @@ typedef enum class RandSeedCases
     FREE_3,
     FREE_4,
 } RSC;
-
-
-extern long long g_rand_grp[g_kNumRSeeds];
-//extern long long g_rand_num;
-
 
 namespace uniformrand
 {
@@ -101,6 +97,10 @@ T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size]);
 
 #include "random.tpp"
 
-} // namespace uniformrand
+}  // namespace uniformrand
+
+extern long long g_rand_grp[g_kNumRSeeds];
+//extern long long g_rand_num;
+
 
 #endif // for #ifndef _RANDOM_H

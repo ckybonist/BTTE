@@ -9,17 +9,28 @@ PieceMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
 {
     PieceMsg msg;
 
-    for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    //for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    //{
+    //    auto nei = g_peers[selector_pid_].neighbors[i];
+
+    //    if (!nei.exist) continue;
+
+    //    if (IsDownloadable(nei, target_piece_no))
+    //    {
+    //        msg.src_pid = selector_pid_;
+    //        msg.dest_pid = nei.id;
+    //        msg.piece_no = target_piece_no;
+    //    }
+    //}
+
+    for (auto& nei : g_peers[selector_pid_].get_neighbors())
     {
-        auto nei = g_peers[selector_pid_].neighbors[i];
-
-        if (!nei.exist) continue;
-
-        if (IsDownloadable(nei, target_piece_no))
+        if (HavePiece(nei.first, target_piece_no))
         {
             msg.src_pid = selector_pid_;
-            msg.dest_pid = nei.id;
+            msg.dest_pid = nei.first;
             msg.piece_no = target_piece_no;
+            break;
         }
     }
 

@@ -1,7 +1,7 @@
 #ifndef _PEER_LEVEL_H
 #define _PEER_LEVEL_H
 
-#include "piece.h"
+//#include "piece.h"
 
 /**
  * Peer Level:

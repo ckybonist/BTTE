@@ -122,10 +122,7 @@ PeerManager::~PeerManager()
     reserved_cids_ = nullptr;
 
     for (size_t p = 0; (size_t)p < args_->NUM_PEER; p++)
-    {
-        delete [] g_peers.at(p).pieces;
-        g_peers.at(p).pieces = nullptr;
-    }
+        g_peers.at(p).destroy_pieces();
 
     // also call the destructor to delete neighbors
     delete obj_peerselect_; // MUST BEFORE THE DELETION OF G_PEERS
@@ -144,40 +141,40 @@ PeerManager::~PeerManager()
     args_ = nullptr;
 }
 
-void PeerManager::NewPeerData(PeerType type, const int pid, const float join_time, double prob_leech) const
+void PeerManager::NewPeerData(Peer::Type type,
+                              const int pid,
+                              //const float join_time,
+                              double prob_leech) const
 {
+    const int NUM_PIECE = args_->NUM_PIECE;
+    const int cid = reserved_cids_[pid];
     const int level = reserved_peer_levels_[pid];
     Bandwidth bw = g_kPeerLevel[level].bandwidth;
-    const int cid = reserved_cids_[pid];
-    const int NUM_PIECE = args_->NUM_PIECE;
 
-    Peer peer;
+    g_peers.push_back(Peer(type, pid, cid, bw));
+    Peer& peer = g_peers.at(pid);
 
     switch (type)
     {
-        case SEED:
-            peer = Peer(pid, cid, NUM_PIECE, bw);
+        case Peer::SEED:
+        case Peer::NORMAL:
+            peer.InitPieces(type, args_->NUM_PIECE);
             break;
 
-        case LEECH:
-            peer = Peer(pid, cid, NUM_PIECE, prob_leech, bw);
-            break;
-
-        case NORMAL:
-            peer = Peer(pid, cid, NUM_PIECE, join_time, bw);
+        case Peer::LEECH:
+            peer.InitPieces(type, args_->NUM_PIECE, prob_leech);
             break;
 
         default:
             ExitError("Error in NewPeerData(...)");
+            break;
     }
-
-    g_peers.push_back(peer);
 }
 
 
-void PeerManager::NewPeer(const int pid, const float join_time) const
+void PeerManager::NewPeer(const int pid) const
 {
-    NewPeerData(NORMAL, pid, join_time);
+    NewPeerData(Peer::NORMAL, pid);
 }
 
 void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
@@ -191,7 +188,7 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
         }
         else
         {
-            for(int i = 0; (size_t)i < args_->NUM_PEER; i++)
+            for(size_t i = 0; i < args_->NUM_PEER; i++)
                 g_in_swarm_set[i] = false;
         }
     }
@@ -211,9 +208,9 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
 bool PeerManager::CheckAllPiecesGet(const int pid) const
 {
     bool flag = true;
-    for (int c = 0; (size_t)c < args_->NUM_PIECE; c++)
+    for (size_t c = 0; c < args_->NUM_PIECE; c++)
     {
-        if (!g_peers.at(pid).pieces[c])
+        if (!g_peers.at(pid).get_nth_piece(c))
         {
             flag = false;
             break;
@@ -225,8 +222,9 @@ bool PeerManager::CheckAllPiecesGet(const int pid) const
 
 void PeerManager::AllotNeighbors(const int pid) const
 {
-    Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
-    g_peers.at(pid).neighbors = neighbors;
+    //Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
+    Peer& client = g_peers.at(pid);
+    client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
 }
 
 std::deque<PieceMsg> PeerManager::GetPieceReqMsgs(const int client_pid)
@@ -249,27 +247,25 @@ void PeerManager::CreatePeers()
     // DEBUG
     for(int i = 0; i < g_kNumLevel; i++)
     {
+        const float up_bandwidth = g_kPeerLevel[i].bandwidth.downlink;
         std::cout << "Transmission Time of level "<< i << " : "
-                  << g_kPieceSize / g_kPeerLevel[i].bandwidth.downlink << "\n";
+                  << g_kPieceSize / up_bandwidth << std::endl;
     }
     std::cout << "\n\n\n";
 
-    /// Allocate memroy space for all peers (if use typical array)
+    // Allocate memroy space for all peers (array)
     //AllocPeersSpace();
-
     InitSeeds();
-
     InitLeeches();
 }
 
 void PeerManager::DeployPeersLevel()
 {
-    const size_t NUM_PEER = args_->NUM_PEER;
-
 	int count[g_kNumLevel] = { 0 };
 	int exclude_set[g_kNumLevel] = { 0 };
+    const size_t NUM_PEER = args_->NUM_PEER;
 
-	for (int p = 0; (size_t)p < NUM_PEER; p++)
+	for (size_t p = 0; p < NUM_PEER; p++)
     {
         int level = RangeRandNumExceptEx<int, g_kNumLevel>(RSC::PEER_LEVEL, exclude_set);
         const int idx = level - 1;
@@ -293,7 +289,6 @@ void PeerManager::DeployPeersLevel()
         std::cout << "Amount of level " << i + 1 << " peers: "
                   << count[i] << "\n";
     }
-
     std::cout << "\n";
 }
 
@@ -304,7 +299,7 @@ void PeerManager::DeployClusterIDs()
 
     // assing a cid to each peer, and don't exceed
     // the volume (NUM_PEER / g_kNumClusters) of cluster
-    for (int p = 0; (size_t)p < args_->NUM_PEER; p++)
+    for (size_t p = 0; p < args_->NUM_PEER; p++)
     {
         int cid = RangeRandNumExceptEx<int, g_kNumClusters>(RSC::CB_PEERSELECT, exclude_set);
         const int idx = cid - 1;
@@ -326,8 +321,12 @@ void PeerManager::DeployClusterIDs()
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
 void PeerManager::InitSeeds() const
 {
-    for (int p = 0; (size_t)p < args_->NUM_SEED; p++)
-        NewPeerData(SEED, p, 0.0);
+    for (size_t p = 0; p < args_->NUM_SEED; p++)
+    {
+        Peer::Type type = Peer::SEED;
+        //NewPeerData(type, p, 0.0);
+        NewPeerData(type, p);
+    }
 }
 
 /*
@@ -355,7 +354,8 @@ void PeerManager::InitLeeches()
     for (int p = start; p < end; p++)
     {
         double prob_leech = Roll<double>(RSC::PROB_LEECH, 0.1, 0.9);
-        NewPeerData(LEECH, p, 0.0, prob_leech);
+        //NewPeerData(Peer::LEECH, p, 0.0, prob_leech);
+        NewPeerData(Peer::LEECH, p, prob_leech);
         UpdateSwarmInfo(ISF::JOIN, p);
     }
 

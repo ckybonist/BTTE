@@ -12,14 +12,15 @@ using std::endl;
 namespace
 {
 
-void PeerInfo(const size_t pid);
+void PeerInfo(const int pid);
 
-void PieceInfo(const size_t pid,
+void PieceInfo(const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter);
 
-void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST);
+void NeighborInfo(const int pid,
+                  const size_t NUM_PEERLIST);
 
 }
 
@@ -28,21 +29,18 @@ void ShowDbgInfo(const Args &args)
 {
     int* piece_own_counter = new int[args.NUM_PIECE];
 
-    if (nullptr == piece_own_counter)
-    {
-        ExitError("\nMemory Allocation Fault\n");
-    }
+    if (nullptr == piece_own_counter) ExitError("Memory Allocation Fault");
 
     cout.precision(3);
     cout << "\n\n\n\n@ Peer Info: \n\n";
 
-    for (int pid = 0; (size_t)pid < args.NUM_PEER; pid++)
+    for (size_t pid = 0; pid < args.NUM_PEER; pid++)
     {
         PeerInfo(pid);
 
         PieceInfo(pid, args.NUM_PIECE, args.NUM_SEED, piece_own_counter);
 
-        if ((size_t)pid >= args.NUM_SEED)
+        if (pid >= args.NUM_SEED)
             NeighborInfo(pid, args.NUM_PEERLIST);
 
         cout << "\n===========================\n\n";
@@ -62,21 +60,21 @@ void ShowDbgInfo(const Args &args)
 namespace
 {
 
-void PeerInfo(const size_t pid)
+void PeerInfo(const int pid)
 {
     ////////////////////////
     // id info
-    cout << "Peer ID: " << g_peers.at(pid).pid << endl;
-    cout << "Cluster ID: " << g_peers.at(pid).cid << endl;
-    cout << "\nJoin time (not yet): " << g_peers.at(pid).join_time << endl;
+    cout << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
+    cout << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
+    cout << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
 
     auto peer = g_peers.at(pid);
 
-    if (peer.type == SEED)
+    if (peer.get_type() == Peer::SEED)
     {
         cout << "Peer type: Seed" << endl;
     }
-    else if (peer.type == LEECH)
+    else if (peer.get_type() == Peer::LEECH)
     {
         cout << "Peer type: Leech" << endl;
     }
@@ -85,11 +83,12 @@ void PeerInfo(const size_t pid)
         cout << "Peer type: Average" << endl;
     }
 
-    cout << "Upload Bandwidth: " << peer.bandwidth.uplink << endl;
-    cout << "Download Bandwidth: " << peer.bandwidth.downlink << endl;
+    auto& bandwidth = peer.get_bandwidth();
+    cout << "Upload Bandwidth: " << bandwidth.uplink << endl;
+    cout << "Download Bandwidth: " << bandwidth.downlink << endl;
 }
 
-void PieceInfo(const size_t pid,
+void PieceInfo(const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter)
@@ -98,39 +97,36 @@ void PieceInfo(const size_t pid,
     // pieces info
     int piece_count = 0;
 
-    for (int c = 0; (size_t)c < NUM_PIECE; c++)
+    for (size_t c = 0; c < NUM_PIECE; c++)
     {
-        if (g_peers.at(pid).pieces[c])
+        if (g_peers.at(pid).get_nth_piece(c))
         {
             ++piece_count;
-
-            if (pid >= NUM_SEED)
-                ++counter[c];
+            if ((size_t)pid >= NUM_SEED) ++counter[c];
         }
     }
-
     cout << "\nPieces status:\n";
     cout << "    * Get: " << piece_count << endl;
     cout << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
 }
 
-void NeighborInfo(const size_t pid, const size_t NUM_PEERLIST)
+void NeighborInfo(const int pid, const size_t NUM_PEERLIST)
 {
     /////////////////////////
     // neighbors info
     cout << "\nNeighbors info (pid, cid, neighbor_counts, pg_delay):\n";
-    for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
+    //for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
+    for (auto& nei : g_peers.at(pid).get_neighbors())
     {
-        Neighbor neighbor = g_peers.at(pid).neighbors[k];
-        const int nid = neighbor.id;
-        if (nid != -1)
-        {
-            cout << "    (" << nid
-                 << ",  " << g_peers.at(nid).cid
-                 << ",  " << g_peers.at(nid).neighbor_counts
-                 << ",  " << neighbor.pg_delay
-                 << ")" << endl;
-        }
+        //Neighbor neighbor = g_peers.at(pid).neighbors[k];
+        //const int nid = neighbor.id;
+        const int nid = nei.first;
+        Neighbor const& nei_info = nei.second;
+        cout << "    (" << nid
+             << ",  " << g_peers.at(nid).get_cid()
+             << ",  " << g_peers.at(nid).get_neighbor_counts()
+             << ",  " << nei_info.pg_delay
+             << ")" << endl;
     }
 }
 

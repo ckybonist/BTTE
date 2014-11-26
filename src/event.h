@@ -2,6 +2,7 @@
 #define _EVENT_H
 
 #include <deque>
+
 #include "piece.h"
 
 class Event
