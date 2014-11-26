@@ -3,9 +3,6 @@
 
 #include <set>
 
-//#include "args.h"
-//#include "piece.h"
-//#include "peer_level.h"
 #include "peer_selection.h"
 #include "piece_selection.h"
 

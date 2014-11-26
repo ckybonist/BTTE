@@ -9,7 +9,6 @@
 #include "STD_peer_selection.h"
 #include "LB_peer_selection.h"
 #include "CB_peer_selection.h"
-
 #include "RFP_piece_selection.h"
 #include "RF_piece_selection.h"
 
@@ -149,7 +148,7 @@ void PeerManager::NewPeerData(Peer::Type type,
     const int NUM_PIECE = args_->NUM_PIECE;
     const int cid = reserved_cids_[pid];
     const int level = reserved_peer_levels_[pid];
-    Bandwidth bw = g_kPeerLevel[level].bandwidth;
+    Bandwidth const& bw = g_kPeerLevel[level].bandwidth;
 
     g_peers.push_back(Peer(type, pid, cid, bw));
     Peer& peer = g_peers.at(pid);
@@ -158,11 +157,11 @@ void PeerManager::NewPeerData(Peer::Type type,
     {
         case Peer::SEED:
         case Peer::NORMAL:
-            peer.InitPieces(type, args_->NUM_PIECE);
+            peer.InitPieces(type, NUM_PIECE);
             break;
 
         case Peer::LEECH:
-            peer.InitPieces(type, args_->NUM_PIECE, prob_leech);
+            peer.InitPieces(type, NUM_PIECE, prob_leech);
             break;
 
         default:
