@@ -3,8 +3,6 @@
 
 #include <cassert>
 
-#include "random.h"
-
 using namespace uniformrand;  // for Rand(), Roll()
 
 
