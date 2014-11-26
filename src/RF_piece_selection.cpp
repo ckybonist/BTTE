@@ -211,12 +211,14 @@ MsgQueue RarestFirst::StartSelection(const int client_pid)
         client.push_req_msg(msg);
         peer.push_recv_msg(msg);
 
+        // debug
         std::cout << "Piece Reqest Msg:" << std::endl;
         std::cout << "   src: " << msg.src_pid << std::endl;
         std::cout << "   dest: " << msg.dest_pid << std::endl;
         std::cout << "   wanted piece: " << msg.piece_no << std::endl;
         std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
     }
+
     RefreshInfo();
 
     return req_msgs;
