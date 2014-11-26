@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <set>
 
 #include "args.h"
@@ -36,7 +37,7 @@ public:
 protected:
     void CheckNeighbors();
     void SetTargetPieces();
-    bool IsDownloadable(Neighbor& nei, const int target_piece_no) const;
+    bool HavePiece(const int pid, const int piece_no) const;
 
     IntSet targets_set_;
     Args args_;
