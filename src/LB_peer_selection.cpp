@@ -7,8 +7,8 @@ namespace btte_peer_selection
 
 LoadBalancing::~LoadBalancing()
 {
-    delete [] pg_delays_;
-    delete [] nbc_info_;
+    //delete [] pg_delays_;
+    //delete [] nbc_info_;
 }
 
 void LoadBalancing::RefreshInfo()
@@ -31,11 +31,11 @@ void LoadBalancing::GatherNeighborCounts(const size_t cand_size)
 {
     AllocNBCInfo(cand_size);
 
-    for (int i = 0; (size_t)i < cand_size; i++)
+    for (size_t i = 0; i < cand_size; i++)
     {
         const int cand_pid = candidates_[i];
         nbc_info_[i].pid = cand_pid;
-        nbc_info_[i].counts = g_peers.at(cand_pid).neighbor_counts;
+        nbc_info_[i].counts = g_peers.at(cand_pid).get_neighbor_counts();
     }
 }
 
@@ -52,7 +52,7 @@ void LoadBalancing::SortCountsInfo(const size_t cand_size)
           func_comp);
 
     std::cout << "\nNBC Info (pid, neighbor_counts):\n";
-    for (int i = 0; (size_t)i < cand_size; i++)
+    for (size_t i = 0; i < cand_size; i++)
     {
         std::cout << "(" << nbc_info_[i].pid
                   << ",  " << nbc_info_[i].counts << ")\n";
@@ -60,33 +60,40 @@ void LoadBalancing::SortCountsInfo(const size_t cand_size)
     std::cout << std::endl;
 }
 
-void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
+//void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
+void LoadBalancing::AssignNeighbors(NeighborMap& neighbors, const size_t cand_size)
 {
-    for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    for (size_t i = 0; i < args_.NUM_PEERLIST; i++)
     {
-        if ((size_t)i < cand_size)
+        if (i < cand_size)
         {
             const int cand_pid = nbc_info_[i].pid;
-            neighbors[i].id = cand_pid;
-            neighbors[i].exist = true;
+            float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
+            Neighbor nei_info = Neighbor(pg_delay);
+            neighbors.insert(std::pair<int, Neighbor>(cand_pid, nei_info));
+            //const int cand_pid = nbc_info_[i].pid;
+            //neighbors[i].id = cand_pid;
+            //neighbors[i].exist = true;
 
-            float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
-            neighbors[i].pg_delay = pg_delay;
+            //float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
+            //neighbors[i].pg_delay = pg_delay;
 
-            ++g_peers.at(cand_pid).neighbor_counts;  // Important
+            g_peers.at(cand_pid).incr_neighbor_counts(1);  // Important
         }
         else
-        {
             break;
-        }
     }
 }
 
-Neighbor* LoadBalancing::StartSelection(const int client_pid, const IntSet& in_swarm_set)
+//Neighbor* LoadBalancing::StartSelection(const int client_pid, const IntSet& in_swarm_set)
+NeighborMap LoadBalancing::StartSelection(const int client_pid, const IntSet& in_swarm_set)
 {
+    g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
+
     selector_pid_ = client_pid;
 
-    Neighbor* neighbors = AllocNeighbors();
+    //Neighbor* neighbors = AllocNeighbors();
+    NeighborMap neighbors;
 
     size_t candidates_size = SetCandidates(in_swarm_set, false);
 
@@ -97,23 +104,7 @@ Neighbor* LoadBalancing::StartSelection(const int client_pid, const IntSet& in_s
 
     AssignNeighbors(neighbors, candidates_size);
 
-    // debug info
-    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
-    std::cout << "Info: (pid, cid, neighbor counts, PG delay)\n";
-    for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
-    {
-        Neighbor nei = neighbors[n];
-        if (nei.id == -1)
-        {
-            std::cout << "None\n";
-            continue;
-        }
-        std::cout << "(" << nei.id << ",  "
-                  << g_peers.at(nei.id).cid << ",  "
-                  << g_peers.at(nei.id).neighbor_counts << ",  "
-                  << nei.pg_delay << ")" << std::endl;
-    }
-    std::cout << std::endl;
+    DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

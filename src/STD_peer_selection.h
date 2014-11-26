@@ -15,9 +15,9 @@ public:
     ~Standard();
 
 private:
-    Neighbor* StartSelection(const int client_pid,
-                             const IntSet& in_swarm_set) override;
-    void AssignNeighbors(Neighbor* const neighbors, const size_t cand_size);
+    //Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
+    NeighborMap StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
+    void AssignNeighbors(NeighborMap& neighbors, const size_t cand_size);
     void RefreshInfo();
 
     float* pg_delays_;

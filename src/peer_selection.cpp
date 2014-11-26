@@ -22,11 +22,11 @@ IPeerSelect::~IPeerSelect()
         candidates_ = nullptr;
     }
 
-    for(int pid = args_.NUM_SEED; (size_t)pid < args_.NUM_PEER; pid++)
-    {
-        delete [] g_peers.at(pid).neighbors;
-        g_peers.at(pid).neighbors = nullptr;
-    }
+    //for(int pid = args_.NUM_SEED; (size_t)pid < args_.NUM_PEER; pid++)
+    //{
+    //    delete [] g_peers.at(pid).neighbors;
+    //    g_peers.at(pid).neighbors = nullptr;
+    //}
 }
 
 Neighbor* IPeerSelect::AllocNeighbors()
@@ -68,18 +68,14 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
     {
         IntSet same_cluster_peers;
         IntSet diff_cluster_peers;
-        const int self_cid = g_peers.at(selector_pid_).cid;
+        const int self_cid = g_peers.at(selector_pid_).get_cid();
 
-        for(IntSetIter pid = cand_pid_set.begin(); pid != cand_pid_set.end(); pid++)
+        for (const int pid : cand_pid_set)
         {
-            if (g_peers.at(*pid).cid == self_cid)
-            {
-                same_cluster_peers.insert(*pid);
-            }
+            if (g_peers.at(pid).get_cid() == self_cid)
+                same_cluster_peers.insert(pid);
             else
-            {
-                diff_cluster_peers.insert(*pid);
-            }
+                diff_cluster_peers.insert(pid);
         }
 
         // assign peers with same cid at front of array
@@ -105,6 +101,35 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
     }
 
     return cand_pid_set.size();
+}
+
+void IPeerSelect::DebugInfo(NeighborMap const& neighbors, const int client_pid) const
+{
+    // debug info
+    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
+    std::cout << "Info: (pid, cid, neighbor counts, PG delay)\n";
+    for (auto& it : neighbors)
+    {
+        std::cout << "(" << it.first << ",  "
+                  << g_peers.at(it.first).get_cid() << ",  "
+                  << g_peers.at(it.first).get_neighbor_counts() << ",  "
+                  << it.second.pg_delay << ")" << std::endl;
+    }
+
+    //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+    {
+        //Neighbor nei = neighbors[n];
+        //if (nei.id == -1)
+        //{
+        //    std::cout << "None\n";
+        //    continue;
+        //}
+        //std::cout << "(" << nei.id << ",  "
+        //          << g_peers.at(nei.id).cid << ",  "
+        //          << g_peers.at(nei.id).neighbor_counts << ",  "
+        //          << nei.pg_delay << ")" << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 }
