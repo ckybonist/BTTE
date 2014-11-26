@@ -12,8 +12,6 @@ bool* MakePieces(const int NUM_PIECE);
 
 struct PieceMsg
 {
-    PieceMsg();
-
     int src_pid;
     int dest_pid;
     int piece_no;
