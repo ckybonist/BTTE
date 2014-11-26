@@ -33,7 +33,7 @@ namespace uniformrand {
 
 const int kInterval = 1000000;
 
-long long Rand(const RSC& rsc)
+long long Rand(const RSC rsc)
 {
     const int iRSC = static_cast<int>(rsc);
 

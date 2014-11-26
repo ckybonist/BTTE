@@ -7,7 +7,7 @@ using namespace uniformrand;  // for Rand(), Roll()
 
 
 template<typename T>
-T Roll(const RSC& rsc,
+T Roll(const RSC rsc,
        const T low,
        const T up)
 {
@@ -38,7 +38,7 @@ T Roll(const RSC& rsc,
 }
 
 template<typename T>
-T* DistinctRandNum(const RSC& rsc,
+T* DistinctRandNum(const RSC rsc,
                    const size_t size,
                    const T rand_limit)
 {
@@ -77,7 +77,7 @@ T* DistinctRandNum(const RSC& rsc,
 }
 
 template<typename T>
-void Shuffle(const RSC& rsc, T *arr, size_t N)
+void Shuffle(const RSC rsc, T *arr, size_t N)
 {
     if (arr == nullptr)
     {
@@ -99,7 +99,7 @@ void Shuffle(const RSC& rsc, T *arr, size_t N)
 }
 
 template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size])
+T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size])
 {
 	int target = 0;
 	bool flag = true;
@@ -126,6 +126,15 @@ T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size])
 	}
 
 	return target;
+}
+
+template <typename T>
+T RandChooseSetElement(const RSC rsc, std::set<T> const& myset)
+{
+    const T rand_pos = Rand(rsc) % myset.size();
+    auto it = myset.begin();
+    for (int i = 0; i < rand_pos; ++i, ++it);
+    return *it;
 }
 
 #endif // for #ifndef _RANDOM_IMPL_H

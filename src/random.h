@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
+#include <set>
 
 #include "error.h"
 
@@ -55,7 +56,7 @@ typedef enum class RandSeedCases
 namespace uniformrand
 {
 
-long long Rand(const RSC& rsc);
+long long Rand(const RSC rsc);
 
 void Srand(const int iRsc, const int seed);
 
@@ -64,17 +65,17 @@ void InitRandSeeds();
 float ExpRand(float rate, long long rand_num);
 
 template<typename T>
-T Roll(const RSC& rsc,
+T Roll(const RSC rsc,
        const T low,
        const T up);
 
 template <typename T>
-T* DistinctRandNum(const RSC& rsc,
+T* DistinctRandNum(const RSC rsc,
                    const size_t size,
                    const T rand_limit);
 
 template<typename T>
-void Shuffle(const RSC& rsc, T *arr, size_t N);
+void Shuffle(const RSC rsc, T *arr, size_t N);
 
 
 /*
@@ -93,7 +94,11 @@ void Shuffle(const RSC& rsc, T *arr, size_t N);
  *
  * */
 template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size]);
+T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size]);
+
+
+template<typename T>
+T RandChooseSetElement(const RSC rsc, std::set<T> const& myset);
 
 #include "random.tpp"
 
