@@ -31,3 +31,6 @@ tags
 
 # CScope
 cscope.*
+
+# Doxygen Output
+doxygen
