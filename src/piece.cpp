@@ -13,6 +13,11 @@ bool g_all_pieces_get = false;
 //    src_up_bw = 0.0;
 //}
 
+bool PieceMsg::operator<(PieceMsg const& p) const
+{
+    return src_up_bw > p.src_up_bw;
+}
+
 namespace  // enclosing in compile unit
 {
 

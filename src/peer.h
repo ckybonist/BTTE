@@ -2,13 +2,12 @@
 #define _PEER_H
 
 #include <map>
-#include <deque>
+#include <list>
 #include <vector>
 
 #include "piece.h"
 #include "neighbor.h"
 #include "bandwidth.h"
-
 
 typedef std::map<int, Neighbor> NeighborMap;
 
@@ -78,8 +77,8 @@ public:
     NeighborMap const& get_neighbors() const;
     Neighbor const& get_nth_neighbor(const int n) const;
     Bandwidth const& get_bandwidth() const;
-    std::deque<PieceMsg> const& get_req_msgs() const;
-    std::deque<PieceMsg> const& get_recv_msg_buf() const;
+    std::list<PieceMsg> const& get_req_msgs() const;
+    std::list<PieceMsg> const& get_recv_msg_buf() const;
 
 
 private:
@@ -95,8 +94,8 @@ private:
     NeighborMap neighbors;  // <nid, nei_info>
     //Neighbor* neighbors;
 
-    std::deque<PieceMsg> req_msgs;
-    std::deque<PieceMsg> recv_msg_buf;
+    std::list<PieceMsg> req_msgs;
+    std::list<PieceMsg> recv_msg_buf;
 
     Bandwidth bandwidth;
 

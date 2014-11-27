@@ -104,8 +104,8 @@ NeighborMap const& Peer::get_neighbors() const
 
 Neighbor const& Peer::get_nth_neighbor(const int n) const  { return neighbors.at(n); }
 Bandwidth const& Peer::get_bandwidth() const               { return bandwidth; }
-std::deque<PieceMsg> const& Peer::get_req_msgs() const     { return req_msgs; }
-std::deque<PieceMsg> const& Peer::get_recv_msg_buf() const { return recv_msg_buf; }
+std::list<PieceMsg> const& Peer::get_req_msgs() const      { return req_msgs; }
+std::list<PieceMsg> const& Peer::get_recv_msg_buf() const  { return recv_msg_buf; }
 
 void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_prob)
 {

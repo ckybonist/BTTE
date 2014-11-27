@@ -12,6 +12,8 @@ bool* MakePieces(const int NUM_PIECE);
 
 struct PieceMsg
 {
+    bool operator<(PieceMsg const& p) const;
+
     int src_pid;
     int dest_pid;
     int piece_no;
