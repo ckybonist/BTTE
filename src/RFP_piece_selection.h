@@ -13,8 +13,8 @@ public:
     RandomFirstPiece(Args args) : IPieceSelect(args) {};
 
 private:
-    MsgQueue StartSelection(const int client_pid) override;
-    PieceMsg CreateReqMsg(const int target_piece_no);  // for Random First Piece
+    IntSet StartSelection(const int client_pid) override;
+    IntSet GetTargetPieces(const size_t num_target) const;
     void RefreshInfo();
 };
 

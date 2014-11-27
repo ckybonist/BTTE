@@ -17,6 +17,79 @@
 
 using namespace uniformrand;
 
+namespace
+{
+
+bool IsDupDest(const IntSet& dest_peers,
+               const int nid)
+{
+    bool flag = false;
+    for (const auto& it : dest_peers)
+    {
+        if (it == nid)
+        {
+            flag = true;
+            break;
+        }
+    }
+    return flag;
+}
+
+bool HavePiece(const int pid, const int piece_no)
+{
+    return g_peers.at(pid).get_nth_piece(piece_no);
+}
+
+std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces,
+                                         NeighborMap const& neighbors)
+{
+    std::map<int, IntSet> piece_owner_map;
+
+    for (const int no : target_pieces)
+    {
+        for (auto& nei : neighbors)
+            piece_owner_map[no].insert(nei.first);
+    }
+    return piece_owner_map;
+}
+
+MsgQueue GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
+{
+    MsgQueue req_msgs;
+    IntSet dest_peers;
+    NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
+    std::map<int, IntSet> piece_owners_map = GetEachPieceOwners(target_pieces, neighbors);
+
+    size_t i = 0;
+    for (const int piece_no : target_pieces)
+    {
+        ++i;
+        auto& neighbors = g_peers.at(client_pid).get_neighbors();
+        const int size = neighbors.size(); //for (int i = 0; i < size; i++)
+
+        // If more than one neighbors having this piece,
+        // then randomly choose one neighbor to request.
+        IntSet const& owners = piece_owners_map.at(piece_no);
+        const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
+
+        if (!IsDupDest(dest_peers, dest_pid))
+        {
+            PieceMsg msg;
+            msg.src_pid = client_pid;
+            msg.dest_pid = dest_pid;
+            msg.piece_no = piece_no;
+            msg.src_up_bw = g_peers.at(client_pid).get_bandwidth().uplink;
+            req_msgs.push_back(msg);
+
+            dest_peers.insert(dest_pid);
+        }
+    }
+
+    return req_msgs;
+}
+
+}
+
 
 PeerManager::PeerManager()
 {
@@ -226,9 +299,27 @@ void PeerManager::AllotNeighbors(const int pid) const
     client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
 }
 
-std::deque<PieceMsg> PeerManager::GetPieceReqMsgs(const int client_pid)
+MsgQueue PeerManager::GetAvailablePieceReqs(const int client_pid)
 {
-    const auto req_msgs = obj_pieceselect_->StartSelection(client_pid);
+    IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
+    MsgQueue req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
+
+    // debug
+    for (const PieceMsg& msg : req_msgs)
+    {
+        Peer& client = g_peers.at(client_pid);
+        Peer& peer = g_peers.at(msg.dest_pid);
+        client.push_req_msg(msg);
+        peer.push_recv_msg(msg);
+
+        // debug
+        std::cout << "Piece Reqest Msg:" << std::endl;
+        std::cout << "   src: " << msg.src_pid << std::endl;
+        std::cout << "   dest: " << msg.dest_pid << std::endl;
+        std::cout << "   wanted piece: " << msg.piece_no << std::endl;
+        std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
+    }
+
     return req_msgs;
 }
 

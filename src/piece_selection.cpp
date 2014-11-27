@@ -23,13 +23,13 @@ void IPieceSelect::CheckNeighbors()
     }
 }
 
-void IPieceSelect::SetTargetPieces()
+void IPieceSelect::CollectNoDownloadPieces()
 {
     for (size_t c = 0; c < args_.NUM_PIECE; c++)
     {
         const Peer& selector = g_peers.at(selector_pid_);
         if (!selector.get_nth_piece(c))
-            targets_set_.insert(c);
+            no_download_pieces_set_.insert(c);
     }
 }
 

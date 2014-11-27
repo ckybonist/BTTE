@@ -5,7 +5,6 @@
 
 #include "peer_selection.h"
 #include "piece_selection.h"
-
 using namespace btte_peer_selection;
 using namespace btte_piece_selection;
 
@@ -25,20 +24,13 @@ public:
     PeerManager(Args* const args);
     ~PeerManager();
 
-    void NewPeer(const int pid) const;  // for peer_join event
-
-    void UpdateSwarmInfo(const ISF isf, const int pid);
+public:
     bool CheckAllPiecesGet(const int pid) const;
-
-    void AllotNeighbors(const int client_pid) const;  // Peer Selection, for average peers
-    std::deque<PieceMsg> GetPieceReqMsgs(const int client_pid);     // get the result of Piece Selection
-
+    void NewPeer(const int pid) const;  // for peer_join event
+    void UpdateSwarmInfo(const ISF isf, const int pid);
+    void AllotNeighbors(const int client_pid) const;            // Peer Selection
+    MsgQueue GetAvailablePieceReqs(const int client_pid); // Piece Selection
     void CreatePeers();
-
-    // A rate (0.x) for extracting steady peers stat..
-    // We get rid of head and tail's peers (0.x / 2 * NUM_PEERS),
-    // and gather stat info of middle peers.
-    const float dummy_peers_rate = 0.1;
 
 private:
     //void AllocPeersSpace();
@@ -61,6 +53,12 @@ private:
     int* reserved_peer_levels_;  // pre-init
 
     IntSet in_swarm_set_;  // for peer selection
+
+    // A rate (0.x) for extracting steady peers stat..
+    // We get rid of head and tail's peers (0.x / 2 * NUM_PEERS),
+    // and gather stat info of middle peers.
+    const float dummy_peers_rate = 0.1;
+
 };
 
 #endif // for #ifndef _PEERMANAGER_H

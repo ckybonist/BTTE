@@ -5,66 +5,40 @@ using namespace uniformrand;
 namespace btte_piece_selection
 {
 
-PieceMsg RandomFirstPiece::CreateReqMsg(const int target_piece_no)
-{
-    PieceMsg msg;
-
-    //for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
-    //{
-    //    auto nei = g_peers[selector_pid_].neighbors[i];
-
-    //    if (!nei.exist) continue;
-
-    //    if (IsDownloadable(nei, target_piece_no))
-    //    {
-    //        msg.src_pid = selector_pid_;
-    //        msg.dest_pid = nei.id;
-    //        msg.piece_no = target_piece_no;
-    //    }
-    //}
-
-    for (auto& nei : g_peers[selector_pid_].get_neighbors())
-    {
-        if (HavePiece(nei.first, target_piece_no))
-        {
-            msg.src_pid = selector_pid_;
-            msg.dest_pid = nei.first;
-            msg.piece_no = target_piece_no;
-            break;
-        }
-    }
-
-    return msg;
-}
-
 void RandomFirstPiece::RefreshInfo()
 {
-    targets_set_.clear();
+    no_download_pieces_set_.clear();
 }
 
-MsgQueue RandomFirstPiece::StartSelection(const int client_pid)
+IntSet RandomFirstPiece::GetTargetPieces(const size_t num_target) const
+{
+    // Randomly select a piece no from set
+    IntSet target_pieces;
+
+    IntSetIter piece_no = no_download_pieces_set_.begin();
+    int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_target;
+    for(; rand_offset != 0; --rand_offset) ++piece_no;
+
+    target_pieces.insert(*piece_no);
+
+    return target_pieces;
+}
+
+IntSet RandomFirstPiece::StartSelection(const int client_pid)
 {
     selector_pid_ = client_pid;
 
     CheckNeighbors();
 
-    SetTargetPieces();
+    CollectNoDownloadPieces();
 
-    const size_t num_targets = targets_set_.size();
+    const size_t num_target = no_download_pieces_set_.size();
 
-    // Randomly select a piece no from set
-    IntSetIter piece_no = targets_set_.begin();
-    int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_targets;
-    for(; rand_offset != 0; --rand_offset) ++piece_no;
-
-    std::deque<PieceMsg> req_msgs;
-    const PieceMsg msg = CreateReqMsg(*piece_no);
-    if (msg.dest_pid != -1)
-        req_msgs.push_back(msg);
+    IntSet target_pieces = GetTargetPieces(num_target);
 
     RefreshInfo();
 
-    return req_msgs;
+    return target_pieces;
 }
 
 }

@@ -32,14 +32,14 @@ class IPieceSelect
 public:
     IPieceSelect(Args args);
     virtual ~IPieceSelect();
-    virtual MsgQueue StartSelection(const int client_pid) = 0;
+    virtual IntSet StartSelection(const int client_pid) = 0;
 
 protected:
     void CheckNeighbors();
-    void SetTargetPieces();
+    void CollectNoDownloadPieces();
     bool HavePiece(const int pid, const int piece_no) const;
 
-    IntSet targets_set_;
+    IntSet no_download_pieces_set_;
     Args args_;
     int selector_pid_;
 };

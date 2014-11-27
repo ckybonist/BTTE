@@ -25,16 +25,12 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
-    for (IntSetIter p_no = targets_set_.begin(); p_no != targets_set_.end(); p_no++, index++)
+    for (IntSetIter p_no = no_download_pieces_set_.begin(); p_no != no_download_pieces_set_.end(); p_no++, index++)
     {
         int counts = 0;
         for (auto& nei : neighbors)
         {
-            if (HavePiece(nei.first, *p_no))
-            {
-                ++counts;
-                piece_owner_set_[*p_no].insert(nei.first);
-            }
+            if (HavePiece(nei.first, *p_no)) ++counts;
         }
         //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
         //{
@@ -76,24 +72,11 @@ void RarestFirst::SortByPieceCounts(const int num_target)
     std::cout << std::endl;
 }
 
-bool RarestFirst::IsDupDest(const IntSet& dest_peers, const int nid)
-{
-    bool flag = false;
-    for (const auto& it : dest_peers)
-    {
-        if (it == nid)
-        {
-            flag = true;
-            break;
-        }
-    }
-    return flag;
-}
-
-IntSet RarestFirst::GetFinalTargetPieces(const int num_target) const
+// Radomlt choose one piece from set of same-peer-count pieces
+IntSet RarestFirst::TrimDupCountPieces(const int num_target) const
 {
     IntSet dup_count_pieces;
-    IntSet final_target_pieces;
+    IntSet target_pieces;
     for (size_t i = 1; i < num_target; ++i)
     {
         const int no = counts_info_[i].piece_no;
@@ -115,113 +98,62 @@ IntSet RarestFirst::GetFinalTargetPieces(const int num_target) const
             if (i == 1)
             {
                 const int prev_no = counts_info_[i-1].piece_no;
-                final_target_pieces.insert(prev_no);
+                target_pieces.insert(prev_no);
             }
-            else if (i == num_target - 1)
+            else if (i == num_target - 1 ||
+                     dup_count_pieces.size() == 0)
             {
-                final_target_pieces.insert(no);
+                target_pieces.insert(no);
             }
-
-            if (dup_count_pieces.size() == 0)
-            {
-                final_target_pieces.insert(no);  // add current piece
-            }
+            //if (dup_count_pieces.size() == 0)
+            //{
+            //    target_pieces.insert(no);  // add current piece
+            //}
             else
             {
                 const int rand_no = RandChooseSetElement(RSC::RF_PIECESELECT,
                                                          dup_count_pieces);
-                final_target_pieces.insert(rand_no);
+                target_pieces.insert(rand_no);
                 dup_count_pieces.clear();
             }
         }
     }
 
     std::cout << "My final targets: \n";
-    for (const int piece_no : final_target_pieces)
+    for (const int piece_no : target_pieces)
     {
         std::cout << piece_no << std::endl << std::endl;
     }
 
-    return final_target_pieces;
-}
-
-MsgQueue RarestFirst::CreateReqMsgQ(IntSet const& final_target_pieces)
-{
-    MsgQueue req_msgs;
-    IntSet dest_peers;
-
-    size_t i = 0;
-    for (const int piece_no : final_target_pieces)
-    {
-        ++i;
-        auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
-        const int size = neighbors.size(); //for (int i = 0; i < size; i++)
-
-        // If more than one neighbors having this piece,
-        // then randomly choose one neighbor to request.
-        IntSet const& owners = piece_owner_set_.at(piece_no);
-        const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
-
-        if (!IsDupDest(dest_peers, dest_pid))
-        {
-            PieceMsg msg;
-            msg.src_pid = selector_pid_;
-            msg.dest_pid = dest_pid;
-            msg.piece_no = piece_no;
-            msg.src_up_bw = g_peers.at(selector_pid_).get_bandwidth().uplink;
-            req_msgs.push_back(msg);
-
-            dest_peers.insert(dest_pid);
-        }
-    }
-    std::cout << "Size of msg queue: " << req_msgs.size() << std::endl;
-
-    return req_msgs;
+    return target_pieces;
 }
 
 void RarestFirst::RefreshInfo()
 {
     delete [] counts_info_;
-    counts_info_ = nullptr;  // important !!!
-    targets_set_.clear();
+    counts_info_ = nullptr;
+    no_download_pieces_set_.clear();
 }
 
-MsgQueue RarestFirst::StartSelection(const int client_pid)
+IntSet RarestFirst::StartSelection(const int client_pid)
 {
     selector_pid_ = client_pid;
 
     CheckNeighbors();
 
-    SetTargetPieces();
+    CollectNoDownloadPieces();
 
-    const size_t num_target = targets_set_.size();
+    const size_t num_target = no_download_pieces_set_.size();
 
     CountNumPeerOwnPiece(num_target);
 
     SortByPieceCounts(num_target);
 
-    // Create Req Msgs
-    IntSet final_target_pieces = GetFinalTargetPieces(num_target);
-    MsgQueue req_msgs = CreateReqMsgQ(final_target_pieces);
-
-    for (const PieceMsg& msg : req_msgs)
-    {
-        Peer& client = g_peers.at(selector_pid_);
-        Peer& peer = g_peers.at(msg.dest_pid);
-        client.push_req_msg(msg);
-        peer.push_recv_msg(msg);
-
-        // debug
-        std::cout << "Piece Reqest Msg:" << std::endl;
-        std::cout << "   src: " << msg.src_pid << std::endl;
-        std::cout << "   dest: " << msg.dest_pid << std::endl;
-        std::cout << "   wanted piece: " << msg.piece_no << std::endl;
-        std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
-    }
+    IntSet target_pieces = TrimDupCountPieces(num_target);
 
     RefreshInfo();
 
-    return req_msgs;
+    return target_pieces;
 }
 
 }
