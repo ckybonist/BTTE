@@ -107,10 +107,6 @@ IntSet RarestFirst::GetRarestPiecesSet(const int num_target) const
             {
                 target_pieces.insert(no);
             }
-            //if (dup_count_pieces.size() == 0)
-            //{
-            //    target_pieces.insert(no);  // add current piece
-            //}
             else
             {
                 const int rand_no = RandChooseSetElement(RSC::RF_PIECESELECT,
