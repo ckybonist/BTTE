@@ -48,8 +48,14 @@ std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces,
     for (const int no : target_pieces)
     {
         for (auto& nei : neighbors)
-            piece_owner_map[no].insert(nei.first);
+        {
+            if (HavePiece(nei.first, no))
+            {
+                piece_owner_map[no].insert(nei.first);
+            }
+        }
     }
+
     return piece_owner_map;
 }
 
