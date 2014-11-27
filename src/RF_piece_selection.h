@@ -19,7 +19,7 @@ private:
     void CountNumPeerOwnPiece(const size_t num_target);
     void SortByPieceCounts(const int num_target);
     bool IsDupDest(const IntSet& dest_peers, const int nid);
-    IntSet TrimDupCountPieces(const int num_target) const;
+    IntSet GetRarestPiecesSet(const int num_target) const;
     void RefreshInfo();
 
     struct PeerOwnCounts

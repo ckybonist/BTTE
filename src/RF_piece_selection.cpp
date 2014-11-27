@@ -72,11 +72,13 @@ void RarestFirst::SortByPieceCounts(const int num_target)
     std::cout << std::endl;
 }
 
-// Radomlt choose one piece from set of same-peer-count pieces
-IntSet RarestFirst::TrimDupCountPieces(const int num_target) const
+IntSet RarestFirst::GetRarestPiecesSet(const int num_target) const
 {
-    IntSet dup_count_pieces;
     IntSet target_pieces;
+    IntSet dup_count_pieces;
+
+    // Check peer-count of each piece iteratively, if appear same-peer-count situation,
+    // then randomly choose one.
     for (size_t i = 1; i < num_target; ++i)
     {
         const int no = counts_info_[i].piece_no;
@@ -149,7 +151,7 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     SortByPieceCounts(num_target);
 
-    IntSet target_pieces = TrimDupCountPieces(num_target);
+    IntSet target_pieces = GetRarestPiecesSet(num_target);
 
     RefreshInfo();
 
