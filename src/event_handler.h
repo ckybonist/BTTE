@@ -5,7 +5,6 @@
 #include <list>
 #include <functional>
 
-//#include "args.h"
 #include "event.h"
 #include "peer_manager.h"
 
@@ -13,7 +12,7 @@
 class EventHandler
 {
 public:
-    EventHandler(Args args, PeerManager* const pm, float lambda, float mu);
+    EventHandler(PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
     void StartRoutine();
     float get_lambda() { return lambda_; };
@@ -64,7 +63,6 @@ private:
     std::list<Event> system_;
 
     // external
-    Args args_;
     PeerManager* pm_;
 
     float lambda_;

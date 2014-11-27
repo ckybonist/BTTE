@@ -11,8 +11,8 @@ namespace btte_peer_selection
 class LoadBalancing : public IPeerSelect
 {
 public:
-    LoadBalancing(Args args) : IPeerSelect(args),
-                               pg_delays_(nullptr) {};
+    LoadBalancing() : IPeerSelect(),
+                      pg_delays_(nullptr) {};
     ~LoadBalancing();
 
 private:

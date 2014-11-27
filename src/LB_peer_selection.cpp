@@ -63,7 +63,9 @@ void LoadBalancing::SortCountsInfo(const size_t cand_size)
 //void LoadBalancing::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
 void LoadBalancing::AssignNeighbors(NeighborMap& neighbors, const size_t cand_size)
 {
-    for (size_t i = 0; i < args_.NUM_PEERLIST; i++)
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
+
+    for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
         if (i < cand_size)
         {
@@ -74,10 +76,8 @@ void LoadBalancing::AssignNeighbors(NeighborMap& neighbors, const size_t cand_si
             //const int cand_pid = nbc_info_[i].pid;
             //neighbors[i].id = cand_pid;
             //neighbors[i].exist = true;
-
             //float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
             //neighbors[i].pg_delay = pg_delay;
-
             g_peers.at(cand_pid).incr_neighbor_counts(1);  // Important
         }
         else

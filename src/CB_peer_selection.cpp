@@ -39,28 +39,25 @@ void ClusterBased::AssignNeighbors(NeighborMap& neighbors,
                                    const size_t cand_size,
                                    const int client_cid)
 {
-    for (size_t i = 0; i < args_.NUM_PEERLIST; i++)
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
+
+    for (size_t i = 0; i < cand_size; i++)
     {
-        if (i < cand_size)
-        {
-            const int cand_pid = candidates_[i];
-            const int cand_cid = g_peers.at(cand_pid).get_cid();
-            float pg_delay = ComputePGDelayByCluster(client_cid, cand_cid);
+        if (i >= NUM_PEERLIST) break;
 
-            Neighbor nei_info = Neighbor(pg_delay);
-            neighbors.insert(std::pair<int, Neighbor>(cand_pid, nei_info));
+        const int pid = candidates_[i];
+        const int cid = g_peers.at(pid).get_cid();
+        float pg_delay = ComputePGDelayByCluster(client_cid, cid);
 
-            //const int cand_pid = candidates_[i];
-            //const int cand_cid = g_peers.at(cand_pid).cid;
-            //neighbors[i].id = cand_pid;
-            //neighbors[i].exist = true;
-            //float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
-            //neighbors[i].pg_delay = pg_delay;
-
-            g_peers.at(cand_pid).incr_neighbor_counts(1);
-        }
-        else
-            break;
+        Neighbor nei_info = Neighbor(pg_delay);
+        neighbors.insert(std::pair<int, Neighbor>(pid, nei_info));
+        //const int cand_pid = candidates_[i];
+        //const int cand_cid = g_peers.at(cand_pid).cid;
+        //neighbors[i].id = cand_pid;
+        //neighbors[i].exist = true;
+        //float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
+        //neighbors[i].pg_delay = pg_delay;
+        g_peers.at(pid).incr_neighbor_counts(1);
     }
 }
 

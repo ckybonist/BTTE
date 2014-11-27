@@ -3,10 +3,15 @@
 #include "piece_selection.h"
 #include "args.h"
 
+
 using namespace btte_peer_selection;
 using namespace btte_piece_selection;
 
-Args::Args(const std::string filename)
+
+Args g_btte_args;
+
+
+void Args::InitArgs(const std::string filename)
 {
     Config cfg(filename);
 
@@ -29,3 +34,15 @@ Args::Args(const std::string filename)
 
     //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 }
+
+/* getter */
+size_t Args::get_num_peer()      const { return NUM_PEER; }
+size_t Args::get_num_seed()      const { return NUM_SEED; }
+size_t Args::get_num_leech()     const { return NUM_LEECH; }
+size_t Args::get_num_peerlist()  const { return NUM_PEERLIST; }
+size_t Args::get_num_choking()   const { return NUM_CHOKING; }
+size_t Args::get_num_ou()        const { return NUM_OU; };
+size_t Args::get_num_piece()     const { return NUM_PIECE; }
+int Args::get_type_peerselect()  const { return TYPE_PEERSELECT; }
+int Args::get_type_pieceselect() const { return TYPE_PIECESELECT; }
+float Args::get_arrival_rate()   const { return ARRIVAL_RATE; }

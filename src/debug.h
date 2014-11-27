@@ -3,6 +3,6 @@
 
 #include "args.h"
 
-void ShowDbgInfo(const Args& args);
+void ShowDbgInfo();
 
 #endif // for #ifndef _DEBUG_H

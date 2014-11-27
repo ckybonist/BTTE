@@ -25,7 +25,9 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
-    for (IntSetIter p_no = no_download_pieces_set_.begin(); p_no != no_download_pieces_set_.end(); p_no++, index++)
+    IntSetIter begin = no_download_pieces_set_.begin();
+    IntSetIter end = no_download_pieces_set_.end();
+    for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
     {
         int counts = 0;
         for (auto& nei : neighbors)
@@ -48,7 +50,7 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
     //neighbors = nullptr;
 }
 
-void RarestFirst::SortByPieceCounts(const int num_target)
+void RarestFirst::SortByPieceCounts(const size_t num_target)
 {
     auto cmp = [] (const void* l, const void* r) {
                       const PeerOwnCounts* myl = (PeerOwnCounts*)l;
@@ -72,7 +74,7 @@ void RarestFirst::SortByPieceCounts(const int num_target)
     std::cout << std::endl;
 }
 
-IntSet RarestFirst::GetRarestPiecesSet(const int num_target) const
+IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
 {
     IntSet target_pieces;
     IntSet dup_count_pieces;

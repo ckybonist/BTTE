@@ -21,7 +21,6 @@ public:
 
 
     PeerManager();
-    PeerManager(Args* const args);
     ~PeerManager();
 
 public:
@@ -43,8 +42,6 @@ private:
     void InitSeeds() const;
     void InitLeeches();
     void InitAbstractObj();
-
-    Args *args_;
 
     IPeerSelect* obj_peerselect_;
     IPieceSelect* obj_pieceselect_;

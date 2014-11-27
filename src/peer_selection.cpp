@@ -8,9 +8,8 @@ using namespace uniformrand;
 namespace btte_peer_selection
 {
 
-IPeerSelect::IPeerSelect(Args args)
+IPeerSelect::IPeerSelect()
 {
-    args_ = args;
     candidates_ = nullptr;
 }
 
@@ -31,7 +30,8 @@ IPeerSelect::~IPeerSelect()
 
 Neighbor* IPeerSelect::AllocNeighbors()
 {
-    Neighbor* neighbors = new Neighbor[args_.NUM_PEERLIST];
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
+    Neighbor* neighbors = new Neighbor[NUM_PEERLIST];
 
     if(neighbors == nullptr)
     {
@@ -82,12 +82,14 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
         int index = 0;
         for(IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
         {
+            if (index >= cand_pid_set.size()) break;
             candidates_[index] = *pid;
         }
 
         // peers with different cid put on tail of array
         for(IntSetIter pid = diff_cluster_peers.begin(); pid != diff_cluster_peers.end(); pid++, index++)
         {
+            if (index >= cand_pid_set.size()) break;
             candidates_[index] = *pid;
         }
     }

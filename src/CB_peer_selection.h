@@ -9,7 +9,7 @@ namespace btte_peer_selection
 class ClusterBased : public IPeerSelect
 {
 public:
-    ClusterBased(Args args) : IPeerSelect(args) {};
+    ClusterBased() : IPeerSelect() {};
     ~ClusterBased() {};
 
 private:

@@ -11,15 +11,15 @@ namespace btte_piece_selection
 class RarestFirst : public IPieceSelect
 {
 public:
-    RarestFirst(Args args) : IPieceSelect(args) {};
+    RarestFirst() : IPieceSelect() {};
     ~RarestFirst();
 
 private:
     IntSet StartSelection(const int client_pid) override;
     void CountNumPeerOwnPiece(const size_t num_target);
-    void SortByPieceCounts(const int num_target);
+    void SortByPieceCounts(const size_t num_target);
     bool IsDupDest(const IntSet& dest_peers, const int nid);
-    IntSet GetRarestPiecesSet(const int num_target) const;
+    IntSet GetRarestPiecesSet(const size_t num_target) const;
     void RefreshInfo();
 
     struct PeerOwnCounts

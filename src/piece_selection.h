@@ -30,7 +30,7 @@ typedef std::deque<PieceMsg> MsgQueue;
 class IPieceSelect
 {
 public:
-    IPieceSelect(Args args);
+    IPieceSelect();
     virtual ~IPieceSelect();
     virtual IntSet StartSelection(const int client_pid) = 0;
 
@@ -40,7 +40,6 @@ protected:
     bool HavePiece(const int pid, const int piece_no) const;
 
     IntSet no_download_pieces_set_;
-    Args args_;
     int selector_pid_;
 };
 

@@ -10,8 +10,8 @@ namespace btte_peer_selection
 class Standard : public IPeerSelect
 {
 public:
-    Standard(Args args) : IPeerSelect(args),
-                          pg_delays_(nullptr) {};
+    Standard() : IPeerSelect(),
+                 pg_delays_(nullptr) {};
     ~Standard();
 
 private:

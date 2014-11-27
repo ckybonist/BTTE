@@ -3,9 +3,8 @@
 namespace btte_piece_selection
 {
 
-IPieceSelect::IPieceSelect(Args args)
+IPieceSelect::IPieceSelect()
 {
-    args_ = args;
 }
 
 IPieceSelect::~IPieceSelect()
@@ -25,7 +24,9 @@ void IPieceSelect::CheckNeighbors()
 
 void IPieceSelect::CollectNoDownloadPieces()
 {
-    for (size_t c = 0; c < args_.NUM_PIECE; c++)
+    const size_t NUM_PIECE = g_btte_args.get_num_piece();
+
+    for (size_t c = 0; c < NUM_PIECE; c++)
     {
         const Peer& selector = g_peers.at(selector_pid_);
         if (!selector.get_nth_piece(c))

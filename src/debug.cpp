@@ -25,23 +25,28 @@ void NeighborInfo(const int pid,
 }
 
 
-void ShowDbgInfo(const Args &args)
+void ShowDbgInfo()
 {
-    int* piece_own_counter = new int[args.NUM_PIECE];
+    const size_t NUM_PIECE = g_btte_args.get_num_piece();
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+    const size_t NUM_SEED = g_btte_args.get_num_seed();
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
 
-    if (nullptr == piece_own_counter) ExitError("Memory Allocation Fault");
+    int* piece_own_counter = new int[NUM_PIECE];
+    if (nullptr == piece_own_counter)
+        ExitError("Memory Allocation Fault");
 
     cout.precision(3);
     cout << "\n\n\n\n@ Peer Info: \n\n";
 
-    for (size_t pid = 0; pid < args.NUM_PEER; pid++)
+    for (size_t pid = 0; pid < NUM_PEER; pid++)
     {
         PeerInfo(pid);
 
-        PieceInfo(pid, args.NUM_PIECE, args.NUM_SEED, piece_own_counter);
+        PieceInfo(pid, NUM_PIECE, NUM_SEED, piece_own_counter);
 
-        if (pid >= args.NUM_SEED)
-            NeighborInfo(pid, args.NUM_PEERLIST);
+        if (pid >= NUM_SEED)
+            NeighborInfo(pid, NUM_PEERLIST);
 
         cout << "\n===========================\n\n";
     }

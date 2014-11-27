@@ -25,9 +25,8 @@ const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[
 const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 
 
-EventHandler::EventHandler(Args args, PeerManager* const pm, float lambda, float mu)
+EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
 {
-    args_ = args;
     pm_ = pm;
     lambda_ = lambda;
     mu_ = mu;
@@ -72,11 +71,11 @@ void EventHandler::CreateSingleFlowDependencies()
 
 void EventHandler::PushInitEvent()
 {
-    const int initial_pid = args_.NUM_SEED + args_.NUM_LEECH;
+    const size_t NUM_SEED = g_btte_args.get_num_seed();
+    const size_t NUM_LEECH = g_btte_args.get_num_leech();
+    const int initial_pid = NUM_SEED + NUM_LEECH;
     const int initial_idx = 1;
-    next_event_idx_ = initial_idx;  // init next event index
-
-    float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
     Event first_event(Event::Type::ARRIVAL,
                       Event::PEER_JOIN,
@@ -85,6 +84,8 @@ void EventHandler::PushInitEvent()
                       time);
 
     event_list_.push_back(first_event);
+
+    next_event_idx_ = initial_idx;  // init next event index
 }
 
 void EventHandler::PushArrivalEvent(const Event& ev)
@@ -197,8 +198,9 @@ void EventHandler::PushPeerJoinEvent(const Event& ev)
     /// 如果是處理 Peer Join 事件,就再產生下一個 Peer Join 事件
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
     const int next_join_pid = ev.pid + 1;
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
 
-    if ((size_t)next_join_pid < args_.NUM_PEER &&
+    if ((size_t)next_join_pid < NUM_PEER &&
             !g_in_swarm_set[next_join_pid])
     {
         float time = ComputeArrivalEventTime(ev, Event::PEER_JOIN);

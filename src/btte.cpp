@@ -69,20 +69,18 @@ int main(int argc, const char *argv[])
         ExitError("Too much arguments.");
     }
 
-    Args args(argv[1]);
-    //Args args("../btte.conf.dbg");
-
+    g_btte_args.InitArgs(argv[1]);
 
     ///////////////////////
     // 3. start simulating
     //
-    PeerManager pm(&args);
+    PeerManager pm = PeerManager();
     pm.CreatePeers();
 
-    EventHandler evh(args, &pm, 0.2, 0.5);
+    EventHandler evh(&pm, 0.2, 0.5);
     evh.StartRoutine();
 
-    ShowDbgInfo(args);
+    ShowDbgInfo();
 
 
     /////////////////////////////////
