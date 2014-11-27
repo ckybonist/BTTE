@@ -94,7 +94,7 @@ MsgQueue GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
     return req_msgs;
 }
 
-}
+}  // anonymous namespace
 
 
 PeerManager::PeerManager()
