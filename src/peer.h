@@ -26,25 +26,6 @@ public:
                     const int NUM_PIECE,
                     const double main_prob = 0.0);
 
-    // seed
-    //Peer(const int pid,
-    //     const int cid,
-    //     const int NUM_PIECE,
-    //     const Bandwidth bw);
-
-    // leech
-    //Peer(const int pid,
-    //     const int cid,
-    //     const int NUM_PIECE,
-    //     const double prob_leech,
-    //     const Bandwidth bw);
-
-    //// average peer
-    //Peer(const int pid,
-    //     const int cid,
-    //     const int NUM_PIECE,
-    //     const float join_time,
-    //     const Bandwidth bw);
 public:
     /* setter */
     void set_in_swarm(const bool st);
