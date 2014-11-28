@@ -28,7 +28,7 @@ public:
     void NewPeer(const int pid) const;  // for peer_join event
     void UpdateSwarmInfo(const ISF isf, const int pid);
     void AllotNeighbors(const int client_pid) const;            // Peer Selection
-    MsgQueue GetAvailablePieceReqs(const int client_pid); // Piece Selection
+    MsgBuf GetAvailablePieceReqs(const int client_pid); // Piece Selection
     void CreatePeers();
 
 private:

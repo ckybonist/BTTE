@@ -4,6 +4,7 @@
 #include <deque>
 
 #include "piece.h"
+#include "peer.h"
 
 class Event
 {
@@ -43,7 +44,8 @@ public:
     float pg_delay;
 
     // Piece-related
-    std::deque<PieceMsg> tmp_req_msgs;
+    MsgBuf req_msgs;
+    MsgBuf admit_req_msgs;
     bool am_choking;    // PieceReqRecv event
     int piece_no;       // piece no which being admitted (or received)
     int client_pid;     // use when generate derived event of PIECE_ADMIT

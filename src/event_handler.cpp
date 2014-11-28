@@ -158,7 +158,7 @@ void EventHandler::PushDerivedEvent(const Event& ev)
     //switch (ev.type_bt)
     //{
     //    case Event::PEERLIST_GET:  // generate initial piece-req events
-    //        for (const PieceMsg& msg : ev.tmp_req_msgs)
+    //        for (const PieceMsg& msg : ev.req_msgs)
     //        {
     //            next_event.client_pid = msg.src_pid;
     //            next_event.pid = msg.dest_pid;
@@ -260,7 +260,7 @@ bool EventHandler::ReqTimeout(const Event& ev)
     //assert(current_time_ > e.time_req_send);
 
     bool flag = false;
-    // TODO: 紀錄送出要求的時間(time_req_send)(產生要求事件的系統時的 current-time)，
+    // TODO: 紀錄送出要求的時間(time_req_send)(產生要求事件當下的系統時間的 current_time_)，
     //       並且將現在時間(cur_time)減掉 time_req_send
     //       如果大於等於 kTimeout 就視為 Timeout
     if (current_time_ - ev.time_req_send >= kTimeout_)
@@ -291,10 +291,10 @@ void EventHandler::PeerListGetEvent(Event& ev)
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
 
-    ev.tmp_req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
+    ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
 
     ////for (auto it = ev.req_msgs->begin(); it != ev.req_msgs->end(); ++it)
-    //for (const PieceMsg& msg : ev.tmp_req_msgs)
+    //for (const PieceMsg& msg : ev.req_msgs)
     //{
     //    Peer& client = g_peers.at(ev.pid);      // self peer
     //    Peer& peer = g_peers.at(msg.dest_pid);  // other peer
@@ -314,9 +314,8 @@ void EventHandler::PeerListGetEvent(Event& ev)
 
 void EventHandler::PieceReqRecvEvent(Event& ev)
 {
-    // 如果已經 timeout 就把這個事件移出系統
-    // 並忽略下面的執行程序
-    //if (ReqTimeout(e)) return;
+    // TODO 檢查要求者的 piece 狀態，只要有一個是完全沒拿到 piece
+    // 就做 choking
 
     // TODO
     // 接收者收到訊息後，檢查是否 choking 要求者，如果沒有就產生 PieceAdmit 事件

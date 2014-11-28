@@ -9,7 +9,10 @@
 #include "neighbor.h"
 #include "bandwidth.h"
 
+
 typedef std::map<int, Neighbor> NeighborMap;
+typedef std::list<PieceMsg> MsgBuf;
+
 
 class Peer
 {
@@ -77,8 +80,8 @@ private:
     NeighborMap neighbors;  // <nid, nei_info>
     //Neighbor* neighbors;
 
-    std::list<PieceMsg> req_msgs;
-    std::list<PieceMsg> recv_msg_buf;
+    MsgBuf req_msgs;
+    MsgBuf recv_msg_buf;
 
     Bandwidth bandwidth;
 

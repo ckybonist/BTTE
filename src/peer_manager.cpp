@@ -17,6 +17,7 @@
 
 using namespace uniformrand;
 
+
 namespace
 {
 
@@ -59,9 +60,9 @@ std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces,
     return piece_owner_map;
 }
 
-MsgQueue GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
+MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 {
-    MsgQueue req_msgs;
+    MsgBuf req_msgs;
     IntSet dest_peers;
     NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
     std::map<int, IntSet> piece_owners_map = GetEachPieceOwners(target_pieces, neighbors);
@@ -299,10 +300,10 @@ void PeerManager::AllotNeighbors(const int pid) const
     client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
 }
 
-MsgQueue PeerManager::GetAvailablePieceReqs(const int client_pid)
+MsgBuf PeerManager::GetAvailablePieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
-    MsgQueue req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
+    MsgBuf req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     // debug
     for (const PieceMsg& msg : req_msgs)

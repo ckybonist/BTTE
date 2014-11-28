@@ -25,8 +25,6 @@ typedef enum class TypePieceSelect
     USER_DEFINED_2,
 } PieceSelect_T;
 
-typedef std::deque<PieceMsg> MsgQueue;
-
 class IPieceSelect
 {
 public:
