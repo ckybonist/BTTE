@@ -35,7 +35,7 @@ EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
     next_event_idx_ = 0;
 
     MapEvents();
-    CreateSingleFlowDependencies();
+    MapFlowDownEventDependencies();
 }
 
 EventHandler::~EventHandler()
@@ -45,28 +45,25 @@ EventHandler::~EventHandler()
 
 void EventHandler::MapEvents()
 {
-    event_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
-    event_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
-    event_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
-    event_map_[Event::PIECE_REQ_RECV] = &EventHandler::PieceReqRecvEvent;
-    event_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
-    event_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
-    event_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
-    event_map_[Event::PEER_LEAVE] = &EventHandler::PeerLeaveEvent;
+    event_func_map_[Event::PEER_JOIN] = &EventHandler::PeerJoinEvent;
+    event_func_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::PeerListReqRecvEvent;
+    event_func_map_[Event::PEERLIST_GET] = &EventHandler::PeerListGetEvent;
+    event_func_map_[Event::PIECE_REQ_RECV] = &EventHandler::PieceReqRecvEvent;
+    event_func_map_[Event::PIECE_ADMIT] = &EventHandler::PieceAdmitEvent;
+    event_func_map_[Event::PIECE_GET] = &EventHandler::PieceGetEvent;
+    event_func_map_[Event::COMPLETED] = &EventHandler::CompletedEvent;
+    event_func_map_[Event::PEER_LEAVE] = &EventHandler::PeerLeaveEvent;
 }
 
-void EventHandler::CreateSingleFlowDependencies()
+void EventHandler::MapFlowDownEventDependencies()
 {
-    event_deps_map_[Event::PEER_JOIN] = Event::PEERLIST_REQ_RECV;
-    event_deps_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
-    event_deps_map_[Event::PEERLIST_GET] = Event::PIECE_REQ_RECV;
-
-    // TODO: The derived event of REQ_PIECE needs to fix
-    event_deps_map_[Event::PIECE_REQ_RECV] = Event::PIECE_ADMIT;
-
-    event_deps_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
-    event_deps_map_[Event::PIECE_GET] = Event::COMPLETED;
-    event_deps_map_[Event::COMPLETED] = Event::PEER_LEAVE;
+    event_map_[Event::PEER_JOIN] = Event::PEERLIST_REQ_RECV;
+    event_map_[Event::PEERLIST_REQ_RECV] = Event::PEERLIST_GET;
+    event_map_[Event::PEERLIST_GET] = Event::PIECE_REQ_RECV;
+    event_map_[Event::PIECE_REQ_RECV] = Event::PIECE_ADMIT;
+    event_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
+    event_map_[Event::PIECE_GET] = Event::COMPLETED;
+    event_map_[Event::COMPLETED] = Event::PEER_LEAVE;
 }
 
 void EventHandler::PushInitEvent()
@@ -150,7 +147,7 @@ void EventHandler::PushDerivedEvent(const Event& ev)
 {
     int pid = ev.pid;
     Event::Type base_etype = Event::Type::ARRIVAL;
-    Event::Type4BT derived_tbt = event_deps_map_[ev.type_bt];  // tbt == type_bt
+    Event::Type4BT derived_tbt = event_map_[ev.type_bt];  // tbt == type_bt
     float time = ComputeArrivalEventTime(ev, derived_tbt);
 
     Event next_event = Event(base_etype, derived_tbt, ++next_event_idx_, pid, time);
@@ -220,7 +217,7 @@ void EventHandler::ProcessArrival(Event& ev)
     system_.push_back(ev);
 
     /// 處理 System 的頭一個 BT 事件
-    (this->*event_map_[ev.type_bt])(ev);
+    (this->*event_func_map_[ev.type_bt])(ev);
 
     /// 如果這個 request event 已經 timeout, 也就代表這個事件已經沒用,
     //  所以不再產生衍生事件，直接跳出函式

@@ -19,24 +19,25 @@ public:
     float get_mu() { return mu_; };
 
 private:
+    void MapEvents();
+    void MapFlowDownEventDependencies();
+
     void PushInitEvent();
     void PushDerivedEvent(const Event& ev);
     void PushPeerJoinEvent(const Event& ev);
     void PushArrivalEvent(const Event& ev);
+    void PushDepartureEvent(const Event::Type4BT type_bt,
+                            const int next_index,
+                            const int pid);
+
 
     void ProcessArrival(Event& ev);
     void ProcessDeparture(const Event& ev);
     void ProcessEvent(Event& ev);
 
-    void PushDepartureEvent(const Event::Type4BT type_bt,
-                            const int next_index,
-                            const int pid);
-
-    float ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt);
+    float ComputeArrivalEventTime(const Event& ev,
+                                  const Event::Type4BT derived_type_bt);
     float ComputeDepartureEventTime();
-
-    void MapEvents();
-    void CreateSingleFlowDependencies();
 
 
 private:
@@ -55,9 +56,8 @@ private:
 private:
     typedef void (EventHandler::*Fptr)(Event&);
     typedef std::map<Event::Type4BT, Fptr> FuncMap;
-
-    FuncMap event_map_;
-    std::map<Event::Type4BT, Event::Type4BT> event_deps_map_;
+    FuncMap event_func_map_;
+    std::map<Event::Type4BT, Event::Type4BT> event_map_;
 
     std::list<Event> event_list_;
     std::list<Event> system_;
