@@ -59,9 +59,11 @@ public:
     void set_leave_time(const float t);
 
     void push_req_msg(PieceMsg const& msg);
-    void push_recv_msg(PieceMsg const& msg);
     void pop_req_msg();
+    void push_recv_msg(PieceMsg const& msg);
+    void sort_recv_msg();
     void pop_recv_msg();
+
     void destroy_pieces();
 
     /* getter */

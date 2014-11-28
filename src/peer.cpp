@@ -60,9 +60,11 @@ void Peer::set_neighbors(NeighborMap const& ns)
 }
 
 void Peer::clear_neighbors()                  { neighbors.clear(); }
+
 void Peer::push_req_msg(PieceMsg const& msg)  { req_msgs.push_back(msg); }
-void Peer::push_recv_msg(PieceMsg const& msg) { recv_msg_buf.push_back(msg); }
 void Peer::pop_req_msg()                      { req_msgs.pop_front(); }
+void Peer::push_recv_msg(PieceMsg const& msg) { recv_msg_buf.push_back(msg); }
+void Peer::sort_recv_msg()                    { recv_msg_buf.sort(); }
 void Peer::pop_recv_msg()                     { recv_msg_buf.pop_front(); }
 
 void Peer::destroy_pieces()
@@ -105,7 +107,7 @@ NeighborMap const& Peer::get_neighbors() const
 Neighbor const& Peer::get_nth_neighbor(const int n) const  { return neighbors.at(n); }
 Bandwidth const& Peer::get_bandwidth() const               { return bandwidth; }
 std::list<PieceMsg> const& Peer::get_req_msgs() const      { return req_msgs; }
-std::list<PieceMsg> const& Peer::get_recv_msg_buf() const  { return recv_msg_buf; }
+std::list<PieceMsg> const& Peer::get_recv_msg_buf() const { return recv_msg_buf; }
 
 void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_prob)
 {
