@@ -8,7 +8,7 @@
 
 class Event
 {
-public:
+  public:
     enum class Type
     {
         DEPARTURE,
@@ -28,10 +28,15 @@ public:
     };
 
     Event() {};
-    Event(Type t, Type4BT t_bt, int idx, int pid, float ti);
+    Event(Type t,        // arrival, departure
+          Type4BT t_bt,  // type of BT event
+          int index,
+          int pid,       // which peer belongs to this event
+          float ti);     // arrival time of event
+
     bool operator<(const Event& e);
 
-    Type type;  // arrival or departure
+    Type type;  // arrival, departure
     Type4BT type_bt;
 
     // Base of Event
@@ -44,12 +49,16 @@ public:
     float pg_delay;
 
     // Piece-related
-    MsgBuf req_msgs;
-    MsgBuf admit_req_msgs;
-    bool am_choking;    // PieceReqRecv event
-    int piece_no;       // piece no which being admitted (or received)
-    int client_pid;     // use when generate derived event of PIECE_ADMIT
+    std::list<PieceMsg> req_msgs;
+    std::list<PieceMsg> admitted_reqs;    // request being admitted
+    std::list<PieceMsg> uploaded_reqs;  // request-infos that need to upload piece to
     float time_req_send;
+
+    // TRUE, if no target pieces found when
+    // executing Piece Selection
+    bool need_new_neighbors;
+
+    bool is_complete;  // all pieces got
 };
 
 

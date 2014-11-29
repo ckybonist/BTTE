@@ -11,15 +11,16 @@
 
 class EventHandler
 {
-public:
+  public:
     EventHandler(PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
     void StartRoutine();
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
-private:
-    void MapEvents();
+  private:
+    void MapEventFuncs();
+    void MapEventCreators();
     void MapFlowDownEventDependencies();
 
     void PushInitEvent();
@@ -40,9 +41,10 @@ private:
     float ComputeDepartureEventTime();
 
 
-private:
-    bool ReqTimeout(const Event& ev);
+  private:
+    bool ReqTimeout(const Event& ev);   // TODO
 
+    /* Main BitTorrent Events */
     void PeerJoinEvent(Event& ev);
     void PeerListReqRecvEvent(Event& ev);
     void PeerListGetEvent(Event& ev);
@@ -53,10 +55,15 @@ private:
     void PeerLeaveEvent(Event& ev);
 
 
-private:
-    typedef void (EventHandler::*Fptr)(Event&);
-    typedef std::map<Event::Type4BT, Fptr> FuncMap;
-    FuncMap event_func_map_;
+  private:
+    //typedef void (EventHandler::*Fptr)(Event&);
+    typedef std::function<void(EventHandler&, Event&)> FuncProto_1;  // function to process event
+    typedef std::function<void(const Event&)> FuncProto_2;  // function to process event
+    typedef std::map<Event::Type4BT, FuncProto_1> FuncMap_1;
+    typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
+
+    FuncMap_1 event_func_map_;
+    FuncMap_2 event_creator_map_;  // dv : derived event
     std::map<Event::Type4BT, Event::Type4BT> event_map_;
 
     std::list<Event> event_list_;

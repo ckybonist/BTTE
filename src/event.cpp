@@ -11,10 +11,6 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     pg_delay = 0.0;
 
     //req_timeout = false;
-
-    // not for all type of events
-    client_pid = -1;
-    piece_no = -1;
 }
 
 bool Event::operator<(const Event& e)
