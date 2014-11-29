@@ -42,10 +42,10 @@ void LoadBalancing::GatherNeighborCounts(const size_t cand_size)
 void LoadBalancing::SortCountsInfo(const size_t cand_size)
 {
     auto func_comp = [] (const void* a, const void* b) {
-                             const NBCountsInfo* pa = (NBCountsInfo*)a;
-                             const NBCountsInfo* pb = (NBCountsInfo*)b;
-                             return pa->counts - pb->counts;
-                        };
+        const NBCountsInfo* pa = (NBCountsInfo*)a;
+        const NBCountsInfo* pb = (NBCountsInfo*)b;
+        return pa->counts - pb->counts;
+    };
     qsort(nbc_info_,
           cand_size,
           sizeof(NBCountsInfo),

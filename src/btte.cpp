@@ -15,7 +15,7 @@ namespace  // for debug
 
 typedef std::map<RSC, std::string> RSmapStr;  // debug
 
-void RSC2Str(RSmapStr &rs2str)
+void RSC2Str(RSmapStr& rs2str)
 {
     rs2str[RSC::PEER_LEVEL] = "Peer Level";
     rs2str[RSC::PROB_LEECH] = "Base Prob. of Leech";
@@ -36,7 +36,7 @@ void RSC2Str(RSmapStr &rs2str)
 
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     /////////////////////////////
     // 1. init random seeds group
@@ -46,9 +46,9 @@ int main(int argc, const char *argv[])
     std::cout << "Initial Random Seeds:\n";
     RSmapStr rs2str;
     RSC2Str(rs2str);
-    for(int i = 0; i < g_kNumRSeeds; i++)
+    for (int i = 0; i < g_kNumRSeeds; i++)
     {
-        if(i == 11) { std::cout << "\nUnused Rand Seeds: \n"; }
+        if (i == 11) { std::cout << "\nUnused Rand Seeds: \n"; }
         RSC type_rsc = static_cast<RSC>(i);
         std::string rsc_str = rs2str[type_rsc];
         std::cout << std::left << rsc_str << " : \n";
@@ -60,7 +60,7 @@ int main(int argc, const char *argv[])
     ////////////////////
     // 2. read arguments
     //
-    if(argc == 1)
+    if (argc == 1)
     {
         ExitError("First argument: path of config file");
     }
@@ -87,14 +87,14 @@ int main(int argc, const char *argv[])
     // 4. check seeds was being used
 
     std::cout << "\n\nFinal Random Seeds:\n";
-    for(int i = 0; i < g_kNumRSeeds; i++)
+    for (int i = 0; i < g_kNumRSeeds; i++)
     {
-        if(i == 11) { std::cout << "\nUnused rand seeds: \n"; }
+        if (i == 11) { std::cout << "\nUnused rand seeds: \n"; }
         RSC type_rsc = static_cast<RSC>(i);
         std::string rsc_str = rs2str[type_rsc];
         std::cout << std::left << rsc_str << " : \n";
         std::cout << "\t\t\t\t" << g_rand_grp[i] << "\n\n";
     }
 
-	return 0;
+    return 0;
 }

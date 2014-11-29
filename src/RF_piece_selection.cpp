@@ -53,10 +53,10 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
 void RarestFirst::SortByPieceCounts(const size_t num_target)
 {
     auto cmp = [] (const void* l, const void* r) {
-                      const PeerOwnCounts* myl = (PeerOwnCounts*)l;
-                      const PeerOwnCounts* myr = (PeerOwnCounts*)r;
-                      return myl->counts - myr->counts;
-                  };
+        const PeerOwnCounts* myl = (PeerOwnCounts*)l;
+        const PeerOwnCounts* myr = (PeerOwnCounts*)r;
+        return myl->counts - myr->counts;
+    };
 
     // sort pieces counts info
     qsort(counts_info_,
@@ -85,13 +85,13 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
     {
         const int no = counts_info_[i].piece_no;
         const int count = counts_info_[i].counts;
-        const int prev_count = counts_info_[i-1].counts;
+        const int prev_count = counts_info_[i - 1].counts;
 
         if (count == prev_count)
         {
             if (i == 1)
             {
-                const int prev_no = counts_info_[i-1].piece_no;
+                const int prev_no = counts_info_[i - 1].piece_no;
                 dup_count_pieces.insert(prev_no);
             }
 
@@ -101,7 +101,7 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
         {
             if (i == 1)
             {
-                const int prev_no = counts_info_[i-1].piece_no;
+                const int prev_no = counts_info_[i - 1].piece_no;
                 target_pieces.insert(prev_no);
             }
             else if (i == num_target - 1 ||
@@ -112,7 +112,7 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
             else
             {
                 const int rand_no = RandChooseSetElement(RSC::RF_PIECESELECT,
-                                                         dup_count_pieces);
+                                    dup_count_pieces);
                 target_pieces.insert(rand_no);
                 dup_count_pieces.clear();
             }

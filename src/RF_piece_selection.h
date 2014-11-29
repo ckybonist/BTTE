@@ -10,11 +10,11 @@ namespace btte_piece_selection
 
 class RarestFirst : public IPieceSelect
 {
-public:
+  public:
     RarestFirst() : IPieceSelect() {};
     ~RarestFirst();
 
-private:
+  private:
     IntSet StartSelection(const int client_pid) override;
     void CountNumPeerOwnPiece(const size_t num_target);
     void SortByPieceCounts(const size_t num_target);

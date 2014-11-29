@@ -5,7 +5,7 @@
 
 class Args
 {
-public:
+  public:
     Args() {};
     void InitArgs(const std::string filename);
 
@@ -21,7 +21,7 @@ public:
     int get_type_pieceselect() const;
     float get_arrival_rate() const;
 
-private:
+  private:
     size_t NUM_PEER;
     size_t NUM_SEED;
     size_t NUM_LEECH;

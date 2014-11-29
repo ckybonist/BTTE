@@ -42,7 +42,7 @@ bool HavePiece(const int pid, const int piece_no)
 }
 
 std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces,
-                                         NeighborMap const& neighbors)
+        NeighborMap const& neighbors)
 {
     std::map<int, IntSet> piece_owner_map;
 
@@ -260,7 +260,7 @@ void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
         }
         else
         {
-            for(size_t i = 0; i < NUM_PEER; i++)
+            for (size_t i = 0; i < NUM_PEER; i++)
                 g_in_swarm_set[i] = false;
         }
     }
@@ -336,10 +336,10 @@ MsgBuf PeerManager::GetAvailablePieceReqs(const int client_pid)
 void PeerManager::CreatePeers()
 {
     // DEBUG
-    for(int i = 0; i < g_kNumLevel; i++)
+    for (int i = 0; i < g_kNumLevel; i++)
     {
         const float up_bandwidth = g_kPeerLevel[i].bandwidth.downlink;
-        std::cout << "Transmission Time of level "<< i << " : "
+        std::cout << "Transmission Time of level " << i << " : "
                   << g_kPieceSize / up_bandwidth << std::endl;
     }
     std::cout << "\n\n\n";
@@ -352,27 +352,27 @@ void PeerManager::CreatePeers()
 
 void PeerManager::DeployPeersLevel()
 {
-	int count[g_kNumLevel] = { 0 };
-	int exclude_set[g_kNumLevel] = { 0 };
+    int count[g_kNumLevel] = { 0 };
+    int exclude_set[g_kNumLevel] = { 0 };
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
-	for (size_t p = 0; p < NUM_PEER; p++)
+    for (size_t p = 0; p < NUM_PEER; p++)
     {
         int level = RangeRandNumExceptEx<int, g_kNumLevel>(RSC::PEER_LEVEL, exclude_set);
         const int idx = level - 1;
 
         reserved_peer_levels_[p] = idx;
 
-		++count[idx];
+        ++count[idx];
 
         const int max_num = static_cast<int>(g_kPeerLevel[idx].dist_rate * NUM_PEER);
 
         if (count[idx] == max_num)
         {
-			if (exclude_set[idx] == 0)
-				exclude_set[idx] = level;
-		}
-	}
+            if (exclude_set[idx] == 0)
+                exclude_set[idx] = level;
+        }
+    }
 
     std::cout << "\n";
     for (int i = 0; i < 3; i++)
@@ -386,7 +386,7 @@ void PeerManager::DeployPeersLevel()
 void PeerManager::DeployClusterIDs()
 {
     int count[g_kNumClusters] = { 0 };
-	int exclude_set[g_kNumClusters] = { 0 };
+    int exclude_set[g_kNumClusters] = { 0 };
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     // assing a cid to each peer, and don't exceed
@@ -398,15 +398,15 @@ void PeerManager::DeployClusterIDs()
 
         reserved_cids_[p] = cid;
 
-		++count[idx];
+        ++count[idx];
 
         const int kMaxClusterAmount = static_cast<int>(NUM_PEER / (float)g_kNumClusters);
 
         if (count[idx] == kMaxClusterAmount)
         {
-			if (exclude_set[idx] == 0)
-				exclude_set[idx] = cid;
-		}
+            if (exclude_set[idx] == 0)
+                exclude_set[idx] = cid;
+        }
     }
 }
 
@@ -448,7 +448,7 @@ void PeerManager::InitLeeches()
         UpdateSwarmInfo(ISF::JOIN, p);
     }
 
-    for(size_t p = start; p < end; p++)
+    for (size_t p = start; p < end; p++)
         AllotNeighbors(p);
 
     std::cout << "============================\n";

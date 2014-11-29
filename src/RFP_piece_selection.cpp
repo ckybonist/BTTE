@@ -17,7 +17,7 @@ IntSet RandomFirstPiece::GetTargetPieces(const size_t num_target) const
 
     IntSetIter piece_no = no_download_pieces_set_.begin();
     int rand_offset = Rand(RSC::RFP_PIECESELECT) % num_target;
-    for(; rand_offset != 0; --rand_offset) ++piece_no;
+    for (; rand_offset != 0; --rand_offset) ++piece_no;
 
     target_pieces.insert(*piece_no);
 

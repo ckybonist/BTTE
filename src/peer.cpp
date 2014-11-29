@@ -46,6 +46,7 @@ Peer::Peer(const Type type,
 void Peer::set_in_swarm(const bool st)       { in_swarm = st; }
 void Peer::set_pid(const int pid)            { this->pid = pid; }
 void Peer::set_cid(const int cid)            { this->cid = cid; }
+void Peer::to_seed()                         { type = SEED; }
 void Peer::set_nth_piece(const int n)        { pieces[n] = true; }
 void Peer::set_neighbor_counts(const int c)  { neighbor_counts = c; }
 void Peer::incr_neighbor_counts(const int n) { neighbor_counts += n; }
@@ -78,12 +79,14 @@ void Peer::destroy_pieces()
 
 
 /* getter */
-int Peer::get_pid() const              { return pid; }
-int Peer::get_cid() const              { return cid; }
-int Peer::get_neighbor_counts() const  { return neighbor_counts; }
-float Peer::get_join_time() const      { return join_time; }
-float Peer::get_leave_time() const     { return leave_time; }
-bool Peer::check_in_swarm() const      { return in_swarm; }
+int Peer::get_pid() const                                  { return pid; }
+int Peer::get_cid() const                                  { return cid; }
+int Peer::get_neighbor_counts() const                      { return neighbor_counts; }
+float Peer::get_trans_time() const                         { return g_kPieceSize / bandwidth.uplink; }
+float Peer::get_neighbor_pgdelay(const int nid) const      { return neighbors.at(nid).pg_delay; }
+float Peer::get_join_time() const                          { return join_time; }
+float Peer::get_leave_time() const                         { return leave_time; }
+bool Peer::check_in_swarm() const                          { return in_swarm; }
 
 bool Peer::get_nth_piece(const int n) const
 {
@@ -107,7 +110,7 @@ NeighborMap const& Peer::get_neighbors() const
 Neighbor const& Peer::get_nth_neighbor(const int n) const  { return neighbors.at(n); }
 Bandwidth const& Peer::get_bandwidth() const               { return bandwidth; }
 std::list<PieceMsg> const& Peer::get_req_msgs() const      { return req_msgs; }
-std::list<PieceMsg> const& Peer::get_recv_msg_buf() const { return recv_msg_buf; }
+std::list<PieceMsg> const& Peer::get_recv_msg_buf() const  { return recv_msg_buf; }
 
 void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_prob)
 {

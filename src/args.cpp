@@ -27,10 +27,10 @@ void Args::InitArgs(const std::string filename)
     NUM_OU = cfg.GetValueOfKey<size_t>("NUM_OU", 1);
 
     TYPE_PEERSELECT = cfg.GetValueOfKey<size_t>("TYPE_PEERSELECT",
-                                             static_cast<int>(PeerSelect_T::STANDARD));
+                      static_cast<int>(PeerSelect_T::STANDARD));
 
     TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
-                                              static_cast<int>(PieceSelect_T::BUILTIN));
+                       static_cast<int>(PieceSelect_T::BUILTIN));
 
     //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 }

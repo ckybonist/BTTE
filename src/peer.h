@@ -16,7 +16,7 @@ typedef std::list<PieceMsg> MsgBuf;
 
 class Peer
 {
-public:
+  public:
     enum Type { SEED, LEECH, NORMAL };
 
     Peer();
@@ -29,11 +29,12 @@ public:
                     const int NUM_PIECE,
                     const double main_prob = 0.0);
 
-public:
+  public:
     /* setter */
     void set_in_swarm(const bool st);
     void set_pid(const int pid);
     void set_cid(const int cid);
+    void to_seed();
     void set_nth_piece(const int n);
     void set_neighbors(NeighborMap const& ns);
     void clear_neighbors();
@@ -54,6 +55,8 @@ public:
     int get_pid() const;
     int get_cid() const;
     int get_neighbor_counts() const;
+    float get_trans_time() const;
+    float get_neighbor_pgdelay(const int nid) const;
     float get_join_time() const;
     float get_leave_time() const;
     bool check_in_swarm() const;
@@ -67,7 +70,7 @@ public:
     std::list<PieceMsg> const& get_recv_msg_buf() const;
 
 
-private:
+  private:
     bool in_swarm;
 
     int pid;

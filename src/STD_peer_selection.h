@@ -9,12 +9,12 @@ namespace btte_peer_selection
 
 class Standard : public IPeerSelect
 {
-public:
+  public:
     Standard() : IPeerSelect(),
-                 pg_delays_(nullptr) {};
+        pg_delays_(nullptr) {};
     ~Standard();
 
-private:
+  private:
     //Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
     NeighborMap StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
     void AssignNeighbors(NeighborMap& neighbors, const size_t cand_size);

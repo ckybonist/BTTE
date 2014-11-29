@@ -33,7 +33,7 @@ Neighbor* IPeerSelect::AllocNeighbors()
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
     Neighbor* neighbors = new Neighbor[NUM_PEERLIST];
 
-    if(neighbors == nullptr)
+    if (neighbors == nullptr)
     {
         ExitError("Memory Allocation Fault!");
     }
@@ -60,7 +60,7 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
     IntSet cand_pid_set = ExcludeSelf(in_swarm_set);
 
     candidates_ = new int[cand_pid_set.size()];
-    if(nullptr == candidates_)
+    if (nullptr == candidates_)
         ExitError("\nMemory Allocation Fault in SetCandidates\n");
 
     // for cluster-based
@@ -80,14 +80,14 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
 
         // assign peers with same cid at front of array
         int index = 0;
-        for(IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
+        for (IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
         {
             if (index >= cand_pid_set.size()) break;
             candidates_[index] = *pid;
         }
 
         // peers with different cid put on tail of array
-        for(IntSetIter pid = diff_cluster_peers.begin(); pid != diff_cluster_peers.end(); pid++, index++)
+        for (IntSetIter pid = diff_cluster_peers.begin(); pid != diff_cluster_peers.end(); pid++, index++)
         {
             if (index >= cand_pid_set.size()) break;
             candidates_[index] = *pid;
@@ -96,7 +96,7 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
     else  // for standard or load-balancing
     {
         int index = 0;
-        for(IntSetIter it = cand_pid_set.begin(); it != cand_pid_set.end(); it++, index++)
+        for (IntSetIter it = cand_pid_set.begin(); it != cand_pid_set.end(); it++, index++)
         {
             candidates_[index] = *it;
         }

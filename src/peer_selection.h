@@ -25,13 +25,13 @@ typedef enum class TypePeerSelect
 
 class IPeerSelect
 {
-public:
+  public:
     IPeerSelect();
     virtual ~IPeerSelect();  // ensuring destructor of derived class will be invoked
     //virtual Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) = 0;
     virtual NeighborMap StartSelection(const int client_pid, const IntSet& in_swarm_set) = 0;
 
-protected:
+  protected:
     Neighbor* AllocNeighbors();
     //void DebugInfo(NeighborMap* neighbors) const;
     void DebugInfo(NeighborMap const& neighbors, const int client_pid) const;

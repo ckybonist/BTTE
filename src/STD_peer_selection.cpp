@@ -26,7 +26,7 @@ void Standard::AssignNeighbors(NeighborMap& neighbors, const size_t cand_size)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
 
-    for(size_t i = 0; i < NUM_PEERLIST; i++)
+    for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
         if (i < cand_size)
         {

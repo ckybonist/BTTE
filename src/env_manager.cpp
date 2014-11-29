@@ -7,8 +7,8 @@
 /* Class definition */
 EnvManager& EnvManager::GetInstance()
 {
-	static EnvManager instance;
-	return instance;
+    static EnvManager instance;
+    return instance;
 }
 
 void EnvManager::Init(const std::string filename)

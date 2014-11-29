@@ -8,11 +8,11 @@ namespace btte_peer_selection
 
 class ClusterBased : public IPeerSelect
 {
-public:
+  public:
     ClusterBased() : IPeerSelect() {};
     ~ClusterBased() {};
 
-private:
+  private:
     //Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
     NeighborMap StartSelection(const int client_pid, const IntSet& in_swarm_set) override;
     float ComputePGDelayByCluster(const int self_cid, const int cand_cid);

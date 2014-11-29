@@ -10,7 +10,7 @@ using namespace btte_piece_selection;
 
 class PeerManager
 {
-public:
+  public:
     typedef std::set<int> IntSet;
     typedef IntSet::iterator IntSetIter;
     typedef enum class InSwarmFlag
@@ -23,7 +23,7 @@ public:
     PeerManager();
     ~PeerManager();
 
-public:
+  public:
     bool CheckAllPiecesGet(const int pid) const;
     void NewPeer(const int pid) const;  // for peer_join event
     void UpdateSwarmInfo(const ISF isf, const int pid);
@@ -31,7 +31,7 @@ public:
     MsgBuf GetAvailablePieceReqs(const int client_pid); // Piece Selection
     void CreatePeers();
 
-private:
+  private:
     //void AllocPeersSpace();
     void NewPeerData(Peer::Type type,
                      const int pid,

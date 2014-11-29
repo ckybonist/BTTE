@@ -75,7 +75,7 @@ T* DistinctRandNum(const RSC rsc,
                    const T rand_limit);
 
 template<typename T>
-void Shuffle(const RSC rsc, T *arr, size_t N);
+void Shuffle(const RSC rsc, T* arr, size_t N);
 
 
 /*

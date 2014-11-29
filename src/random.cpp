@@ -7,15 +7,15 @@
 
 namespace
 {
-    const long long kInitSeed = 377003613;
+const long long kInitSeed = 377003613;
 
-    void RandForInternal(const RSC& rsc)
-    {
-        const int iRSC = static_cast<int>(rsc);
+void RandForInternal(const RSC& rsc)
+{
+    const int iRSC = static_cast<int>(rsc);
 
-        /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-        g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
-    }
+    /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
+    g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
+}
 }
 
 

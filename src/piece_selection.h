@@ -27,12 +27,12 @@ typedef enum class TypePieceSelect
 
 class IPieceSelect
 {
-public:
+  public:
     IPieceSelect();
     virtual ~IPieceSelect();
     virtual IntSet StartSelection(const int client_pid) = 0;
 
-protected:
+  protected:
     void CheckNeighbors();
     void CollectNoDownloadPieces();
     bool HavePiece(const int pid, const int piece_no) const;
