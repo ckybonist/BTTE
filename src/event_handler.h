@@ -8,7 +8,6 @@
 #include "event.h"
 #include "peer_manager.h"
 
-
 class EventHandler
 {
   public:
@@ -24,25 +23,26 @@ class EventHandler
     void MapFlowDownEventDependencies();
 
     void PushInitEvent();
-    void PushDerivedEvent(const Event& ev);
-    void PushPeerJoinEvent(const Event& ev);
-    void PushArrivalEvent(const Event& ev);
+    void PushDerivedEvent(Event const& ev);
+    void PushPeerJoinEvent(Event const& ev);
+    void PushArrivalEvent(Event const& ev);
     void PushDepartureEvent(const Event::Type4BT type_bt,
                             const int next_index,
                             const int pid);
 
 
     void ProcessArrival(Event& ev);
-    void ProcessDeparture(const Event& ev);
+    void ProcessDeparture(Event const& ev);
     void ProcessEvent(Event& ev);
 
-    float ComputeArrivalEventTime(const Event& ev,
+    float ComputeArrivalEventTime(Event const& ev,
                                   const Event::Type4BT derived_type_bt);
     float ComputeDepartureEventTime();
 
 
   private:
-    bool ReqTimeout(const Event& ev);   // TODO
+    bool ReqTimeout(Event const& ev);   // TODO
+    void SendPieceReqs(Event& ev);
 
     /* Main BitTorrent Events */
     void PeerJoinEvent(Event& ev);
@@ -58,7 +58,7 @@ class EventHandler
   private:
     //typedef void (EventHandler::*Fptr)(Event&);
     typedef std::function<void(EventHandler&, Event&)> FuncProto_1;  // function to process event
-    typedef std::function<void(const Event&)> FuncProto_2;  // function to process event
+    typedef std::function<void(Event const&)> FuncProto_2;  // function to process event
     typedef std::map<Event::Type4BT, FuncProto_1> FuncMap_1;
     typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
 

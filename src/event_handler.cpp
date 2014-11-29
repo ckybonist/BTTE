@@ -442,6 +442,28 @@ bool EventHandler::ReqTimeout(Event const& ev)
     return flag;
 }
 
+void EventHandler::SendPieceReqs(Event& ev)
+{
+    ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
+
+    if (0 == ev.req_msgs.size())
+        ev.need_new_neighbors = true;
+
+    for (const PieceMsg& msg : ev.req_msgs)
+    {
+        Peer& client = g_peers.at(ev.pid);
+        Peer& peer = g_peers.at(msg.dest_pid);
+        client.push_req_msg(msg);
+        peer.push_recv_msg(msg);
+
+        std::cout << "Sending piece-req msg from peer #"
+                  << msg.src_pid << " to peer #"
+                  << msg.dest_pid << std::endl;
+        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
+    }
+
+}
+
 void EventHandler::PeerJoinEvent(Event& ev)
 {
     //pm_->NewPeer(ev.pid, ev.time);
@@ -459,21 +481,7 @@ void EventHandler::PeerListGetEvent(Event& ev)
 {
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
-
-    ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
-
-    for (const PieceMsg& msg : ev.req_msgs)
-    {
-        Peer& client = g_peers.at(ev.pid);
-        Peer& peer = g_peers.at(msg.dest_pid);
-        client.push_req_msg(msg);
-        peer.push_recv_msg(msg);
-
-        std::cout << "Sending piece-req msg from peer #"
-                  << msg.src_pid << " to peer #"
-                  << msg.dest_pid << std::endl;
-        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
-    }
+    SendPieceReqs(ev);
 }
 
 void EventHandler::PieceReqRecvEvent(Event& ev)
@@ -505,19 +513,7 @@ void EventHandler::PieceGetEvent(Event& ev)
     else
     {
         // download incomplete, so execute Piece Selection
-        ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
-        for (const PieceMsg& msg : ev.req_msgs)
-        {
-            Peer& client = g_peers.at(ev.pid);
-            Peer& peer = g_peers.at(msg.dest_pid);
-            client.push_req_msg(msg);
-            peer.push_recv_msg(msg);
-
-            std::cout << "Sending piece-req msg from peer #"
-                      << msg.src_pid << " to peer #"
-                      << msg.dest_pid << std::endl;
-            std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
-        }
+        SendPieceReqs(ev);
     }
 }
 
