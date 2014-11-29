@@ -58,14 +58,19 @@ void EventHandler::MapEventFuncs()
 
 void EventHandler::MapEventCreators()
 {
+    const Event::Type ev_type = Event::Type::ARRIVAL;
+
     /* Define Lambda Functions */
     // Peer-Join Event
     auto func_c1 = [this](Event const & ev) {
         assert(ev.type_bt == Event::PEER_JOIN);
 
+        // 再產生下一個 Peer-Join Event
+        if (ev.type_bt == Event::PEER_JOIN)  { PushPeerJoinEvent(ev); }
+
         const float time = ev.time + g_pg_delay_tracker;
 
-        Event next_ev = Event(Event::Type::ARRIVAL,
+        Event next_ev = Event(ev_type,
                               Event::PEERLIST_REQ_RECV,
                               ++next_event_idx_,
                               ev.pid,
@@ -80,7 +85,7 @@ void EventHandler::MapEventCreators()
 
         const float time = ev.time + g_pg_delay_tracker;
 
-        Event next_ev =  Event(Event::Type::ARRIVAL,
+        Event next_ev =  Event(ev_type,
                                Event::PEERLIST_GET,
                                ++next_event_idx_,
                                ev.pid,
@@ -101,7 +106,7 @@ void EventHandler::MapEventCreators()
             const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
             const float time = ev.time + pg_delay;
 
-            Event next_ev = Event(Event::Type::ARRIVAL,
+            Event next_ev = Event(ev_type,
                                   Event::PIECE_REQ_RECV,
                                   ++next_event_idx_,
                                   dest_pid,
@@ -122,7 +127,7 @@ void EventHandler::MapEventCreators()
         // Next round admit-events
         for (PieceMsg const& msg : ev.admitted_reqs)
         {
-            Event next_ev = Event(Event::Type::ARRIVAL,
+            Event next_ev = Event(ev_type,
                                   Event::PIECE_ADMIT,
                                   ++next_event_idx_,
                                   ev.pid,
@@ -137,14 +142,15 @@ void EventHandler::MapEventCreators()
     auto func_c5 = [this](Event const & ev) {
         assert(ev.type_bt == Event::PIECE_ADMIT);
 
+        Peer const& peer = g_peers.at(ev.pid);
+
         // Generate Piece-Get events
         for (PieceMsg const& msg : ev.uploaded_reqs)
         {
-            Peer const& peer = g_peers.at(ev.pid);
             const float pg_delay = peer.get_neighbor_pgdelay(msg.src_pid);
             const float time = ev.time + pg_delay;
 
-            Event next_ev = Event(Event::Type::ARRIVAL,
+            Event next_ev = Event(ev_type,
                                   Event::PIECE_GET,
                                   ++next_event_idx_,
                                   msg.src_pid,
@@ -156,10 +162,9 @@ void EventHandler::MapEventCreators()
         // Generate Next Admit Events
         for (PieceMsg const& msg : ev.admitted_reqs)
         {
-            Peer const& peer = g_peers.at(ev.pid);
-            float time = ev.time + peer.get_trans_time();
+            const float time = ev.time + peer.get_trans_time();
 
-            Event next_ev = Event(Event::Type::ARRIVAL,
+            Event next_ev = Event(ev_type,
                                   Event::PIECE_ADMIT,
                                   ++next_event_idx_,
                                   ev.pid,
@@ -175,7 +180,7 @@ void EventHandler::MapEventCreators()
 
         if (ev.is_complete)
         {
-            Event next_ev = Event(Event::Type::ARRIVAL,
+            Event next_ev = Event(ev_type,
                                   Event::COMPLETED,
                                   ++next_event_idx_,
                                   ev.pid,
@@ -188,9 +193,9 @@ void EventHandler::MapEventCreators()
             {
                 Peer const& client = g_peers.at(ev.pid);
                 const float pg_delay = client.get_neighbor_pgdelay(msg.dest_pid);
-                float time = ev.time + pg_delay;
+                const float time = ev.time + pg_delay;
 
-                Event next_ev = Event(Event::Type::ARRIVAL,
+                Event next_ev = Event(ev_type,
                                       Event::PIECE_REQ_RECV,
                                       ++next_event_idx_,
                                       msg.dest_pid,
@@ -205,9 +210,9 @@ void EventHandler::MapEventCreators()
     auto func_c7 = [this](Event const & ev) {
         assert(ev.type_bt == Event::COMPLETED);
 
-        float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+        const float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
-        Event next_ev = Event(Event::Type::ARRIVAL,
+        Event next_ev = Event(ev_type,
                               Event::PEER_LEAVE,
                               ++next_event_idx_,
                               ev.pid,
@@ -385,19 +390,16 @@ void EventHandler::ProcessArrival(Event& ev)
 {
     total_sys_size_ += system_.size();
 
-    system_.push_back(ev);
-
     // 如果 request event 已經 timeout, 直接忽略(跳出函式)
     //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout) return;
 
-    /// 處理 System 的頭一個 BT 事件
+    system_.push_back(ev);
+
+    // 處理 System 的頭一個 BT 事件
     // (this->*event_func_map_[ev.type_bt])(ev);  // func ptr version
     event_func_map_[ev.type_bt](*this, ev);  // std::function version
 
-    // 如果是節點加入事件，就再產生下一個
-    if (ev.type_bt == Event::PEER_JOIN)  { PushPeerJoinEvent(ev); }
-
-    /// 只要不是 Peer Leave 事件，就產生衍生事件
+    // 只要不是 Peer Leave 事件，就產生衍生事件
     if (ev.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(ev); }
 
     // 如果系統中只有一個事件，就產生離開事件
@@ -433,9 +435,8 @@ bool EventHandler::ReqTimeout(Event const& ev)
     bool flag = false;
     if (current_time_ - ev.time_req_send >= kTimeout_)
     {
-        std::cout << "This req-event is timeout, so dump it out of the system" << std::endl;
-        system_.pop_back();
         flag = true;
+        std::cout << "This req-event is timeout" << std::endl;
     }
 
     return flag;
@@ -467,7 +468,6 @@ void EventHandler::PeerListGetEvent(Event& ev)
         Peer& peer = g_peers.at(msg.dest_pid);
         client.push_req_msg(msg);
         peer.push_recv_msg(msg);
-        ev.req_msgs.push_back(msg);
 
         std::cout << "Sending piece-req msg from peer #"
                   << msg.src_pid << " to peer #"
@@ -505,7 +505,19 @@ void EventHandler::PieceGetEvent(Event& ev)
     else
     {
         // download incomplete, so execute Piece Selection
-        ev.admitted_reqs = pm_->GetAvailablePieceReqs(ev.pid);
+        ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
+        for (const PieceMsg& msg : ev.req_msgs)
+        {
+            Peer& client = g_peers.at(ev.pid);
+            Peer& peer = g_peers.at(msg.dest_pid);
+            client.push_req_msg(msg);
+            peer.push_recv_msg(msg);
+
+            std::cout << "Sending piece-req msg from peer #"
+                      << msg.src_pid << " to peer #"
+                      << msg.dest_pid << std::endl;
+            std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
+        }
     }
 }
 

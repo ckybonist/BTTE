@@ -72,8 +72,11 @@ class EventHandler
     // external
     PeerManager* pm_;
 
+    // rate
     float lambda_;
     float mu_;
+
+    // statistics
     float total_sys_size_;
     float current_time_;
     float waiting_time_;
