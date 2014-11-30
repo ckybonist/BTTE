@@ -1,4 +1,5 @@
 #include "error.h"
+#include "algo.h"
 #include "random.h"
 
 #include "peer.h"
@@ -20,6 +21,9 @@ using namespace uniformrand;
 
 namespace
 {
+
+typedef std::vector<int> IntVec;
+typedef std::map<int, IntVec> I2IVecMap;
 
 bool IsDupDest(const IntSet& dest_peers,
                const int nid)
@@ -50,15 +54,41 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
         if (HavePiece(nei.first, piece_no))
             owners.insert(nei.first);
     }
+
+    IntSet on_req_peers = client.get_on_req_peer_set();
+
+    // TODO 要去除掉正在要求過程中的目標節點
     return owners;
 }
 
-std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces, const int client_pid)
+IntVec GetNonReqPieceOwners(const int no, const int client_pid)
 {
-    std::map<int, IntSet> piece_owner_map;
+    IntSet owners = GetPieceOwners(no, client_pid);
+    IntSet on_req_peers = g_peers.at(client_pid).get_on_req_peer_set();
+
+    IntVec result(owners.size());
+
+    btte_set_diff(owners.begin(), owners.end(),
+                  on_req_peers.begin(), on_req_peers.end(),
+                  result.begin());
+
+    IntVec::iterator it = result.begin();
+    for (; it != result.end(); ++it)
+    {
+        if (*it == 0) break;
+    }
+    result.erase(it, result.end());
+
+    return result;
+}
+
+std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int client_pid)
+{
+    std::map<int, IntVec> piece_owner_map;
 
     for (const int no : target_pieces)
-        piece_owner_map[no] = GetPieceOwners(no, client_pid);
+        piece_owner_map[no] = GetNonReqPieceOwners(no, client_pid);
+        //piece_owner_map[no] = GetPieceOwners(no, client_pid);
 
     return piece_owner_map;
 }
@@ -68,7 +98,7 @@ MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
     MsgBuf req_msgs;
     IntSet dest_peers;
     NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
-    std::map<int, IntSet> piece_owners_map = GetEachPieceOwners(target_pieces, client_pid);
+    I2IVecMap piece_owners_map = GetPieceOwnersMap(target_pieces, client_pid);
 
     for (const int piece_no : target_pieces)
     {
@@ -76,8 +106,9 @@ MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 
         // If more than one neighbors having this piece,
         // then randomly choose one neighbor to request.
-        IntSet const& owners = piece_owners_map.at(piece_no);
-        const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
+        IntVec const& owners = piece_owners_map.at(piece_no);
+        //const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
+        const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
 
         if (!IsDupDest(dest_peers, dest_pid))
         {
@@ -306,12 +337,6 @@ MsgBuf PeerManager::GenrAllPieceReqs(const int client_pid)
 
     for (PieceMsg const& msg : req_msgs)
     {
-        Peer& client = g_peers.at(client_pid);
-        Peer& peer = g_peers.at(msg.dest_pid);
-
-        client.push_req_msg(msg);
-        peer.push_recv_msg(msg);
-
         // debug
         std::cout << "Piece Reqest Msg:" << std::endl;
         std::cout << "   src: " << msg.src_pid << std::endl;
@@ -324,32 +349,19 @@ MsgBuf PeerManager::GenrAllPieceReqs(const int client_pid)
 }
 
 // For request timeout situation
-PieceMsg PeerManager::GenrSinglePieceReq(const int piece_no, const int client_pid)
+PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
 {
     Peer const& client = g_peers.at(client_pid);
     NeighborMap const& neighbors = client.get_neighbors();
 
-    // Get ownsers of piece
-    IntSet owners = GetPieceOwners(piece_no, client_pid);
-
-    // Remove owner which on request
-    for (const int pid : owners)
-    {
-        for (auto const& msg : client.get_req_msgs())
-        {
-            if (pid == msg.dest_pid)
-            {
-                owners.erase(pid);
-                break;
-            }
-        }
-    }
+    // Get ownsers of piece which not on request
+    std::vector<int> owners = GetNonReqPieceOwners(piece_no, client_pid);
 
     // Create new msg
     PieceMsg msg;
     if (owners.size() != 0)
     {
-        const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
+        const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
         const float src_up_bw = client.get_bandwidth().uplink;
         msg = PieceMsg(client_pid, dest_pid, piece_no, src_up_bw);
     }

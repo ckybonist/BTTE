@@ -111,6 +111,7 @@ void EventHandler::MapEventCreators()
                                   ++next_event_idx_,
                                   dest_pid,
                                   time);
+            next_ev.client_pid = ev.pid;
 
             PushArrivalEvent(next_ev);
         }
@@ -390,8 +391,17 @@ void EventHandler::ProcessArrival(Event& ev)
 {
     total_sys_size_ += system_.size();
 
+    /* Timeout 機制 */
     // 如果 request event 已經 timeout, 直接忽略(跳出函式)
-    //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout) return;
+    //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout)
+    {
+        // 刪除要求者中 "正在要求中的 peers (on_req_peers)"
+        // 這個紀錄裡面的 接收者ID (ev.pid)
+        // 這樣避免在重新尋找這個 piece 的目標節點時，找不到當前的接收者
+        //g_peers.at(ev.client_pid).erase_on_req_peer(ev.pid);
+        //
+        //return;
+    }
 
     system_.push_back(ev);
 
@@ -446,7 +456,7 @@ void EventHandler::SendPieceReqs(Event& ev)
 {
     ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
-    // FIXME: 不確定何時要換 PeerList
+    // FIXME: 選不出目標 peers 時要換 PeerList
     //if (0 == ev.req_msgs.size())
     //    ev.need_new_neighbors = true;
 
@@ -454,7 +464,7 @@ void EventHandler::SendPieceReqs(Event& ev)
     {
         Peer& client = g_peers.at(ev.pid);
         Peer& peer = g_peers.at(msg.dest_pid);
-        client.push_req_msg(msg);
+        client.insert_on_req_peer(msg.dest_pid);
         peer.push_recv_msg(msg);
 
         std::cout << "Sending piece-req msg from peer #"
@@ -496,6 +506,14 @@ void EventHandler::PieceAdmitEvent(Event& ev)
 {
     // TODO : 將 piece 送給要求者並產生 PieceGet 事件
     ev.uploaded_reqs = ev.admitted_reqs;
+
+    // 刪除每一個要求者中有關於接收者的紀錄
+    for (auto const& msg : ev.uploaded_reqs)
+    {
+        Peer& client = g_peers.at(msg.src_pid);
+        client.erase_on_req_peer(ev.pid);
+    }
+
     ev.admitted_reqs.clear();
 
     // TODO: 執行 choking 來產生下一次的 Piece Admit

@@ -97,8 +97,13 @@ template<typename T, size_t set_size>
 T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size]);
 
 
-template<typename T>
-T RandChooseSetElement(const RSC rsc, std::set<T> const& myset);
+// For STL containers except set
+template<template<typename, typename> class C_t, typename V_t>
+V_t RandChooseElementInContainer(const RSC rsc, C_t<V_t, std::allocator<V_t>> const& cont);
+
+// Only for STL set
+template <typename T>
+T RandChooseElementInSet(const RSC rsc, std::set<T> myset);
 
 #include "random.tpp"
 

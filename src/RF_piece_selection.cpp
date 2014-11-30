@@ -111,8 +111,7 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
             }
             else
             {
-                const int rand_no = RandChooseSetElement(RSC::RF_PIECESELECT,
-                                    dup_count_pieces);
+                const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
                 target_pieces.insert(rand_no);
                 dup_count_pieces.clear();
             }

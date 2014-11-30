@@ -49,6 +49,7 @@ class Event
     float pg_delay;
 
     // Piece-related
+    int client_pid;
     std::list<PieceMsg> req_msgs;
     std::list<PieceMsg> admitted_reqs;    // request being admitted
     std::list<PieceMsg> uploaded_reqs;  // request-infos that need to upload piece to

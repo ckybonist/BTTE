@@ -128,10 +128,19 @@ T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size])
 	return target;
 }
 
-template <typename T>
-T RandChooseSetElement(const RSC rsc, std::set<T> const& myset)
+template<template<typename, typename> class C_t, typename V_t>
+V_t RandChooseElementInContainer(const RSC rsc, C_t<V_t, std::allocator<V_t>> const& cont)
 {
-    const T rand_pos = Rand(rsc) % myset.size();
+    const int rand_pos = Rand(rsc) % cont.size();
+    auto it = cont.begin();
+    for (int i = 0; i < rand_pos; ++i, ++it);
+    return *it;
+}
+
+template <typename T>
+T RandChooseElementInSet(const RSC rsc, std::set<T> myset)
+{
+    const int rand_pos = Rand(rsc) % myset.size();
     auto it = myset.begin();
     for (int i = 0; i < rand_pos; ++i, ++it);
     return *it;

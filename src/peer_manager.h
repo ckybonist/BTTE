@@ -29,7 +29,7 @@ class PeerManager
     void UpdateSwarmInfo(const ISF isf, const int pid);
     void AllotNeighbors(const int client_pid) const;            // Peer Selection
     MsgBuf GenrAllPieceReqs(const int client_pid); // Piece Selection
-    PieceMsg GenrSinglePieceReq(const int piece_no, const int client_pid);
+    PieceMsg ReGenrPieceReq(const int piece_no, const int client_pid);
     void CreatePeers();
 
   private:
