@@ -444,10 +444,11 @@ bool EventHandler::ReqTimeout(Event const& ev)
 
 void EventHandler::SendPieceReqs(Event& ev)
 {
-    ev.req_msgs = pm_->GetAvailablePieceReqs(ev.pid);
+    ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
-    if (0 == ev.req_msgs.size())
-        ev.need_new_neighbors = true;
+    // FIXME: 不確定何時要換 PeerList
+    //if (0 == ev.req_msgs.size())
+    //    ev.need_new_neighbors = true;
 
     for (const PieceMsg& msg : ev.req_msgs)
     {

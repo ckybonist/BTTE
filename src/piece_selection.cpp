@@ -17,7 +17,7 @@ void IPieceSelect::CheckNeighbors()
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
     if (0 == neighbors.size())
     {
-        std::cout << "\nYou don't have neighbors. So there is no way to select a target piece\n";
+        std::cout << "\nYou don't have neighbors. Can't start Piece Selection\n";
         exit(0);
     }
 }

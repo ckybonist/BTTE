@@ -41,21 +41,24 @@ bool HavePiece(const int pid, const int piece_no)
     return g_peers.at(pid).get_nth_piece(piece_no);
 }
 
-std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces,
-        NeighborMap const& neighbors)
+IntSet GetPieceOwners(const int piece_no, const int client_pid)
+{
+    IntSet owners;
+    Peer const& client = g_peers.at(client_pid);
+    for (auto const& nei : client.get_neighbors())
+    {
+        if (HavePiece(nei.first, piece_no))
+            owners.insert(nei.first);
+    }
+    return owners;
+}
+
+std::map<int, IntSet> GetEachPieceOwners(IntSet const& target_pieces, const int client_pid)
 {
     std::map<int, IntSet> piece_owner_map;
 
     for (const int no : target_pieces)
-    {
-        for (auto& nei : neighbors)
-        {
-            if (HavePiece(nei.first, no))
-            {
-                piece_owner_map[no].insert(nei.first);
-            }
-        }
-    }
+        piece_owner_map[no] = GetPieceOwners(no, client_pid);
 
     return piece_owner_map;
 }
@@ -65,12 +68,10 @@ MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
     MsgBuf req_msgs;
     IntSet dest_peers;
     NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
-    std::map<int, IntSet> piece_owners_map = GetEachPieceOwners(target_pieces, neighbors);
+    std::map<int, IntSet> piece_owners_map = GetEachPieceOwners(target_pieces, client_pid);
 
-    size_t i = 0;
     for (const int piece_no : target_pieces)
     {
-        ++i;
         auto& neighbors = g_peers.at(client_pid).get_neighbors();
 
         // If more than one neighbors having this piece,
@@ -80,11 +81,9 @@ MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 
         if (!IsDupDest(dest_peers, dest_pid))
         {
-            PieceMsg msg;
-            msg.src_pid = client_pid;
-            msg.dest_pid = dest_pid;
-            msg.piece_no = piece_no;
-            msg.src_up_bw = g_peers.at(client_pid).get_bandwidth().uplink;
+            const float src_up_bw = g_peers.at(client_pid).get_bandwidth().uplink;
+
+            PieceMsg msg(client_pid, dest_pid, piece_no, src_up_bw);
             req_msgs.push_back(msg);
 
             dest_peers.insert(dest_pid);
@@ -300,16 +299,16 @@ void PeerManager::AllotNeighbors(const int pid) const
     client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
 }
 
-MsgBuf PeerManager::GetAvailablePieceReqs(const int client_pid)
+MsgBuf PeerManager::GenrAllPieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
     MsgBuf req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
-    // debug
-    for (const PieceMsg& msg : req_msgs)
+    for (PieceMsg const& msg : req_msgs)
     {
         Peer& client = g_peers.at(client_pid);
         Peer& peer = g_peers.at(msg.dest_pid);
+
         client.push_req_msg(msg);
         peer.push_recv_msg(msg);
 
@@ -323,6 +322,41 @@ MsgBuf PeerManager::GetAvailablePieceReqs(const int client_pid)
 
     return req_msgs;
 }
+
+// For request timeout situation
+PieceMsg PeerManager::GenrSinglePieceReq(const int piece_no, const int client_pid)
+{
+    Peer const& client = g_peers.at(client_pid);
+    NeighborMap const& neighbors = client.get_neighbors();
+
+    // Get ownsers of piece
+    IntSet owners = GetPieceOwners(piece_no, client_pid);
+
+    // Remove owner which on request
+    for (const int pid : owners)
+    {
+        for (auto const& msg : client.get_req_msgs())
+        {
+            if (pid == msg.dest_pid)
+            {
+                owners.erase(pid);
+                break;
+            }
+        }
+    }
+
+    // Create new msg
+    PieceMsg msg;
+    if (owners.size() != 0)
+    {
+        const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
+        const float src_up_bw = client.get_bandwidth().uplink;
+        msg = PieceMsg(client_pid, dest_pid, piece_no, src_up_bw);
+    }
+
+    return msg;
+}
+
 
 //void PeerManager::AllocPeersSpace()
 //{
