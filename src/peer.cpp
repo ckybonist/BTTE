@@ -60,13 +60,14 @@ void Peer::set_neighbors(NeighborMap const& ns)
     neighbors = ns;
 }
 
-void Peer::clear_neighbors()                  { neighbors.clear(); }
+void Peer::clear_neighbors()                                    { neighbors.clear(); }
 
-void Peer::push_req_msg(PieceMsg const& msg)  { req_msgs.push_back(msg); }
-void Peer::pop_req_msg()                      { req_msgs.pop_front(); }
-void Peer::push_recv_msg(PieceMsg const& msg) { recv_msg_buf.push_back(msg); }
-void Peer::sort_recv_msg()                    { recv_msg_buf.sort(); }
-void Peer::pop_recv_msg()                     { recv_msg_buf.pop_front(); }
+void Peer::insert_on_req_peer(const int pid)                    { on_req_peer_set.insert(pid); }
+void Peer::erase_on_req_peer(const int pid)                     { on_req_peer_set.erase(pid); }
+void Peer::push_recv_msg(PieceMsg const& msg)                   { recv_msg_buf.push_back(msg); }
+void Peer::sort_recv_msg()                                      { recv_msg_buf.sort(); }
+void Peer::erase_recv_msg(MsgBuf::iterator it)                  { recv_msg_buf.erase(it); }
+void Peer::pop_recv_msg()                                       { recv_msg_buf.pop_front(); }
 
 void Peer::destroy_pieces()
 {
@@ -107,10 +108,10 @@ NeighborMap const& Peer::get_neighbors() const
     return neighbors;
 }
 
-Neighbor const& Peer::get_nth_neighbor(const int n) const  { return neighbors.at(n); }
-Bandwidth const& Peer::get_bandwidth() const               { return bandwidth; }
-std::list<PieceMsg> const& Peer::get_req_msgs() const      { return req_msgs; }
-std::list<PieceMsg> const& Peer::get_recv_msg_buf() const  { return recv_msg_buf; }
+Neighbor const& Peer::get_nth_neighbor(const int n) const         { return neighbors.at(n); }
+Bandwidth const& Peer::get_bandwidth() const                      { return bandwidth; }
+std::set<int> const& Peer::get_on_req_peer_set() const            { return on_req_peer_set; }
+std::list<PieceMsg> const& Peer::get_recv_msg_buf() const         { return recv_msg_buf; }
 
 void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_prob)
 {

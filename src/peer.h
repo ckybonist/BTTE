@@ -1,6 +1,7 @@
 #ifndef _PEER_H
 #define _PEER_H
 
+#include <set>
 #include <map>
 #include <list>
 #include <vector>
@@ -43,10 +44,11 @@ class Peer
     void set_join_time(const float t);
     void set_leave_time(const float t);
 
-    void push_req_msg(PieceMsg const& msg);
-    void pop_req_msg();
+    void insert_on_req_peer(const int pid);
+    void erase_on_req_peer(const int pid);
     void push_recv_msg(PieceMsg const& msg);
     void sort_recv_msg();
+    void erase_recv_msg(MsgBuf::iterator it);
     void pop_recv_msg();
 
     void destroy_pieces();
@@ -66,7 +68,7 @@ class Peer
     NeighborMap const& get_neighbors() const;
     Neighbor const& get_nth_neighbor(const int n) const;
     Bandwidth const& get_bandwidth() const;
-    std::list<PieceMsg> const& get_req_msgs() const;
+    std::set<int> const& get_on_req_peer_set() const;
     std::list<PieceMsg> const& get_recv_msg_buf() const;
 
 
@@ -83,7 +85,7 @@ class Peer
     NeighborMap neighbors;  // <nid, nei_info>
     //Neighbor* neighbors;
 
-    MsgBuf req_msgs;
+    std::set<int> on_req_peer_set;
     MsgBuf recv_msg_buf;
 
     Bandwidth bandwidth;
