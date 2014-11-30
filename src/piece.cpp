@@ -5,13 +5,16 @@
 
 bool g_all_pieces_get = false;
 
-//PieceMsg::PieceMsg()
-//{
-//    src_pid = -1;
-//    dest_pid = -1;
-//    piece_no = -1;
-//    src_up_bw = 0.0;
-//}
+PieceMsg::PieceMsg(const int src_pid,
+                   const int dest_pid,
+                   const int piece_pid,
+                   const float src_up_bw)
+{
+    this->src_pid = src_pid;
+    this->dest_pid = dest_pid;
+    this->piece_no = piece_no;
+    this->src_up_bw = src_up_bw;
+}
 
 bool PieceMsg::operator<(PieceMsg const& p) const
 {
