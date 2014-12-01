@@ -21,6 +21,7 @@ void EventInfo(Event const& head, float cur_sys_time);
 
 }
 
+
 const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth.downlink;
 const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 
@@ -557,6 +558,25 @@ void EventHandler::ProcessEvent(Event& ev)
         ProcessDeparture(ev);
 }
 
+void EventHandler::StartRoutine()
+{
+    //const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
+    //const int num_avg_peer = args_.NUM_PEER - aborigin;
+    PushInitEvent();
+
+    while (!event_list_.empty())
+    {
+        Event head = event_list_.front();
+
+        event_list_.pop_front();
+
+        ProcessEvent(head);
+
+        EventInfo(head, current_time_);
+    }
+}
+
+
 namespace
 {
 
@@ -597,22 +617,4 @@ void EventInfo(Event const& head, float sys_cur_time)
               << "\n\n\n";
 }
 
-}
-
-void EventHandler::StartRoutine()
-{
-    //const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
-    //const int num_avg_peer = args_.NUM_PEER - aborigin;
-    PushInitEvent();
-
-    while (!event_list_.empty())
-    {
-        Event head = event_list_.front();
-
-        event_list_.pop_front();
-
-        ProcessEvent(head);
-
-        EventInfo(head, current_time_);
-    }
-}
+}  // namespace
