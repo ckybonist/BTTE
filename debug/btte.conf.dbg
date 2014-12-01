@@ -1,8 +1,12 @@
 # Config File for BTTE (debug version)
 
-# 1. Use number which is multiple of 10
+# 1. NUM_PEER which is multiple of 10
+#
 # 2. If you using Cluster-Based Peer Selection,
-#    the amount of peers must also be multiple of amount of clusters
+#    the amount of peers must also be multiple of
+#    amount of clusters.
+#    Ex:  NUM_CLUSTER = 4
+#         NUM_PEER % NUM_CLUSTER == 0
 NUM_PEER = 20
 
 
@@ -22,7 +26,7 @@ NUM_CHOKING = 4
 NUM_OU = 1
 
 
-NUM_PIECE = 20
+NUM_PIECE = 5
 
 
 # Type of peer selection
