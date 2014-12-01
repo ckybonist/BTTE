@@ -68,6 +68,8 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
 
     IntVec result(owners.size());
 
+    // 從這個 piece 的持有者中再去除掉之前有送過要求但還沒拿到 piece 的持有者，
+    // 也就是不要對同一個 neighbor 送超過一個要求。
     btte_set_diff(owners.begin(), owners.end(),
                   on_req_peers.begin(), on_req_peers.end(),
                   result.begin());
@@ -79,6 +81,12 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     }
     result.erase(it, result.end());
 
+    if (result.size() == 0)
+        std::cout << "Owner of all pieces are on request. Can't found possible request\n";
+    else
+        for (const int pid : result)
+            std::cout << "Non Req Piece Owner: " << pid << std::endl;
+
     return result;
 }
 
@@ -86,6 +94,7 @@ std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int c
 {
     std::map<int, IntVec> piece_owner_map;
 
+    // 蒐集所有 piece 的持有者（已過濾）
     for (const int no : target_pieces)
         piece_owner_map[no] = GetNonReqPieceOwners(no, client_pid);
         //piece_owner_map[no] = GetPieceOwners(no, client_pid);
@@ -101,21 +110,33 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
     MsgList req_msgs;
     IntSet dest_peers;
 
+    // 針對每一個 piece，找到 "不重複" 的持有者，並封裝成一個要求訊息。
+    // 最終將每個訊息集合成一組訊息列表
+    //
+    // NOTE-1: 不一定每個 rarest piece 找到合適的持有者去要求
+    // NOTE-2: 不重複有兩種意思:
+    //             1. 不跟正在要求的節點重複
+    //             2. 不同 pieces 之間的要求對象是互斥的
     for (const int piece_no : target_pieces)
     {
-        // If more than one neighbors having this piece,
-        // then randomly choose one neighbor to request.
         IntVec const& owners = piece_owners_map.at(piece_no);
-        const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
 
-        if (!IsDupDest(dest_peers, dest_pid))
+        if (owners.size() != 0)
         {
-            const float src_up_bw = client.get_bandwidth().uplink;
+            // If more than one neighbors have this piece,
+            // then randomly choose one neighbor to request.
+            const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
 
-            PieceMsg msg(client_pid, dest_pid, piece_no, src_up_bw);
-            req_msgs.push_back(msg);
+            // 紀錄
+            if (!IsDupDest(dest_peers, dest_pid))
+            {
+                const float src_up_bw = client.get_bandwidth().uplink;
 
-            dest_peers.insert(dest_pid);
+                PieceMsg msg(client_pid, dest_pid, piece_no, src_up_bw);
+                req_msgs.push_back(msg);
+
+                dest_peers.insert(dest_pid);
+            }
         }
     }
 
