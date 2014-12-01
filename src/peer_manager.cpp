@@ -95,24 +95,22 @@ std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int c
 
 MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 {
+    Peer const& client = g_peers.at(client_pid);
+    I2IVecMap piece_owners_map = GetPieceOwnersMap(target_pieces, client_pid);
+
     MsgList req_msgs;
     IntSet dest_peers;
-    NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
-    I2IVecMap piece_owners_map = GetPieceOwnersMap(target_pieces, client_pid);
 
     for (const int piece_no : target_pieces)
     {
-        auto& neighbors = g_peers.at(client_pid).get_neighbors();
-
         // If more than one neighbors having this piece,
         // then randomly choose one neighbor to request.
         IntVec const& owners = piece_owners_map.at(piece_no);
-        //const int dest_pid = RandChooseSetElement(RSC::RF_PIECESELECT, owners);
         const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
 
         if (!IsDupDest(dest_peers, dest_pid))
         {
-            const float src_up_bw = g_peers.at(client_pid).get_bandwidth().uplink;
+            const float src_up_bw = client.get_bandwidth().uplink;
 
             PieceMsg msg(client_pid, dest_pid, piece_no, src_up_bw);
             req_msgs.push_back(msg);
@@ -120,6 +118,8 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
             dest_peers.insert(dest_pid);
         }
     }
+
+    dest_peers.clear();
 
     return req_msgs;
 }
@@ -335,6 +335,7 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
     MsgList req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
+    // DEBUG
     for (PieceMsg const& msg : req_msgs)
     {
         // debug

@@ -7,7 +7,7 @@ bool g_all_pieces_get = false;
 
 PieceMsg::PieceMsg(const int src_pid,
                    const int dest_pid,
-                   const int piece_pid,
+                   const int piece_no,
                    const float src_up_bw)
 {
     this->src_pid = src_pid;
@@ -16,6 +16,7 @@ PieceMsg::PieceMsg(const int src_pid,
     this->src_up_bw = src_up_bw;
 }
 
+// sort msg by upload bandwidth of src-peer
 bool PieceMsg::operator<(PieceMsg const& p) const
 {
     return src_up_bw > p.src_up_bw;

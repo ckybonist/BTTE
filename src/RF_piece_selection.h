@@ -16,10 +16,10 @@ class RarestFirst : public IPieceSelect
 
   private:
     IntSet StartSelection(const int client_pid) override;
-    void CountNumPeerOwnPiece(const size_t num_target);
-    void SortByPieceCounts(const size_t num_target);
+    void CountNumPeerOwnPiece();
+    void SortByPieceCounts();
     bool IsDupDest(const IntSet& dest_peers, const int nid);
-    IntSet GetRarestPiecesSet(const size_t num_target) const;
+    IntSet GetRarestPiecesSet() const;
     void RefreshInfo();
 
     struct PeerOwnCounts
@@ -28,6 +28,8 @@ class RarestFirst : public IPieceSelect
         int counts;
     };
     PeerOwnCounts* counts_info_;
+
+    size_t num_target_;
 };
 
 }

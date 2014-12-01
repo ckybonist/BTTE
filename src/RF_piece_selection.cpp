@@ -17,16 +17,16 @@ RarestFirst::~RarestFirst()
     }
 }
 
-void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
+void RarestFirst::CountNumPeerOwnPiece()
 {
-    counts_info_ = new PeerOwnCounts[num_target];
-
     //const Neighbor *neighbors = g_peers.at(selector_pid_).neighbors;
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
+    std::vector<PeerOwnCounts> tmp_vec;
     IntSetIter begin = no_download_pieces_set_.begin();
     IntSetIter end = no_download_pieces_set_.end();
+
     for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
     {
         int counts = 0;
@@ -43,14 +43,25 @@ void RarestFirst::CountNumPeerOwnPiece(const size_t num_target)
         //        if (is_get_piece) ++counts;
         //    }
         //}
-        counts_info_[index].piece_no = *p_no;
-        counts_info_[index].counts = counts;
+        if (counts > 0)
+        {
+            PeerOwnCounts info = {*p_no, counts};
+            tmp_vec.push_back(info);
+        }
     }
 
+    num_target_ = tmp_vec.size();
+    counts_info_ = new PeerOwnCounts[num_target_];
+    if (nullptr == counts_info_)
+        ExitError("Memory Allocation Error");
+
+    std::copy(tmp_vec.begin(), tmp_vec.end(), counts_info_);
+
+    tmp_vec.clear();
     //neighbors = nullptr;
 }
 
-void RarestFirst::SortByPieceCounts(const size_t num_target)
+void RarestFirst::SortByPieceCounts()
 {
     auto cmp = [] (const void* l, const void* r) {
         const PeerOwnCounts* myl = (PeerOwnCounts*)l;
@@ -60,13 +71,13 @@ void RarestFirst::SortByPieceCounts(const size_t num_target)
 
     // sort pieces counts info
     qsort(counts_info_,
-          num_target,
+          num_target_,
           sizeof(PeerOwnCounts),
           cmp);
 
     // debug info
     std::cout << "\nPiece Count Info (piece-no, counts) :\n";
-    for (size_t i = 0; i < num_target; ++i)
+    for (size_t i = 0; i < num_target_; ++i)
     {
         std::cout << "(" << counts_info_[i].piece_no << ",   "
                   << counts_info_[i].counts << ")\n";
@@ -74,14 +85,14 @@ void RarestFirst::SortByPieceCounts(const size_t num_target)
     std::cout << std::endl;
 }
 
-IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
+IntSet RarestFirst::GetRarestPiecesSet() const
 {
     IntSet target_pieces;
     IntSet dup_count_pieces;
 
     // Check peer-count of each piece iteratively, if appear same-peer-count situation,
     // then randomly choose one.
-    for (size_t i = 1; i < num_target; ++i)
+    for (size_t i = 1; i < num_target_; ++i)
     {
         const int no = counts_info_[i].piece_no;
         const int count = counts_info_[i].counts;
@@ -104,7 +115,7 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
                 const int prev_no = counts_info_[i - 1].piece_no;
                 target_pieces.insert(prev_no);
             }
-            else if (i == num_target - 1 ||
+            else if (i == num_target_ - 1 ||
                      dup_count_pieces.size() == 0)
             {
                 target_pieces.insert(no);
@@ -116,12 +127,6 @@ IntSet RarestFirst::GetRarestPiecesSet(const size_t num_target) const
                 dup_count_pieces.clear();
             }
         }
-    }
-
-    std::cout << "My final targets: \n";
-    for (const int piece_no : target_pieces)
-    {
-        std::cout << piece_no << std::endl << std::endl;
     }
 
     return target_pieces;
@@ -142,15 +147,17 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     CollectNoDownloadPieces();
 
-    const size_t num_target = no_download_pieces_set_.size();
+    CountNumPeerOwnPiece();
 
-    CountNumPeerOwnPiece(num_target);
+    SortByPieceCounts();
 
-    SortByPieceCounts(num_target);
-
-    IntSet target_pieces = GetRarestPiecesSet(num_target);
+    IntSet target_pieces = GetRarestPiecesSet();
 
     RefreshInfo();
+
+    std::cout << "Target pieces :\n";
+    for (const int no : target_pieces)
+        std::cout << no << std::endl;
 
     return target_pieces;
 }

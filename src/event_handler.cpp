@@ -2,11 +2,13 @@
 #include <cassert>
 #include <cmath>
 
-#include "piece.h"
 #include "random.h"
+#include "piece.h"
 #include "pg_delay.h"
 #include "peer_level.h"
+#include "choking.h"
 #include "event_handler.h"
+
 
 using namespace uniformrand;
 
@@ -36,8 +38,8 @@ EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
     next_event_idx_ = 0;
 
     MapEventFuncs();
-    MapEventCreators();
     MapFlowDownEventDependencies();
+    MapEventCreators();
 }
 
 EventHandler::~EventHandler()
@@ -273,7 +275,7 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                                       const int next_index,
                                       const int pid)
 {
-    float next_etime = ComputeDepartureEventTime();
+    float next_etime = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));;
 
     Event depart_event(Event::Type::DEPARTURE,
                        type_bt,
@@ -285,34 +287,34 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
 }
 
 
-//float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt)
-//{
-//    float time = ev.time;
-//    Event::Type4BT dtbt = derived_type_bt;
-//
-//    if (dtbt == Event::PEERLIST_REQ_RECV ||
-//        dtbt == Event::PEERLIST_GET)
-//    {
-//        time += g_pg_delay_tracker;
-//    }
-//    else if (dtbt == Event::PEER_JOIN ||
-//             dtbt == Event::PEER_LEAVE)
-//    {
-//        time += ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-//    }
-//    else if (dtbt == Event::PIECE_ADMIT)
-//    {
-//        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).get_bandwidth().downlink;
-//        time += trans_time;
-//    }
-//    else if (dtbt == Event::PIECE_REQ_RECV ||
-//             dtbt == Event::PIECE_GET)
-//    {
-//        time += ev.pg_delay;
-//    }
-//
-//    return time;
-//}
+float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt)
+{
+    float time = ev.time;
+    Event::Type4BT dtbt = derived_type_bt;
+
+    if (dtbt == Event::PEERLIST_REQ_RECV ||
+        dtbt == Event::PEERLIST_GET)
+    {
+        time += g_pg_delay_tracker;
+    }
+    else if (dtbt == Event::PEER_JOIN ||
+             dtbt == Event::PEER_LEAVE)
+    {
+        time += ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    }
+    else if (dtbt == Event::PIECE_ADMIT)
+    {
+        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).get_bandwidth().downlink;
+        time += trans_time;
+    }
+    else if (dtbt == Event::PIECE_REQ_RECV ||
+             dtbt == Event::PIECE_GET)
+    {
+        time += ev.pg_delay;
+    }
+
+    return time;
+}
 
 float EventHandler::ComputeDepartureEventTime()
 {
@@ -332,6 +334,7 @@ void EventHandler::PushDerivedEvent(Event const& ev)
     //float time = ComputeArrivalEventTime(ev, derived_tbt);
 
     //Event next_event = Event(base_etype, derived_tbt, ++next_event_idx_, pid, time);
+    //PushArrivalEvent(next_event);
 
     //switch (ev.type_bt)
     //{
@@ -413,6 +416,9 @@ void EventHandler::ProcessArrival(Event& ev)
     // 只要不是 Peer Leave 事件，就產生衍生事件
     if (ev.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(ev); }
 
+    // debug (remove after)
+    //if (ev.type_bt == Event::PEER_JOIN)  { PushPeerJoinEvent(ev); }
+
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
     {
@@ -458,8 +464,8 @@ void EventHandler::SendPieceReqs(Event& ev)
     ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
     // FIXME: 選不出目標 peers 時要換 PeerList
-    //if (0 == ev.req_msgs.size())
-    //    ev.need_new_neighbors = true;
+    if (0 == ev.req_msgs.size())
+        ev.need_new_neighbors = true;
 
     for (const PieceMsg& msg : ev.req_msgs)
     {
@@ -467,13 +473,7 @@ void EventHandler::SendPieceReqs(Event& ev)
         Peer& peer = g_peers.at(msg.dest_pid);
         client.insert_on_req_peer(msg.dest_pid);
         peer.push_recv_msg(msg);
-
-        std::cout << "Sending piece-req msg from peer #"
-                  << msg.src_pid << " to peer #"
-                  << msg.dest_pid << std::endl;
-        std::cout << "Wanted piece: " << msg.piece_no << "\n\n";
     }
-
 }
 
 void EventHandler::PeerJoinEvent(Event& ev)
@@ -494,13 +494,38 @@ void EventHandler::PeerListGetEvent(Event& ev)
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
     SendPieceReqs(ev);
+
+
+    // DEBUG of Choking
+    //std::set<int> dest_set;
+    //for (auto const& msg : ev.req_msgs)
+    //    dest_set.insert(msg.dest_pid);
+    //std::list<std::list<PieceMsg>> all_admit_msgs;
+    //for (const int pid : dest_set)
+    //{
+    //    all_admit_msgs.push_back(Choking(pid));
+    //}
+
+    //std::cout << "\n=========================\n";
+    //std::cout << "\nAdmit Messages :\n";
+    //for (auto const& msg_list : all_admit_msgs)
+    //{
+    //    for (auto const& msg : msg_list)
+    //    {
+    //        std::cout << "SRC: " << msg.src_pid << std::endl;
+    //        std::cout << "DEST: " << msg.dest_pid << std::endl;
+    //        std::cout << "PIECE-NO: " << msg.piece_no << std::endl;
+    //        std::cout << "SRC UPLOAD BANDWIDTH: " << msg.src_up_bw << std::endl;
+    //        std::cout << "--------------------------------\n\n";
+    //    }
+    //}
 }
 
 void EventHandler::PieceReqRecvEvent(Event& ev)
 {
     // TODO 檢查要求者的 piece 狀態，只要有一個是完全沒拿到 piece
     // 就做 choking (先不採用）
-    //ev.admitted_reqs = Choking(ev.pid);
+    ev.admitted_reqs = Choking(ev.pid);
 }
 
 void EventHandler::PieceAdmitEvent(Event& ev)
@@ -518,7 +543,7 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     ev.admitted_reqs.clear();
 
     // TODO: 執行 choking 來產生下一次的 Piece Admit
-    //ev.admitted_reqs = Choking(ev.pid);
+    ev.admitted_reqs = Choking(ev.pid);
 }
 
 void EventHandler::PieceGetEvent(Event& ev)
@@ -570,9 +595,9 @@ void EventHandler::StartRoutine()
 
         event_list_.pop_front();
 
-        ProcessEvent(head);
+        EventInfo(head, current_time_);  // DEBUG
 
-        EventInfo(head, current_time_);
+        ProcessEvent(head);
     }
 }
 
@@ -604,8 +629,6 @@ void EventInfo(Event const& head, float sys_cur_time)
     {
         std::cout << "\nEvent #" << head.index << " arrival at " << head.time;
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
-        if (sys_cur_time > head.time) std::cout << "Timeout";
-        else std::cout << "In time";
     }
     else
     {
