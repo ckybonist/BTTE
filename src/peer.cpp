@@ -66,7 +66,7 @@ void Peer::insert_on_req_peer(const int pid)                    { on_req_peer_se
 void Peer::erase_on_req_peer(const int pid)                     { on_req_peer_set.erase(pid); }
 void Peer::push_recv_msg(PieceMsg const& msg)                   { recv_msg_buf.push_back(msg); }
 void Peer::sort_recv_msg()                                      { recv_msg_buf.sort(); }
-void Peer::erase_recv_msg(MsgBuf::iterator it)                  { recv_msg_buf.erase(it); }
+void Peer::erase_recv_msg(MsgList::iterator it)                 { recv_msg_buf.erase(it); }
 void Peer::pop_recv_msg()                                       { recv_msg_buf.pop_front(); }
 
 void Peer::destroy_pieces()

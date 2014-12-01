@@ -93,9 +93,9 @@ std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int c
     return piece_owner_map;
 }
 
-MsgBuf GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
+MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 {
-    MsgBuf req_msgs;
+    MsgList req_msgs;
     IntSet dest_peers;
     NeighborMap const& neighbors = g_peers.at(client_pid).get_neighbors();
     I2IVecMap piece_owners_map = GetPieceOwnersMap(target_pieces, client_pid);
@@ -330,10 +330,10 @@ void PeerManager::AllotNeighbors(const int pid) const
     client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
 }
 
-MsgBuf PeerManager::GenrAllPieceReqs(const int client_pid)
+MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
-    MsgBuf req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
+    MsgList req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     for (PieceMsg const& msg : req_msgs)
     {

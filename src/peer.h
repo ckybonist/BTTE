@@ -12,7 +12,7 @@
 
 
 typedef std::map<int, Neighbor> NeighborMap;
-typedef std::list<PieceMsg> MsgBuf;
+typedef std::list<PieceMsg> MsgList;
 
 
 class Peer
@@ -86,7 +86,7 @@ class Peer
     //Neighbor* neighbors;
 
     std::set<int> on_req_peer_set;
-    MsgBuf recv_msg_buf;
+    MsgList recv_msg_buf;
 
     Bandwidth bandwidth;
 
