@@ -44,6 +44,20 @@ class EventHandler
     bool ReqTimeout(Event const& ev);   // TODO
     void SendPieceReqs(Event& ev);
 
+    /* Event Creators (EC) */
+    void EC_1(Event const& ev);
+    void EC_2(Event const& ev);
+
+    void GetNewPeerList(Event const& ev);
+    void GenrPieceReqRecvEvents(Event const& ev);
+    void EC_3(Event const& ev);
+
+    void EC_4(Event const& ev);
+    void EC_5(Event const& ev);
+    void EC_6(Event const& ev);
+    void EC_7(Event const& ev);
+
+
     /* Main BitTorrent Events */
     void PeerJoinEvent(Event& ev);
     void PeerListReqRecvEvent(Event& ev);
@@ -58,7 +72,7 @@ class EventHandler
   private:
     //typedef void (EventHandler::*Fptr)(Event&);
     typedef std::function<void(EventHandler&, Event&)> FuncProto_1;  // function to process event
-    typedef std::function<void(Event const&)> FuncProto_2;  // function to process event
+    typedef std::function<void(EventHandler&, Event const&)> FuncProto_2;  // function to process event
     typedef std::map<Event::Type4BT, FuncProto_1> FuncMap_1;
     typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
 

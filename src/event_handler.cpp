@@ -38,7 +38,7 @@ EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
     next_event_idx_ = 0;
 
     MapEventFuncs();
-    MapFlowDownEventDependencies();
+    //MapFlowDownEventDependencies();
     MapEventCreators();
 }
 
@@ -61,178 +61,14 @@ void EventHandler::MapEventFuncs()
 
 void EventHandler::MapEventCreators()
 {
-    const Event::Type ev_type = Event::Type::ARRIVAL;
-
-    /* Define Lambda Functions */
-    // Peer-Join Event
-    auto func_c1 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PEER_JOIN);
-
-        // 再產生下一個 Peer-Join Event
-        if (ev.type_bt == Event::PEER_JOIN)  { PushPeerJoinEvent(ev); }
-
-        const float time = ev.time + g_pg_delay_tracker;
-
-        Event next_ev = Event(ev_type,
-                              Event::PEERLIST_REQ_RECV,
-                              ++next_event_idx_,
-                              ev.pid,
-                              time);
-
-        PushArrivalEvent(next_ev);
-    };
-
-    // PeerList-Req-Recv Event
-    auto func_c2 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PEERLIST_REQ_RECV);
-
-        const float time = ev.time + g_pg_delay_tracker;
-
-        Event next_ev =  Event(ev_type,
-                               Event::PEERLIST_GET,
-                               ++next_event_idx_,
-                               ev.pid,
-                               time);
-
-        PushArrivalEvent(next_ev);
-    };
-
-    // PeerList-Get Event
-    auto func_c3 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PEERLIST_GET);
-
-        // Geneerate multiple Piece-Req-Recv events
-        Peer const& client = g_peers.at(ev.pid);
-        for (PieceMsg const& msg : ev.req_msgs)
-        {
-            const int dest_pid = msg.dest_pid;
-            const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
-            const float time = ev.time + pg_delay;
-
-            Event next_ev = Event(ev_type,
-                                  Event::PIECE_REQ_RECV,
-                                  ++next_event_idx_,
-                                  dest_pid,
-                                  time);
-            next_ev.client_pid = ev.pid;
-
-            PushArrivalEvent(next_ev);
-        }
-    };
-
-    // Piece-Req-Recv Event
-    auto func_c4 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PIECE_REQ_RECV);
-
-        // 因為跟前一個事件(Piece-Req-Recv) 的 peer 是一樣的，
-        // 所以不用任何傳輸時間 (pg_delay or trans_time)
-        const float time = ev.time;
-
-        // Next round admit-events
-        for (PieceMsg const& msg : ev.admitted_reqs)
-        {
-            Event next_ev = Event(ev_type,
-                                  Event::PIECE_ADMIT,
-                                  ++next_event_idx_,
-                                  ev.pid,
-                                  time);
-            next_ev.admitted_reqs = ev.admitted_reqs;
-
-            PushArrivalEvent(next_ev);
-        }
-    };
-
-    // Piece-Admit Event
-    auto func_c5 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PIECE_ADMIT);
-
-        Peer const& peer = g_peers.at(ev.pid);
-
-        // Generate Piece-Get events
-        for (PieceMsg const& msg : ev.uploaded_reqs)
-        {
-            const float pg_delay = peer.get_neighbor_pgdelay(msg.src_pid);
-            const float time = ev.time + pg_delay;
-
-            Event next_ev = Event(ev_type,
-                                  Event::PIECE_GET,
-                                  ++next_event_idx_,
-                                  msg.src_pid,
-                                  time);
-
-            PushArrivalEvent(next_ev);
-        }
-
-        // Generate Next Admit Events
-        for (PieceMsg const& msg : ev.admitted_reqs)
-        {
-            const float time = ev.time + peer.get_trans_time();
-
-            Event next_ev = Event(ev_type,
-                                  Event::PIECE_ADMIT,
-                                  ++next_event_idx_,
-                                  ev.pid,
-                                  time);
-
-            PushArrivalEvent(next_ev);
-        }
-    };
-
-    // Piece-Get Event
-    auto func_c6 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::PIECE_GET);
-
-        if (ev.is_complete)
-        {
-            Event next_ev = Event(ev_type,
-                                  Event::COMPLETED,
-                                  ++next_event_idx_,
-                                  ev.pid,
-                                  ev.time);
-
-            PushArrivalEvent(next_ev);
-        }
-        else {
-            for (PieceMsg const& msg : ev.req_msgs)
-            {
-                Peer const& client = g_peers.at(ev.pid);
-                const float pg_delay = client.get_neighbor_pgdelay(msg.dest_pid);
-                const float time = ev.time + pg_delay;
-
-                Event next_ev = Event(ev_type,
-                                      Event::PIECE_REQ_RECV,
-                                      ++next_event_idx_,
-                                      msg.dest_pid,
-                                      time);
-
-                PushArrivalEvent(next_ev);
-            }
-        }
-    };
-
-    // Complete
-    auto func_c7 = [this](Event const & ev) {
-        assert(ev.type_bt == Event::COMPLETED);
-
-        const float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-
-        Event next_ev = Event(ev_type,
-                              Event::PEER_LEAVE,
-                              ++next_event_idx_,
-                              ev.pid,
-                              time);
-
-        PushArrivalEvent(next_ev);
-    };
-
     /* Map Functions */
-    event_creator_map_[Event::PEER_JOIN]         = func_c1;
-    event_creator_map_[Event::PEERLIST_REQ_RECV] = func_c2;
-    event_creator_map_[Event::PEERLIST_GET]      = func_c3;
-    event_creator_map_[Event::PIECE_REQ_RECV]    = func_c4;
-    event_creator_map_[Event::PIECE_ADMIT]       = func_c5;
-    event_creator_map_[Event::PIECE_GET]         = func_c6;
-    event_creator_map_[Event::COMPLETED]         = func_c7;
+    event_creator_map_[Event::PEER_JOIN]         = &EventHandler::EC_1;
+    event_creator_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::EC_2;
+    event_creator_map_[Event::PEERLIST_GET]      = &EventHandler::EC_3;
+    event_creator_map_[Event::PIECE_REQ_RECV]    = &EventHandler::EC_4;
+    event_creator_map_[Event::PIECE_ADMIT]       = &EventHandler::EC_5;
+    event_creator_map_[Event::PIECE_GET]         = &EventHandler::EC_6;
+    event_creator_map_[Event::COMPLETED]         = &EventHandler::EC_7;
 }
 
 void EventHandler::MapFlowDownEventDependencies()
@@ -244,6 +80,190 @@ void EventHandler::MapFlowDownEventDependencies()
     event_map_[Event::PIECE_ADMIT] = Event::PIECE_GET;
     event_map_[Event::PIECE_GET] = Event::COMPLETED;
     event_map_[Event::COMPLETED] = Event::PEER_LEAVE;
+}
+
+void EventHandler::GetNewPeerList(Event const& ev)
+{
+    const int client_pid = ev.pid;
+    const float time = ev.time + g_kTrackerPGDelay;
+
+    Event next_ev = Event(Event::Type::ARRIVAL,
+                          Event::PEERLIST_REQ_RECV,
+                          ++next_event_idx_,
+                          client_pid,
+                          time);
+
+    PushArrivalEvent(next_ev);
+}
+
+void EventHandler::GenrPieceReqRecvEvents(Event const& ev)
+{
+    if (ev.need_new_neighbors)  // no any possible peers to request
+    {
+        GetNewPeerList(ev);
+    }
+    else
+    {
+        for (PieceMsg const& msg : ev.req_msgs)
+        {
+            Peer const& client = g_peers.at(ev.pid);
+            const float pg_delay = client.get_neighbor_pgdelay(msg.dest_pid);
+            const float time = ev.time + pg_delay;
+
+            Event next_ev = Event(Event::Type::ARRIVAL,
+                                  Event::PIECE_REQ_RECV,
+                                  ++next_event_idx_,
+                                  msg.dest_pid,
+                                  time);
+
+            PushArrivalEvent(next_ev);
+        }
+    }
+}
+
+/* Create Derived Events of Peer-Join Event */
+void EventHandler::EC_1(Event const& ev)
+{
+    // Peer-Join Event
+    assert(ev.type_bt == Event::PEER_JOIN);
+
+    // 再產生下一個 Peer-Join Event
+    PushPeerJoinEvent(ev);
+
+    const float time = ev.time + g_kTrackerPGDelay;
+
+    Event next_ev = Event(Event::Type::ARRIVAL,
+                          Event::PEERLIST_REQ_RECV,
+                          ++next_event_idx_,
+                          ev.pid,
+                          time);
+
+    PushArrivalEvent(next_ev);
+}
+
+/* Create Derived Events of Peer-List-Req-Recv Event */
+void EventHandler::EC_2(Event const& ev)
+{
+    assert(ev.type_bt == Event::PEERLIST_REQ_RECV);
+
+    const float time = ev.time + g_kTrackerPGDelay;
+
+    Event next_ev =  Event(Event::Type::ARRIVAL,
+                           Event::PEERLIST_GET,
+                           ++next_event_idx_,
+                           ev.pid,
+                           time);
+
+    PushArrivalEvent(next_ev);
+}
+
+/* Create Derived Events of Peer-List-Get Event */
+void EventHandler::EC_3(Event const& ev)
+{
+    GenrPieceReqRecvEvents(ev);
+}
+
+/* Create Derived Events of Piece-Req-Recv Event */
+void EventHandler::EC_4(Event const& ev)
+{
+    assert(ev.type_bt == Event::PIECE_REQ_RECV);
+
+    // 因為跟前一個事件(Piece-Req-Recv) 的 peer 是一樣的，
+    // 所以不用任何傳輸時間 (pg_delay or trans_time)
+    const float time = ev.time;
+
+    // Next round admit-events
+    for (PieceMsg const& msg : ev.admitted_reqs)
+    {
+        Event next_ev = Event(Event::Type::ARRIVAL,
+                              Event::PIECE_ADMIT,
+                              ++next_event_idx_,
+                              ev.pid,
+                              time);
+        next_ev.admitted_reqs = ev.admitted_reqs;
+
+        PushArrivalEvent(next_ev);
+    }
+}
+
+/* Create Derived Events of Piece-Admit Event */
+void EventHandler::EC_5(Event const& ev)
+{
+    assert(ev.type_bt == Event::PIECE_ADMIT);
+
+    const int client_pid = ev.pid;  // receiver of request
+
+    // Generate Piece-Get events
+    for (PieceMsg const& msg : ev.uploaded_reqs)
+    {
+        Peer const& peer = g_peers.at(msg.src_pid);  // sender of request
+        const float pg_delay = peer.get_neighbor_pgdelay(client_pid);
+        const float time = ev.time + pg_delay;
+
+        Event next_ev = Event(Event::Type::ARRIVAL,
+                              Event::PIECE_GET,
+                              ++next_event_idx_,
+                              msg.src_pid, time);
+
+        PushArrivalEvent(next_ev);
+    }
+
+
+    Peer const& client = g_peers.at(client_pid);
+
+    // Generate Next Admit Events
+    if (ev.admitted_reqs.size() != 0)
+    {
+        for (PieceMsg const& msg : ev.admitted_reqs)
+        {
+            const float time = ev.time + client.get_trans_time();
+
+            Event next_ev = Event(Event::Type::ARRIVAL,
+                                  Event::PIECE_ADMIT,
+                                  ++next_event_idx_,
+                                  ev.pid,
+                                  time);
+
+            PushArrivalEvent(next_ev);
+        }
+    }
+}
+
+/* Create Derived Events of Piece-Get Event */
+void EventHandler::EC_6(Event const& ev)
+{
+    assert(ev.type_bt == Event::PIECE_GET);
+
+    if (ev.is_complete)
+    {
+        Event next_ev = Event(Event::Type::ARRIVAL,
+                              Event::COMPLETED,
+                              ++next_event_idx_,
+                              ev.pid,
+                              ev.time);
+
+        PushArrivalEvent(next_ev);
+    }
+    else
+    {
+        GenrPieceReqRecvEvents(ev);
+    }
+}
+
+/* Create Derived Events of Complete Event */
+void EventHandler::EC_7(Event const& ev)
+{
+    assert(ev.type_bt == Event::COMPLETED);
+
+    const float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+
+    Event next_ev = Event(Event::Type::ARRIVAL,
+                          Event::PEER_LEAVE,
+                          ++next_event_idx_,
+                          ev.pid,
+                          time);
+
+    PushArrivalEvent(next_ev);
 }
 
 void EventHandler::PushInitEvent()
@@ -295,7 +315,7 @@ float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4B
     if (dtbt == Event::PEERLIST_REQ_RECV ||
         dtbt == Event::PEERLIST_GET)
     {
-        time += g_pg_delay_tracker;
+        time += g_kTrackerPGDelay;
     }
     else if (dtbt == Event::PEER_JOIN ||
              dtbt == Event::PEER_LEAVE)
@@ -325,7 +345,7 @@ float EventHandler::ComputeDepartureEventTime()
 void EventHandler::PushDerivedEvent(Event const& ev)
 {
     // 根據此次事件，衍生接下來的事件
-    event_creator_map_[ev.type_bt](ev);
+    event_creator_map_[ev.type_bt](*this, ev);
 
     /* Old Version */
     //int pid = ev.pid;
@@ -414,10 +434,10 @@ void EventHandler::ProcessArrival(Event& ev)
     event_func_map_[ev.type_bt](*this, ev);  // std::function version
 
     // 只要不是 Peer Leave 事件，就產生衍生事件
-    if (ev.type_bt != Event::PEER_LEAVE) { PushDerivedEvent(ev); }
+    if (ev.type_bt != Event::PEER_LEAVE)  { PushDerivedEvent(ev); }
 
     // debug (remove after)
-    //if (ev.type_bt == Event::PEER_JOIN)  { PushPeerJoinEvent(ev); }
+    //if (ev.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(ev); }
 
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
@@ -463,7 +483,7 @@ void EventHandler::SendPieceReqs(Event& ev)
 {
     ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
-    // FIXME: 選不出目標 peers 時要換 PeerList
+    // 沒有要求訊息產生，需要新的 PeerList
     if (0 == ev.req_msgs.size())
         ev.need_new_neighbors = true;
 
@@ -494,7 +514,6 @@ void EventHandler::PeerListGetEvent(Event& ev)
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
     SendPieceReqs(ev);
-
 
     // DEBUG of Choking
     //std::set<int> dest_set;
@@ -533,17 +552,35 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     // TODO : 將 piece 送給要求者並產生 PieceGet 事件
     ev.uploaded_reqs = ev.admitted_reqs;
 
+    const int client_pid = ev.pid;
     // 刪除每一個要求者中有關於接收者的紀錄
     for (auto const& msg : ev.uploaded_reqs)
     {
-        Peer& client = g_peers.at(msg.src_pid);
-        client.erase_on_req_peer(ev.pid);
+        Peer& peer = g_peers.at(msg.src_pid);
+        peer.erase_on_req_peer(client_pid);
     }
 
     ev.admitted_reqs.clear();
 
     // TODO: 執行 choking 來產生下一次的 Piece Admit
-    ev.admitted_reqs = Choking(ev.pid);
+    ev.admitted_reqs = Choking(client_pid);
+
+    // DEBUG
+    std::cout << std::flush;
+    std::cout << "\nAdmit Msg List:";
+    std::cout << "\nSize of Admit Msg List: " << ev.admitted_reqs.size() << std::endl;
+
+    //if (ev.admitted_reqs.size() != 0)
+    //{
+    //    for (auto const& msg : ev.admitted_reqs)
+    //    {
+    //        std::cout << "SRC: " << msg.src_pid << std::endl;
+    //        std::cout << "DEST: " << msg.dest_pid << std::endl;
+    //        std::cout << "PIECE-NO: " << msg.piece_no << std::endl;
+    //        std::cout << "SRC UPLOAD BANDWIDTH: " << msg.src_up_bw << std::endl;
+    //        std::cout << "--------------------------------\n\n";
+    //    }
+    //}
 }
 
 void EventHandler::PieceGetEvent(Event& ev)
