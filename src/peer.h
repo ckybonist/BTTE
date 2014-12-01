@@ -48,7 +48,7 @@ class Peer
     void erase_on_req_peer(const int pid);
     void push_recv_msg(PieceMsg const& msg);
     void sort_recv_msg();
-    void erase_recv_msg(MsgBuf::iterator it);
+    void erase_recv_msg(MsgList::iterator it);
     void pop_recv_msg();
 
     void destroy_pieces();
