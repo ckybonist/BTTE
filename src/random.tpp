@@ -131,7 +131,12 @@ T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size])
 template<template<typename, typename> class C_t, typename V_t>
 V_t RandChooseElementInContainer(const RSC rsc, C_t<V_t, std::allocator<V_t>> const& cont)
 {
-    const int rand_pos = Rand(rsc) % cont.size();
+    const size_t kSize = cont.size();
+
+    if (kSize == 0)
+        ExitError("In RandChooseElementInContainer() :Size of container must greater than zero\n");
+
+    const int rand_pos = Rand(rsc) % kSize;
     auto it = cont.begin();
     for (int i = 0; i < rand_pos; ++i, ++it);
     return *it;
