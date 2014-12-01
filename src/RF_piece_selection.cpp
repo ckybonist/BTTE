@@ -1,195 +1,166 @@
 #include <cstdlib>
-
 #include "RF_piece_selection.h"
 
+
 using namespace uniformrand;
+
 
 namespace btte_piece_selection
 {
 
 RarestFirst::~RarestFirst()
 {
-    if (piece_counts_info_ != nullptr)
+    if (counts_info_ != nullptr)
     {
-        delete [] piece_counts_info_;
-        piece_counts_info_ = nullptr;
+        delete [] counts_info_;
+        counts_info_ = nullptr;
     }
 }
 
-void RarestFirst::CountNumPeerOwnPiece(const size_t num_targets)
+void RarestFirst::CountNumPeerOwnPiece()
 {
-    piece_counts_info_ = new PieceCounts[num_targets];
-
-    const Neighbor *neighbors = g_peers[selector_pid_].neighbors;
+    //const Neighbor *neighbors = g_peers.at(selector_pid_).neighbors;
+    auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
-    for (IntSetIter it = targets_set_.begin(); it != targets_set_.end(); it++, index++)
+    std::vector<PeerOwnCounts> tmp_vec;
+    IntSetIter begin = no_download_pieces_set_.begin();
+    IntSetIter end = no_download_pieces_set_.end();
+
+    for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
     {
         int counts = 0;
-        for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+        for (auto& nei : neighbors)
         {
-            if (neighbors[n].exist)  // ensure the neighbor is exist
-            {
-                const int nid = neighbors[n].id;
-                bool is_get_piece = g_peers[nid].pieces[*it];
-                if (is_get_piece) ++counts;
-            }
+            if (HavePiece(nei.first, *p_no)) ++counts;
         }
-        piece_counts_info_[index].piece_no = *it;
-        piece_counts_info_[index].counts = counts;
+        //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
+        //{
+        //    if (neighbors[n].exist)  // ensure the neighbor is exist
+        //    {
+        //        const int nid = neighbors[n].id;
+        //        bool is_get_piece = g_peers.at(nid).pieces[*it];
+        //        if (is_get_piece) ++counts;
+        //    }
+        //}
+        if (counts > 0)
+        {
+            PeerOwnCounts info = {*p_no, counts};
+            tmp_vec.push_back(info);
+        }
     }
 
-    neighbors = nullptr;
+    num_target_ = tmp_vec.size();
+    counts_info_ = new PeerOwnCounts[num_target_];
+    if (nullptr == counts_info_)
+        ExitError("Memory Allocation Error");
+
+    std::copy(tmp_vec.begin(), tmp_vec.end(), counts_info_);
+
+    tmp_vec.clear();
+    //neighbors = nullptr;
 }
 
-void RarestFirst::SortByPieceCounts(const int num_targets)
+void RarestFirst::SortByPieceCounts()
 {
-    auto func_comp = [] (const void* a, const void* b) {
-                           const PieceCounts* obj_a = (PieceCounts*)a;
-                           const PieceCounts* obj_b = (PieceCounts*)b;
-                           return obj_a->counts - obj_b->counts;
-                        };
+    auto cmp = [] (const void* l, const void* r) {
+        const PeerOwnCounts* myl = (PeerOwnCounts*)l;
+        const PeerOwnCounts* myr = (PeerOwnCounts*)r;
+        return myl->counts - myr->counts;
+    };
 
     // sort pieces counts info
-    qsort(piece_counts_info_,
-          num_targets,
-          sizeof(PieceCounts),
-          func_comp);
-}
-
-bool RarestFirst::IsDupReq(const IntSet& dest_peers, const int nid)
-{
-    bool flag = false;
-    IntSetIter first = dest_peers.begin();
-    IntSetIter last = dest_peers.end();
-    for (IntSetIter it = first; it != last; ++it)
-    {
-        if (*it == nid)
-        {
-            flag = true;
-            break;
-        }
-    }
-    return flag;
-}
-
-PieceReqMsg RarestFirst::CreateReqMsg(const int target_piece_no, const bool is_last_piece)
-{
-    static IntSet dest_peers;
-    PieceReqMsg msg;
-
-    for (int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
-    {
-        const Neighbor &nei = g_peers[selector_pid_].neighbors[i];
-        const int nid = nei.id;
-
-        if (!nei.exist) continue;
-
-        const bool piece_exist = g_peers[nid].pieces[target_piece_no];
-        if (piece_exist && !IsDupReq(dest_peers, nid))
-        {
-            msg.src_pid = selector_pid_;
-            msg.dest_pid = nid;
-            msg.piece_no = target_piece_no;
-
-            dest_peers.insert(nid);
-
-            break;
-        }
-    }
-
-    if (is_last_piece)
-        dest_peers.clear();
-
-    return msg;
-}
-
-//int RarestFirst::GetNumRarest(const int num_targets)
-//{
-//    int num_rarest = 0;
-//
-//    for (int c = 0; c < num_targets; c++)
-//    {
-//        const int first = piece_counts_info_[c].counts;
-//        const int second = piece_counts_info_[c + 1].counts;
-//        if (first - second < 0)
-//        {
-//            num_rarest = c + 1;
-//            break;
-//        }
-//        else if (c == c - 2 &&
-//                 first - second == 0)
-//        {
-//            num_rarest = num_targets;
-//            break;
-//        }
-//    }
-//
-//    std::cout << "Number of rarest piece: " << num_rarest << "\n";
-//
-//    return num_rarest;
-//}
-
-//int RarestFirst::GetTargetPieceNo(const int num_rarest)
-//{
-//    int target_no = 0;
-//
-//    if (num_rarest == 1)
-//    {
-//        target_no = piece_counts_info_[0].piece_no;
-//    }
-//    else
-//    {
-//        int index = Roll<int>(RSC::RF_PIECESELECT, 0, num_rarest - 1);
-//        target_no = piece_counts_info_[index].piece_no;
-//    }
-//
-//    return target_no;
-//}
-
-void RarestFirst::RefreshInfo()
-{
-    delete [] piece_counts_info_;
-    piece_counts_info_ = nullptr;  // important !!!
-    targets_set_.clear();
-}
-
-PRMVec RarestFirst::StartSelection(const int self_pid)
-{
-    selector_pid_ = self_pid;
-
-    CheckNeighbors();
-
-    SetTargetPieces();
-
-    const size_t num_targets = targets_set_.size();
-
-    CountNumPeerOwnPiece(num_targets);
-
-    SortByPieceCounts(num_targets);
+    qsort(counts_info_,
+          num_target_,
+          sizeof(PeerOwnCounts),
+          cmp);
 
     // debug info
     std::cout << "\nPiece Count Info (piece-no, counts) :\n";
-    for (int i = 0; (size_t)i < num_targets; ++i)
+    for (size_t i = 0; i < num_target_; ++i)
     {
-        std::cout << "(" << piece_counts_info_[i].piece_no << ",   "
-                  << piece_counts_info_[i].counts << ")\n";
+        std::cout << "(" << counts_info_[i].piece_no << ",   "
+                  << counts_info_[i].counts << ")\n";
     }
     std::cout << std::endl;
+}
 
-    // Create req-msg list
-    PRMVec req_msgs;
-    for (int i = 0; (size_t)i < num_targets; ++i)
+IntSet RarestFirst::GetRarestPiecesSet() const
+{
+    IntSet target_pieces;
+    IntSet dup_count_pieces;
+
+    // Check peer-count of each piece iteratively, if appear same-peer-count situation,
+    // then randomly choose one.
+    for (size_t i = 1; i < num_target_; ++i)
     {
-        const int piece_no = piece_counts_info_[i].piece_no;
-        const PieceReqMsg msg = CreateReqMsg(piece_no, ((size_t)i == num_targets - 1));
-        if (msg.dest_pid != -1)
-            req_msgs.push_back(msg);
+        const int no = counts_info_[i].piece_no;
+        const int count = counts_info_[i].counts;
+        const int prev_count = counts_info_[i - 1].counts;
+
+        if (count == prev_count)
+        {
+            if (i == 1)
+            {
+                const int prev_no = counts_info_[i - 1].piece_no;
+                dup_count_pieces.insert(prev_no);
+            }
+
+            dup_count_pieces.insert(no);
+        }
+        else
+        {
+            if (i == 1)
+            {
+                const int prev_no = counts_info_[i - 1].piece_no;
+                target_pieces.insert(prev_no);
+            }
+            else if (i == num_target_ - 1 ||
+                     dup_count_pieces.size() == 0)
+            {
+                target_pieces.insert(no);
+            }
+            else
+            {
+                const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
+                target_pieces.insert(rand_no);
+                dup_count_pieces.clear();
+            }
+        }
     }
+
+    return target_pieces;
+}
+
+void RarestFirst::RefreshInfo()
+{
+    delete [] counts_info_;
+    counts_info_ = nullptr;
+    no_download_pieces_set_.clear();
+}
+
+IntSet RarestFirst::StartSelection(const int client_pid)
+{
+    selector_pid_ = client_pid;
+
+    CheckNeighbors();
+
+    CollectNoDownloadPieces();
+
+    CountNumPeerOwnPiece();
+
+    SortByPieceCounts();
+
+    IntSet target_pieces = GetRarestPiecesSet();
+
+    std::cout << "\nResult of Rarest First Piece Selection:\n";
+    for (const int no : target_pieces)
+        std::cout << no << std::endl;
+    std::cout << std::endl;
 
     RefreshInfo();
 
-    return req_msgs;
+    return target_pieces;
 }
 
 }

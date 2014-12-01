@@ -3,32 +3,40 @@
 namespace btte_piece_selection
 {
 
-IPieceSelect::IPieceSelect(Args args)
+IPieceSelect::IPieceSelect()
 {
-    args_ = args;
 }
 
 IPieceSelect::~IPieceSelect()
 {
-
 }
 
 void IPieceSelect::CheckNeighbors()
 {
-    if (nullptr == g_peers[selector_pid_].neighbors)
+    //if (nullptr == g_peers.at(selector_pid_).neighbors)
+    auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
+    if (0 == neighbors.size())
     {
-        std::cout << "\nYou don't have neighbors. So there is no way to select a target piece\n";
+        std::cout << "\nYou don't have neighbors. Can't start Piece Selection\n";
         exit(0);
     }
 }
 
-void IPieceSelect::SetTargetPieces()
+void IPieceSelect::CollectNoDownloadPieces()
 {
-    for (int c = 0; (size_t)c < args_.NUM_PIECE; c++)
+    const size_t NUM_PIECE = g_btte_args.get_num_piece();
+
+    for (size_t c = 0; c < NUM_PIECE; c++)
     {
-        if (!g_peers[selector_pid_].pieces[c])
-            targets_set_.insert(c);
+        const Peer& selector = g_peers.at(selector_pid_);
+        if (!selector.get_nth_piece(c))
+            no_download_pieces_set_.insert(c);
     }
+}
+
+bool IPieceSelect::HavePiece(const int pid, const int piece_no) const
+{
+    return g_peers.at(pid).get_nth_piece(piece_no);
 }
 
 }

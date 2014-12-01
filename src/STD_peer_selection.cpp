@@ -11,8 +11,8 @@ namespace btte_peer_selection
 
 Standard::~Standard()
 {
-    delete [] pg_delays_;
-    pg_delays_ = nullptr;
+    //delete [] pg_delays_;
+    //pg_delays_ = nullptr;
 }
 
 void Standard::RefreshInfo()
@@ -21,71 +21,46 @@ void Standard::RefreshInfo()
     candidates_ = nullptr;
 }
 
-void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
+//void Standard::AssignNeighbors(Neighbor* const neighbors, const size_t cand_size)
+void Standard::AssignNeighbors(NeighborMap& neighbors, const size_t cand_size)
 {
-    //Peer& myself = g_peers[selector_pid_];
-    for(int i = 0; (size_t)i < args_.NUM_PEERLIST; i++)
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
+
+    for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
-        if ((size_t)i < cand_size)
+        if (i < cand_size)
         {
             const int cand_pid = candidates_[i];
-            neighbors[i].id = cand_pid;
-            neighbors[i].exist = true;
-
-            // 1. assign propagation delay (pg_delay is various)
             float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
-            neighbors[i].pg_delay = pg_delay;
-
-            // 2. assign propagation delay (pg_delay is steady)
-            //float pg_delay = 0.0;
-            //if (IsNewNeighbor(selector_pid_, cand_pid))
-            //{
-            //    pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
-            //    RecordPGDelay(selector_pid_, cand_pid, pg_delay);
-            //}
-            //else
-            //{
-            //    pg_delay = QueryPGDelay(selector_pid_, cand_pid);
-            //}
+            Neighbor nei_info = Neighbor(pg_delay);
+            neighbors.insert(std::pair<int, Neighbor>(cand_pid, nei_info));
+            //neighbors[i].id = cand_pid;
+            //neighbors[i].exist = true;
             //neighbors[i].pg_delay = pg_delay;
-
-            ++g_peers[cand_pid].neighbor_counts;
+            g_peers.at(cand_pid).incr_neighbor_counts(1);
         }
         else
-        {
             break;
-        }
     }
 }
 
-Neighbor* Standard::StartSelection(const int self_pid, const IntSet& in_swarm_set)
+NeighborMap Standard::StartSelection(const int client_pid, const IntSet& in_swarm_set)
 {
-    selector_pid_ = self_pid;
+    g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
 
-    Neighbor* neighbors = AllocNeighbors();
+    selector_pid_ = client_pid;
+
+    //Neighbor* neighbors = AllocNeighbors();
+    NeighborMap neighbors;
 
     size_t candidates_size = SetCandidates(in_swarm_set, false);
 
     // Randomly select peers
-    Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);
+    //Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);
 
     AssignNeighbors(neighbors, candidates_size);
 
-    // debug info
-    std::cout << "\nNeighbors of Peer #" << self_pid << std::endl;
-    std::cout << "Info: (pid, cid, PG delay)\n";
-    for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
-    {
-        Neighbor nei = neighbors[n];
-        if (nei.id == -1)
-        {
-            std::cout << "None\n";
-            continue;
-        }
-        std::cout << "(" << nei.id << ",  "
-                  << g_peers[nei.id].cid << ",  "
-                  << nei.pg_delay << ")" << std::endl;
-    }
+    DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

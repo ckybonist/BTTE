@@ -5,8 +5,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
+#include <set>
 
 #include "error.h"
+
 
 //const long long g_kRandMax = 2147483647;  // C++ RAND_MAX Macro
 
@@ -51,15 +53,10 @@ typedef enum class RandSeedCases
     FREE_4,
 } RSC;
 
-
-extern long long g_rand_grp[g_kNumRSeeds];
-//extern long long g_rand_num;
-
-
 namespace uniformrand
 {
 
-long long Rand(const RSC& rsc);
+long long Rand(const RSC rsc);
 
 void Srand(const int iRsc, const int seed);
 
@@ -68,17 +65,17 @@ void InitRandSeeds();
 float ExpRand(float rate, long long rand_num);
 
 template<typename T>
-T Roll(const RSC& rsc,
+T Roll(const RSC rsc,
        const T low,
        const T up);
 
 template <typename T>
-T* DistinctRandNum(const RSC& rsc,
+T* DistinctRandNum(const RSC rsc,
                    const size_t size,
                    const T rand_limit);
 
 template<typename T>
-void Shuffle(const RSC& rsc, T *arr, size_t N);
+void Shuffle(const RSC rsc, T* arr, size_t N);
 
 
 /*
@@ -97,10 +94,23 @@ void Shuffle(const RSC& rsc, T *arr, size_t N);
  *
  * */
 template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC& rsc, const T (&exclude_set)[set_size]);
+T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size]);
+
+
+// For STL containers except set
+template<template<typename, typename> class C_t, typename V_t>
+V_t RandChooseElementInContainer(const RSC rsc, C_t<V_t, std::allocator<V_t>> const& cont);
+
+// Only for STL set
+template <typename T>
+T RandChooseElementInSet(const RSC rsc, std::set<T> myset);
 
 #include "random.tpp"
 
-} // namespace uniformrand
+}  // namespace uniformrand
+
+extern long long g_rand_grp[g_kNumRSeeds];
+//extern long long g_rand_num;
+
 
 #endif // for #ifndef _RANDOM_H

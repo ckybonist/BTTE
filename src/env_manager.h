@@ -10,19 +10,19 @@
 // Singleton
 class EnvManager
 {
-public:
-	static EnvManager& GetInstance();
+  public:
+    static EnvManager& GetInstance();
 
-	void Init(const std::string filename);
+    void Init(const std::string filename);
 
-     //void RunEvents();
+    //void RunEvents();
 
     void Destroy();
 
-private:
-	EnvManager() {};
-	EnvManager(const EnvManager&);
-	void operator=(const EnvManager&);
+  private:
+    EnvManager() {};
+    EnvManager(const EnvManager&);
+    void operator=(const EnvManager&);
     ~EnvManager() {};
 };
 

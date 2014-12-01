@@ -22,7 +22,7 @@ NUM_CHOKING = 4
 NUM_OU = 1
 
 
-NUM_PIECE = 5
+NUM_PIECE = 20
 
 
 # Type of peer selection
