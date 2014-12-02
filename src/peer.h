@@ -36,7 +36,7 @@ class Peer
     void set_pid(const int pid);
     void set_cid(const int cid);
     void to_seed();
-    void set_nth_piece(const int n);
+    void download_piece(const int n);
     void set_neighbors(NeighborMap const& ns);
     void clear_neighbors();
     void set_neighbor_counts(const int c);
@@ -62,8 +62,8 @@ class Peer
     float get_join_time() const;
     float get_leave_time() const;
     bool check_in_swarm() const;
-    bool* get_pieces() const;
-    bool get_nth_piece(const int n) const;
+    bool* get_piece_info() const;
+    bool get_nth_piece_info(const int n) const;
     Type get_type() const;
     NeighborMap const& get_neighbors() const;
     Neighbor const& get_nth_neighbor(const int n) const;

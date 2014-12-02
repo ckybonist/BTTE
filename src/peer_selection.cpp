@@ -83,7 +83,7 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
         }
 
         // assign peers with same cid at front of array
-        int index = 0;
+        size_t index = 0;
         for (IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
         {
             if (index >= cand_pid_set.size()) break;

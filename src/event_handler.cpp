@@ -172,18 +172,15 @@ void EventHandler::EC_4(Event const& ev)
     // 所以不用任何傳輸時間 (pg_delay or trans_time)
     const float time = ev.time;
 
-    // Next round admit-events
-    for (PieceMsg const& msg : ev.admitted_reqs)
-    {
-        Event next_ev = Event(Event::Type::ARRIVAL,
-                              Event::PIECE_ADMIT,
-                              ++next_event_idx_,
-                              ev.pid,
-                              time);
-        next_ev.admitted_reqs = ev.admitted_reqs;
+    // Generate Piece Admit Events
+    Event next_ev = Event(Event::Type::ARRIVAL,
+                          Event::PIECE_ADMIT,
+                          ++next_event_idx_,
+                          ev.pid,
+                          time);
+    next_ev.admitted_reqs = ev.admitted_reqs;
 
-        PushArrivalEvent(next_ev);
-    }
+    PushArrivalEvent(next_ev);
 }
 
 /* Create Derived Events of Piece-Admit Event */
@@ -203,7 +200,8 @@ void EventHandler::EC_5(Event const& ev)
         Event next_ev = Event(Event::Type::ARRIVAL,
                               Event::PIECE_GET,
                               ++next_event_idx_,
-                              msg.src_pid, time);
+                              msg.src_pid,
+                              time);
 
         PushArrivalEvent(next_ev);
     }
@@ -214,18 +212,15 @@ void EventHandler::EC_5(Event const& ev)
     // Generate Next Admit Events
     if (ev.admitted_reqs.size() != 0)
     {
-        for (PieceMsg const& msg : ev.admitted_reqs)
-        {
-            const float time = ev.time + client.get_trans_time();
+        const float time = ev.time + client.get_trans_time();
 
-            Event next_ev = Event(Event::Type::ARRIVAL,
-                                  Event::PIECE_ADMIT,
-                                  ++next_event_idx_,
-                                  ev.pid,
-                                  time);
+        Event next_ev = Event(Event::Type::ARRIVAL,
+                              Event::PIECE_ADMIT,
+                              ++next_event_idx_,
+                              ev.pid,
+                              time);
 
-            PushArrivalEvent(next_ev);
-        }
+        PushArrivalEvent(next_ev);
     }
 }
 
@@ -553,10 +548,12 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     ev.uploaded_reqs = ev.admitted_reqs;
 
     const int client_pid = ev.pid;
-    // 刪除每一個要求者中有關於接收者的紀錄
     for (auto const& msg : ev.uploaded_reqs)
     {
         Peer& peer = g_peers.at(msg.src_pid);
+        // 得到 piece
+        peer.download_piece(msg.piece_no);
+        // 刪除每一個要求者中有關於"送要求接收者"的紀錄
         peer.erase_on_req_peer(client_pid);
     }
 

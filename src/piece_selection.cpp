@@ -29,14 +29,15 @@ void IPieceSelect::CollectNoDownloadPieces()
     for (size_t c = 0; c < NUM_PIECE; c++)
     {
         const Peer& selector = g_peers.at(selector_pid_);
-        if (!selector.get_nth_piece(c))
+        if (!selector.get_nth_piece_info(c))
             no_download_pieces_set_.insert(c);
     }
 }
 
 bool IPieceSelect::HavePiece(const int pid, const int piece_no) const
 {
-    return g_peers.at(pid).get_nth_piece(piece_no);
+    bool have = g_peers.at(pid).get_nth_piece_info(piece_no);
+    return have;
 }
 
 }
