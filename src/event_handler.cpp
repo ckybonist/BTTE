@@ -100,6 +100,7 @@ void EventHandler::GenrPieceReqRecvEvents(Event const& ev)
 {
     if (ev.need_new_neighbors)  // no any possible peers to request
     {
+        std::cout << "\nNO REQ FOUND!\n";
         GetNewPeerList(ev);
     }
     else
@@ -476,18 +477,25 @@ bool EventHandler::ReqTimeout(Event const& ev)
 
 void EventHandler::SendPieceReqs(Event& ev)
 {
+    // FIXME：沒有任何要求訊息!
+    //        因此導致一直重複要求 PeerList 的事件
     ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
     // 沒有要求訊息產生，需要新的 PeerList
-    if (0 == ev.req_msgs.size())
-        ev.need_new_neighbors = true;
-
-    for (const PieceMsg& msg : ev.req_msgs)
+    if (ev.req_msgs.empty())
     {
-        Peer& client = g_peers.at(ev.pid);
-        Peer& peer = g_peers.at(msg.dest_pid);
-        client.insert_on_req_peer(msg.dest_pid);
-        peer.push_recv_msg(msg);
+        ev.need_new_neighbors = true;
+    }
+    else
+    {
+        ev.need_new_neighbors = false;
+        for (const PieceMsg& msg : ev.req_msgs)
+        {
+            Peer& client = g_peers.at(ev.pid);
+            Peer& peer = g_peers.at(msg.dest_pid);
+            client.insert_on_req_peer(msg.dest_pid);
+            peer.push_recv_msg(msg);
+        }
     }
 }
 
