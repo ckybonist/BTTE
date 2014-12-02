@@ -12,7 +12,7 @@ NUM_SEED = 2
 NUM_LEECH = 3
 
 
-NUM_PEERLIST = 5
+NUM_PEERLIST = 10
 
 
 NUM_CHOKING = 4
@@ -22,7 +22,7 @@ NUM_CHOKING = 4
 NUM_OU = 1
 
 
-NUM_PIECE = 20
+NUM_PIECE = 5
 
 
 # Type of peer selection
