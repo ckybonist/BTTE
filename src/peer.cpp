@@ -47,7 +47,7 @@ void Peer::set_in_swarm(const bool st)       { in_swarm = st; }
 void Peer::set_pid(const int pid)            { this->pid = pid; }
 void Peer::set_cid(const int cid)            { this->cid = cid; }
 void Peer::to_seed()                         { type = SEED; }
-void Peer::set_nth_piece(const int n)        { pieces[n] = true; }
+void Peer::download_piece(const int n)       { pieces[n] = true; }
 void Peer::set_neighbor_counts(const int c)  { neighbor_counts = c; }
 void Peer::incr_neighbor_counts(const int n) { neighbor_counts += n; }
 void Peer::set_join_time(const float t)      { join_time = t; }
@@ -89,13 +89,13 @@ float Peer::get_join_time() const                          { return join_time; }
 float Peer::get_leave_time() const                         { return leave_time; }
 bool Peer::check_in_swarm() const                          { return in_swarm; }
 
-bool Peer::get_nth_piece(const int n) const
+bool Peer::get_nth_piece_info(const int n) const
 {
     if (nullptr == pieces) ExitError("Pieces is NULL");
     return pieces[n];
 }
 
-bool* Peer::get_pieces() const
+bool* Peer::get_piece_info() const
 {
     if (nullptr == pieces) ExitError("Pieces is NULL");
     return pieces;

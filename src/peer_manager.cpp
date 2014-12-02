@@ -42,7 +42,8 @@ bool IsDupDest(const IntSet& dest_peers,
 
 bool HavePiece(const int pid, const int piece_no)
 {
-    return g_peers.at(pid).get_nth_piece(piece_no);
+    bool have = g_peers.at(pid).get_nth_piece_info(piece_no);
+    return have;
 }
 
 IntSet GetPieceOwners(const int piece_no, const int client_pid)
@@ -334,7 +335,7 @@ bool PeerManager::CheckAllPiecesGet(const int pid) const
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
     for (size_t c = 0; c < NUM_PIECE; c++)
     {
-        if (!g_peers.at(pid).get_nth_piece(c))
+        if (!g_peers.at(pid).get_nth_piece_info(c))
         {
             flag = false;
             break;

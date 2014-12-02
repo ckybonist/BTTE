@@ -104,7 +104,7 @@ void PieceInfo(const int pid,
 
     for (size_t c = 0; c < NUM_PIECE; c++)
     {
-        if (g_peers.at(pid).get_nth_piece(c))
+        if (g_peers.at(pid).get_nth_piece_info(c))
         {
             ++piece_count;
             if ((size_t)pid >= NUM_SEED) ++counter[c];
