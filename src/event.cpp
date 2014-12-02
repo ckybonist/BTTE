@@ -10,6 +10,13 @@ Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
     time = ti;
     pg_delay = 0.0;
 
+    need_new_neighbors = false;
+
+    time_req_send = 0.0;
+
+    client_pid = -1;
+    need_new_neighbors = false;
+    is_complete = false;
     //req_timeout = false;
 }
 

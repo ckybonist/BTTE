@@ -477,8 +477,6 @@ bool EventHandler::ReqTimeout(Event const& ev)
 
 void EventHandler::SendPieceReqs(Event& ev)
 {
-    // FIXME：沒有任何要求訊息!
-    //        因此導致一直重複要求 PeerList 的事件
     ev.req_msgs = pm_->GenrAllPieceReqs(ev.pid);
 
     // 沒有要求訊息產生，需要新的 PeerList
@@ -488,7 +486,6 @@ void EventHandler::SendPieceReqs(Event& ev)
     }
     else
     {
-        ev.need_new_neighbors = false;
         for (const PieceMsg& msg : ev.req_msgs)
         {
             Peer& client = g_peers.at(ev.pid);
