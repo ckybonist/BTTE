@@ -213,12 +213,29 @@ void PeerManager::InitAbstractObj()
 
 PeerManager::PeerManager()
 {
+    // Reserve spaces for vector of peers
     const size_t NUM_PEER = g_btte_args.get_num_peer();
-    // Reserve spaces for vector
     g_peers.reserve(NUM_PEER + 1000);
 
+    // Init regestration of peers
+    if (g_peers_reg_info == nullptr)
+    {
+        g_peers_reg_info = new bool[NUM_PEER];
+        if (g_peers_reg_info == nullptr)
+        {
+           ExitError("Memory Allocation Error");
+        }
+        else
+        {
+            for (size_t i = 0; i < NUM_PEER; i++)
+                g_peers_reg_info[i] = false;
+        }
+    }
+
+    // Init object of algorithm execution
     InitAbstractObj();
 
+    // Init member data
     reserved_peer_levels_ = new int[NUM_PEER];
     if (nullptr == reserved_peer_levels_)
         ExitError("Memory Allocation Fault");
@@ -258,10 +275,9 @@ PeerManager::~PeerManager()
     //delete [] g_peers;
     //g_peers = nullptr;
     g_peers.clear();
-    in_swarm_set_.clear();
 
-    delete [] g_in_swarm_set;
-    g_in_swarm_set = nullptr;
+    delete [] g_peers_reg_info;
+    g_peers_reg_info = nullptr;
 }
 
 void PeerManager::NewPeerData(Peer::Type type,
@@ -303,29 +319,13 @@ void PeerManager::NewPeer(const int pid) const
 void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
 {
     const size_t NUM_PEER = g_btte_args.get_num_peer();
-    if (g_in_swarm_set == nullptr)
-    {
-        g_in_swarm_set = new bool[NUM_PEER];
-        if (g_in_swarm_set == nullptr)
-        {
-            ExitError("Memory Allocation Error");
-        }
-        else
-        {
-            for (size_t i = 0; i < NUM_PEER; i++)
-                g_in_swarm_set[i] = false;
-        }
-    }
-
     if (isf == ISF::JOIN)
     {
-        in_swarm_set_.insert(pid);
-        g_in_swarm_set[pid] = true;
+        g_peers_reg_info[pid] = true;
     }
-    else
+    else if (isf == ISF::LEAVE)
     {
-        in_swarm_set_.erase(pid);
-        g_in_swarm_set[pid] = false;
+        g_peers_reg_info[pid] = false;
     }
 }
 
@@ -348,8 +348,17 @@ bool PeerManager::CheckAllPiecesGet(const int pid) const
 void PeerManager::AllotNeighbors(const int pid) const
 {
     //Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+    IntSet in_swarm_set;
+
+    for (size_t i = 0; i < NUM_PEER; i++)
+    {
+        if (g_peers_reg_info[i])
+            in_swarm_set.insert(i);
+    }
+
     Peer& client = g_peers.at(pid);
-    client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set_));
+    client.set_neighbors(obj_peerselect_->StartSelection(pid, in_swarm_set));
 }
 
 MsgList PeerManager::GenrAllPieceReqs(const int client_pid)

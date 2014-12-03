@@ -80,7 +80,7 @@ NeighborMap ClusterBased::StartSelection(const int client_pid, const IntSet& in_
     // Set parameter of sort_cid_flag to true, in order to get
     // candidates (most part, not all) which have
     // same cluster id as selector.
-    size_t candidates_size = SetCandidates(in_swarm_set, true);
+    size_t candidates_size = SetCandidates(in_swarm_set, RSC::CB_PEERSELECT, true);
 
     const int client_cid = g_peers.at(client_pid).get_cid();
     AssignNeighbors(neighbors, candidates_size, client_cid);

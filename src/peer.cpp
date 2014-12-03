@@ -5,7 +5,7 @@
 
 
 std::vector<Peer> g_peers;
-bool* g_in_swarm_set = nullptr;
+bool* g_peers_reg_info = nullptr;
 //Peer *g_peers = nullptr;
 
 
