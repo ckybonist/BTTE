@@ -641,7 +641,9 @@ void EventHandler::StartRoutine()
 
         event_list_.pop_front();
 
-        EventInfo(head, current_time_);  // DEBUG
+        // Only print one peer
+        if (head.pid == 8)
+            EventInfo(head, current_time_);  // DEBUG
 
         ProcessEvent(head);
     }
