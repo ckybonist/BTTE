@@ -61,9 +61,21 @@ void Peer::set_neighbors(NeighborMap const& ns)
 }
 
 void Peer::clear_neighbors()                                    { neighbors.clear(); }
+void Peer::push_send_msg(PieceMsg const& msg)                   { send_msg_buf.push_back(msg); }
+void Peer::remove_send_msg(PieceMsg const& msg)
+{
+    auto msg_match = [&msg](PieceMsg const& this_msg) {
+        bool match = false;
+        if (msg.src_pid == this_msg.src_pid &&
+            msg.dest_pid == this_msg.dest_pid &&
+            msg.piece_no == this_msg.piece_no) { match = true; }
 
-void Peer::insert_on_req_peer(const int pid)                    { on_req_peer_set.insert(pid); }
-void Peer::erase_on_req_peer(const int pid)                     { on_req_peer_set.erase(pid); }
+        return match;
+    };
+
+    send_msg_buf.remove_if(msg_match);
+}
+
 void Peer::push_recv_msg(PieceMsg const& msg)                   { recv_msg_buf.push_back(msg); }
 void Peer::sort_recv_msg()                                      { recv_msg_buf.sort(); }
 void Peer::erase_recv_msg(MsgList::iterator it)                 { recv_msg_buf.erase(it); }
@@ -110,8 +122,8 @@ NeighborMap const& Peer::get_neighbors() const
 
 Neighbor const& Peer::get_nth_neighbor(const int n) const         { return neighbors.at(n); }
 Bandwidth const& Peer::get_bandwidth() const                      { return bandwidth; }
-std::set<int> const& Peer::get_on_req_peer_set() const            { return on_req_peer_set; }
-std::list<PieceMsg> const& Peer::get_recv_msg_buf() const         { return recv_msg_buf; }
+MsgList const& Peer::get_send_msg_buf() const                     { return send_msg_buf; }
+MsgList const& Peer::get_recv_msg_buf() const                     { return recv_msg_buf; }
 
 void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_prob)
 {

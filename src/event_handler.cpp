@@ -471,7 +471,7 @@ void EventHandler::SendPieceReqs(Event& ev)
         {
             Peer& client = g_peers.at(ev.pid);
             Peer& peer = g_peers.at(msg.dest_pid);
-            client.insert_on_req_peer(msg.dest_pid);
+            client.push_send_msg(msg);
             peer.push_recv_msg(msg);
         }
     }
@@ -546,8 +546,8 @@ void EventHandler::PieceAdmitEvent(Event& ev)
         // 得到 piece
         peer.download_piece(msg.piece_no);
 
-        // 刪除每一個要求者中有關於"送要求接收者"的紀錄
-        peer.erase_on_req_peer(client_pid);
+        // 刪除每一個要求者中有關於"送出去的要求"的紀錄
+        peer.remove_send_msg(msg);
     }
 
     ev.admitted_reqs.clear();
