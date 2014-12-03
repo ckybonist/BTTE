@@ -128,11 +128,13 @@ void EventHandler::GenrPieceAdmitEvent(Event const& ev, const bool is_first_admi
     if (is_first_admit)
     {
         // 因為跟前一個事件(Piece-Req-Recv) 的 peer 是一樣的，
-        // 所以不用任何傳輸時間 (pg_delay or trans_time)
+        // 而且這是初始的 admit，所以沒有其它要求的 piece 傳輸時間
         time = ev.time;
     }
     else
     {
+        // 需等待前面的 admit 要求的 piece 上傳完，連線才會空出來，
+        // 因此加上一個 piece 傳輸時間
         Peer const& client = g_peers.at(ev.pid);
         time = ev.time + client.get_trans_time();
     }
