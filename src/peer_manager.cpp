@@ -52,8 +52,13 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
     Peer const& client = g_peers.at(client_pid);
     for (auto const& nei : client.get_neighbors())
     {
-        if (HavePiece(nei.first, piece_no))
+        // NOTE: Not only check weather having this piece, but also
+        // check the neighbor is in swarm
+        if (HavePiece(nei.first, piece_no) &&
+                    g_peers_reg_info[nei.first])
+        {
             owners.insert(nei.first);
+        }
     }
 
     IntSet on_req_peers = client.get_on_req_peer_set();
@@ -215,21 +220,17 @@ PeerManager::PeerManager()
 {
     // Reserve spaces for vector of peers
     const size_t NUM_PEER = g_btte_args.get_num_peer();
-    g_peers.reserve(NUM_PEER + 1000);
+    g_peers.reserve(NUM_PEER);
 
     // Init regestration of peers
     if (g_peers_reg_info == nullptr)
     {
         g_peers_reg_info = new bool[NUM_PEER];
         if (g_peers_reg_info == nullptr)
-        {
            ExitError("Memory Allocation Error");
-        }
-        else
-        {
-            for (size_t i = 0; i < NUM_PEER; i++)
-                g_peers_reg_info[i] = false;
-        }
+
+        for (size_t i = 0; i < NUM_PEER; i++)
+            g_peers_reg_info[i] = false;
     }
 
     // Init object of algorithm execution
@@ -282,7 +283,6 @@ PeerManager::~PeerManager()
 
 void PeerManager::NewPeerData(Peer::Type type,
                               const int pid,
-                              //const float join_time,
                               double prob_leech) const
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();

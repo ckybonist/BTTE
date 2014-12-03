@@ -477,7 +477,10 @@ void EventHandler::PeerJoinEvent(Event& ev)
 
 void EventHandler::PeerListReqRecvEvent(Event& ev)
 {
-    pm_->AllotNeighbors(ev.pid);
+    if (g_peers_reg_info[ev.pid])
+    {
+        pm_->AllotNeighbors(ev.pid);
+    }
 }
 
 void EventHandler::PeerListGetEvent(Event& ev)
@@ -646,7 +649,7 @@ void EventInfo(Event const& head, float sys_cur_time)
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];
-    std::cout << "\nThis is event belongs to peer #" << head.pid
+    std::cout << "\nThis event belongs to peer #" << head.pid
               << "\n\n\n";
 }
 
