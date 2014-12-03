@@ -178,7 +178,7 @@ void EventHandler::EC_2(Event const& ev)
     assert(ev.type_bt == Event::PEERLIST_REQ_RECV);
 
     const float time = ev.time + g_kTrackerPGDelay;
-Event next_ev =  Event(Event::Type::ARRIVAL,
+    Event next_ev =  Event(Event::Type::ARRIVAL,
                            Event::PEERLIST_GET,
                            ++next_event_idx_,
                            ev.pid,
@@ -609,6 +609,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 
 void EventHandler::ProcessEvent(Event& ev)
 {
+    // 如果 peer 已經離開，就不去處理其所屬的事件
     const bool in_swarm = g_peers_reg_info[ev.pid];
     if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
 
@@ -671,7 +672,7 @@ void EventInfo(Event const& head, float sys_cur_time)
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];
-    std::cout << "\nThis is event belongs to peer #" << head.pid
+    std::cout << "\nThis event belongs to peer #" << head.pid
               << "\n\n\n";
 }
 

@@ -25,7 +25,7 @@ class PeerManager
 
   public:
     bool CheckAllPiecesGet(const int pid) const;
-    void NewPeer(const int pid) const;  // for peer_join event
+    void NewPeer(const int pid);  // for peer_join event
     void UpdateSwarmInfo(const ISF isf, const int pid);
     void AllotNeighbors(const int client_pid) const;            // Peer Selection
     MsgList GenrAllPieceReqs(const int client_pid); // Piece Selection
@@ -36,11 +36,10 @@ class PeerManager
     //void AllocPeersSpace();
     void NewPeerData(Peer::Type type,
                      const int pid,
-                     //const float join_time,
-                     double prob_leech = 0.1) const;
+                     double prob_leech = 0.1);
     void DeployPeersLevel();
     void DeployClusterIDs();  // if use cluster-based
-    void InitSeeds() const;
+    void InitSeeds();
     void InitLeeches();
     void InitAbstractObj();
 

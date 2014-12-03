@@ -283,7 +283,7 @@ PeerManager::~PeerManager()
 
 void PeerManager::NewPeerData(Peer::Type type,
                               const int pid,
-                              double prob_leech) const
+                              double prob_leech)
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
     const int cid = reserved_cids_[pid];
@@ -291,8 +291,9 @@ void PeerManager::NewPeerData(Peer::Type type,
     Bandwidth const& bw = g_kPeerLevel[level].bandwidth;
 
     g_peers.push_back(Peer(type, pid, cid, bw));
-    Peer& peer = g_peers.at(pid);
+    UpdateSwarmInfo(ISF::JOIN, pid);
 
+    Peer& peer = g_peers.at(pid);
     switch (type)
     {
         case Peer::SEED:
@@ -311,7 +312,7 @@ void PeerManager::NewPeerData(Peer::Type type,
 }
 
 
-void PeerManager::NewPeer(const int pid) const
+void PeerManager::NewPeer(const int pid)
 {
     NewPeerData(Peer::NORMAL, pid);
 }
@@ -489,7 +490,7 @@ void PeerManager::DeployClusterIDs()
 }
 
 /* Peer ID: 0 ~ NUM_SEED-1, 100% pieces */
-void PeerManager::InitSeeds() const
+void PeerManager::InitSeeds()
 {
     const size_t NUM_SEED = g_btte_args.get_num_seed();
     for (size_t p = 0; p < NUM_SEED; p++)
@@ -521,9 +522,7 @@ void PeerManager::InitLeeches()
     for (size_t p = start; p < end; p++)
     {
         double prob_leech = Roll<double>(RSC::PROB_LEECH, 0.1, 0.9);
-        //NewPeerData(Peer::LEECH, p, 0.0, prob_leech);
         NewPeerData(Peer::LEECH, p, prob_leech);
-        UpdateSwarmInfo(ISF::JOIN, p);
     }
 
     for (size_t p = start; p < end; p++)
