@@ -178,7 +178,7 @@ void EventHandler::EC_2(Event const& ev)
     assert(ev.type_bt == Event::PEERLIST_REQ_RECV);
 
     const float time = ev.time + g_kTrackerPGDelay;
-    Event next_ev =  Event(Event::Type::ARRIVAL,
+Event next_ev =  Event(Event::Type::ARRIVAL,
                            Event::PEERLIST_GET,
                            ++next_event_idx_,
                            ev.pid,
@@ -539,13 +539,8 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     for (auto const& msg : ev.uploaded_reqs)
     {
         Peer& peer = g_peers.at(msg.src_pid);
-        std::cout << "\npiece #" << msg.piece_no << " from peer " << client_pid
-                  <<  " to peer #"
-                  << msg.src_pid << "\n\n";
-
         // 得到 piece
         peer.download_piece(msg.piece_no);
-
         // 刪除每一個要求者中有關於"送要求接收者"的紀錄
         peer.erase_on_req_peer(client_pid);
     }
@@ -614,7 +609,10 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 
 void EventHandler::ProcessEvent(Event& ev)
 {
+<<<<<<< HEAD
+=======
     // 如果 peer 已經離開，就不去處理其所屬的事件
+>>>>>>> e0b37bb841b2657af8708705e73acd6a1e230e39
     const bool in_swarm = g_peers_reg_info[ev.pid];
     if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
 
@@ -677,7 +675,7 @@ void EventInfo(Event const& head, float sys_cur_time)
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];
-    std::cout << "\nThis event belongs to peer #" << head.pid
+    std::cout << "\nThis is event belongs to peer #" << head.pid
               << "\n\n\n";
 }
 
