@@ -19,7 +19,7 @@ class EventHandler
 
   private:
     void MapEventFuncs();
-    void MapEventCreators();
+    void MapEventFlow();
     void MapFlowDownEventDependencies();
 
     void PushInitEvent();
@@ -50,6 +50,9 @@ class EventHandler
 
     void GetNewPeerList(Event const& ev);
     void GenrPieceReqRecvEvents(Event const& ev);
+    // is_first_admit: 代表如果當前所 admit 的要求是最新的就為 true, 反之，
+    // 如果要求是之前 wating 的就為 false。這牽涉到 event 到達時間的計算。
+    void GenrPieceAdmitEvent(Event const& ev, const bool is_first_admit);
     void EC_3(Event const& ev);
 
     void EC_4(Event const& ev);
@@ -77,7 +80,7 @@ class EventHandler
     typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
 
     FuncMap_1 event_func_map_;
-    FuncMap_2 event_creator_map_;  // dv : derived event
+    FuncMap_2 event_flow_map_;  // dv : derived event
     std::map<Event::Type4BT, Event::Type4BT> event_map_;
 
     std::list<Event> event_list_;
