@@ -298,7 +298,7 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                                       const int next_index,
                                       const int pid)
 {
-    float next_etime = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));;
+    float next_etime = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));
 
     Event depart_event(Event::Type::DEPARTURE,
                        type_bt,
