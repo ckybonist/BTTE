@@ -85,6 +85,7 @@ void EventHandler::MapFlowDownEventDependencies()
 void EventHandler::GetNewPeerList(Event const& ev)
 {
     const int client_pid = ev.pid;
+    std::cout << "PEER LIST REQESTOR: " << client_pid << std::endl;
     const float time = ev.time + g_kTrackerPGDelay;
 
     Event next_ev = Event(Event::Type::ARRIVAL,
@@ -100,11 +101,12 @@ void EventHandler::GenrPieceReqRecvEvents(Event const& ev)
 {
     if (ev.need_new_neighbors)  // no any possible peers to request
     {
-        std::cout << "\nNO REQ FOUND!\n";
+        std::cout << "\nNO REQ FOUND, NEED NEW NEIGHBORS!\n";
         GetNewPeerList(ev);
     }
     else
     {
+        std::cout << "\nDon't NEED NEW NEIGHBORS!\n";
         for (PieceMsg const& msg : ev.req_msgs)
         {
             Peer const& client = g_peers.at(ev.pid);
@@ -176,8 +178,7 @@ void EventHandler::EC_2(Event const& ev)
     assert(ev.type_bt == Event::PEERLIST_REQ_RECV);
 
     const float time = ev.time + g_kTrackerPGDelay;
-
-    Event next_ev =  Event(Event::Type::ARRIVAL,
+Event next_ev =  Event(Event::Type::ARRIVAL,
                            Event::PEERLIST_GET,
                            ++next_event_idx_,
                            ev.pid,
@@ -239,6 +240,7 @@ void EventHandler::EC_6(Event const& ev)
 
     if (ev.is_complete)
     {
+        std::cout << "Generating COMPLETED event\n";
         Event next_ev = Event(Event::Type::ARRIVAL,
                               Event::COMPLETED,
                               ++next_event_idx_,
@@ -258,7 +260,12 @@ void EventHandler::EC_7(Event const& ev)
 {
     assert(ev.type_bt == Event::COMPLETED);
 
-    const float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    const float time_interval = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    const float time = ev.time + time_interval;
+
+    std::cout << "Generating PEER LEAVE event" << std::endl;
+    std::cout << "Peer #" << ev.pid
+              << " will leave swarm at time " << time << std::endl;
 
     Event next_ev = Event(Event::Type::ARRIVAL,
                           Event::PEER_LEAVE,
@@ -400,6 +407,9 @@ void EventHandler::ProcessArrival(Event& ev)
     // (this->*event_func_map_[ev.type_bt])(ev);  // func ptr version
     event_func_map_[ev.type_bt](*this, ev);  // std::function version
 
+    TBTmapStr tbt2str;
+    Event2Str(tbt2str);
+    std::cout << tbt2str[ev.type_bt] << std::endl;
     // 只要不是 Peer Leave 事件，就產生衍生事件
     if (ev.type_bt != Event::PEER_LEAVE)  { PushDerivedEvent(ev); }
 
@@ -565,6 +575,7 @@ void EventHandler::PieceGetEvent(Event& ev)
     Peer& client = g_peers.at(ev.pid);
     if (pm_->CheckAllPiecesGet(ev.pid))
     {
+        std::cout << "DETECT All PIECES GET" << std::endl;
         client.to_seed();
         ev.is_complete = true;
     }
@@ -573,23 +584,37 @@ void EventHandler::PieceGetEvent(Event& ev)
         // download incomplete, so execute Piece Selection
         SendPieceReqs(ev);
     }
+
+    std::cout << "Piece Get!, Print piece status of peer #" << ev.pid << std::endl;
+    bool const* pieces = client.get_piece_info();
+    for (int i = 0; i < g_btte_args.get_num_piece(); ++i)
+        std::cout << pieces[i] << std::endl;
+    pieces = nullptr;
 }
 
 void EventHandler::CompletedEvent(Event& ev)
 {
     // After random time, this peer will leave.
     // Now, nothing to do
+
+    std::cout << "All PIECES GET, COMPLETE" << std::endl;
 }
 
 void EventHandler::PeerLeaveEvent(Event& ev)
 {
-    g_peers.at(ev.pid).set_in_swarm(false);
-    g_peers.at(ev.pid).set_leave_time(current_time_);
+    Peer& client = g_peers.at(ev.pid);
+    client.set_in_swarm(false);
+    client.set_leave_time(current_time_);
     pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, ev.pid);
 }
 
 void EventHandler::ProcessEvent(Event& ev)
 {
+    const bool in_swarm = g_peers_reg_info[ev.pid];
+    if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
+
+    EventInfo(ev, current_time_);  // DEBUG
+
     if (ev.type == Event::Type::ARRIVAL)
         ProcessArrival(ev);
     else
@@ -607,10 +632,6 @@ void EventHandler::StartRoutine()
         Event head = event_list_.front();
 
         event_list_.pop_front();
-
-        // Only print one peer
-        if (head.pid == 8)
-            EventInfo(head, current_time_);  // DEBUG
 
         ProcessEvent(head);
     }
@@ -651,7 +672,7 @@ void EventInfo(Event const& head, float sys_cur_time)
         std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     std::cout << "It is a " << tbt2str[head.type_bt];
-    std::cout << "\nThis event belongs to peer #" << head.pid
+    std::cout << "\nThis is event belongs to peer #" << head.pid
               << "\n\n\n";
 }
 
