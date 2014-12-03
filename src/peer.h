@@ -44,8 +44,8 @@ class Peer
     void set_join_time(const float t);
     void set_leave_time(const float t);
 
-    void insert_on_req_peer(const int pid);
-    void erase_on_req_peer(const int pid);
+    void push_send_msg(PieceMsg const& msg);
+    void remove_send_msg(PieceMsg const& msg);
     void push_recv_msg(PieceMsg const& msg);
     void sort_recv_msg();
     void erase_recv_msg(MsgList::iterator it);
@@ -68,8 +68,8 @@ class Peer
     NeighborMap const& get_neighbors() const;
     Neighbor const& get_nth_neighbor(const int n) const;
     Bandwidth const& get_bandwidth() const;
-    std::set<int> const& get_on_req_peer_set() const;
-    std::list<PieceMsg> const& get_recv_msg_buf() const;
+    MsgList const& get_send_msg_buf() const;
+    MsgList const& get_recv_msg_buf() const;
 
 
   private:
@@ -85,7 +85,7 @@ class Peer
     NeighborMap neighbors;  // <nid, nei_info>
     //Neighbor* neighbors;
 
-    std::set<int> on_req_peer_set;
+    MsgList send_msg_buf;
     MsgList recv_msg_buf;
 
     Bandwidth bandwidth;
