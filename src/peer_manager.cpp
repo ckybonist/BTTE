@@ -50,18 +50,20 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
 {
     IntSet owners;
     Peer const& client = g_peers.at(client_pid);
+    std::cout << "Original owners of piece #" << piece_no << std::endl;
     for (auto const& nei : client.get_neighbors())
     {
+        const int pid = nei.first;
         // NOTE: Not only check weather having this piece, but also
         // check the neighbor is in swarm
-        if (HavePiece(nei.first, piece_no) &&
-                    g_peers_reg_info[nei.first])
+        if (HavePiece(pid, piece_no) &&
+                    g_peers_reg_info[pid])
         {
-            owners.insert(nei.first);
+            std::cout << pid << std::endl;
+            owners.insert(pid);
         }
     }
 
-    // TODO 要去除掉正在要求過程中的目標節點
     return owners;
 }
 
