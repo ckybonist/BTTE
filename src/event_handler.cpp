@@ -394,7 +394,7 @@ void EventHandler::PushPeerJoinEvent(Event const& ev)
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     if ((size_t)next_join_pid < NUM_PEER &&
-            !g_in_swarm_set[next_join_pid])
+            !g_peers_reg_info[next_join_pid])
     {
         //float time = ComputeArrivalEventTime(ev, Event::PEER_JOIN);
         float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));

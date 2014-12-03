@@ -97,7 +97,7 @@ NeighborMap LoadBalancing::StartSelection(const int client_pid, const IntSet& in
     //Neighbor* neighbors = AllocNeighbors();
     NeighborMap neighbors;
 
-    size_t candidates_size = SetCandidates(in_swarm_set, false);
+    size_t candidates_size = SetCandidates(in_swarm_set, RSC::LB_PEERSELECT, false);
 
     GatherNeighborCounts(candidates_size);
 

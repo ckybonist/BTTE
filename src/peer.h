@@ -96,6 +96,6 @@ class Peer
 
 //extern Peer* g_peers;
 extern std::vector<Peer> g_peers;
-extern bool* g_in_swarm_set;
+extern bool* g_peers_reg_info;
 
 #endif // for #ifndef _PEER_H

@@ -37,7 +37,7 @@ class IPeerSelect
     void DebugInfo(NeighborMap const& neighbors, const int client_pid) const;
 
     IntSet ExcludeSelf(const IntSet& in_swarm_set);
-    size_t SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag);  // find candidates for neighbors
+    size_t SetCandidates(const IntSet& in_swarm_set, const RSC rsc, bool sort_cid_flag);  // find candidates for neighbors
 
     int selector_pid_;
     int* candidates_;

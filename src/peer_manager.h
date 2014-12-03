@@ -50,8 +50,6 @@ class PeerManager
     int* reserved_cids_;  // pre-init, assign to peer after
     int* reserved_peer_levels_;  // pre-init
 
-    IntSet in_swarm_set_;  // for peer selection
-
     // A rate (0.x) for extracting steady peers stat..
     // We get rid of head and tail's peers (0.x / 2 * NUM_PEERS),
     // and gather stat info of middle peers.

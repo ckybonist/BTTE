@@ -53,7 +53,7 @@ NeighborMap Standard::StartSelection(const int client_pid, const IntSet& in_swar
     //Neighbor* neighbors = AllocNeighbors();
     NeighborMap neighbors;
 
-    size_t candidates_size = SetCandidates(in_swarm_set, false);
+    size_t candidates_size = SetCandidates(in_swarm_set, RSC::STD_PEERSELECT, false);
 
     // Randomly select peers
     //Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);

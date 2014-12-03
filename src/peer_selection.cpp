@@ -53,7 +53,7 @@ IntSet IPeerSelect::ExcludeSelf(const IntSet& in_swarm_set)
 // return size of candidates
 // NOTE: if sort_cid_flag is true, then put peers that have
 // same cid as selector at the prior of array
-size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag)
+size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, const RSC rsc, bool sort_cid_flag)
 {
     // Erase self first, then, shuffle the index and
     // select other peers which in swarm.
@@ -65,7 +65,7 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, bool sort_cid_flag
         ExitError("\nMemory Allocation Fault in SetCandidates\n");
 
     // Shuffle the set of candidates to ensure the selection is random
-    Shuffle<int>(RSC::STD_PEERSELECT, candidates_, kCandSize);
+    Shuffle<int>(rsc, candidates_, kCandSize);
 
     // for cluster-based
     if (sort_cid_flag)
