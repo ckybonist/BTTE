@@ -203,6 +203,7 @@ void EventHandler::EC_5(Event const& ev)
                               ++next_event_idx_,
                               msg.src_pid,
                               time);
+        next_ev.admitted_reqs = ev.admitted_reqs;
 
         PushArrivalEvent(next_ev);
     }
@@ -211,6 +212,7 @@ void EventHandler::EC_5(Event const& ev)
     Peer const& client = g_peers.at(client_pid);
 
     // Generate Next Admit Events
+    // GenrAdmitEvents(ev);
     if (ev.admitted_reqs.size() != 0)
     {
         const float time = ev.time + client.get_trans_time();
