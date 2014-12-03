@@ -32,7 +32,13 @@ void RarestFirst::CountNumPeerOwnPiece()
         int counts = 0;
         for (auto& nei : neighbors)
         {
-            if (HavePiece(nei.first, *p_no)) ++counts;
+            // NOTE: Not only check weather having this piece, but also
+            // check the neighbor is in swarm
+            if (HavePiece(nei.first, *p_no) &&
+                    g_peers_reg_info[nei.first])
+            {
+                ++counts;
+            }
         }
         //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
         //{
