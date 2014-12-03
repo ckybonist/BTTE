@@ -74,6 +74,8 @@ NeighborMap ClusterBased::StartSelection(const int client_pid, const IntSet& in_
 
     selector_pid_ = client_pid;
 
+    std::cout << "PEER SELECTOR: " << selector_pid_ << std::endl;
+
     //Neighbor* neighbors = AllocNeighbors();
     NeighborMap neighbors;
 

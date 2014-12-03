@@ -153,7 +153,7 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     IntSet target_pieces = GetRarestPiecesSet();
 
-    std::cout << "\nResult of Rarest First Piece Selection:\n";
+    std::cout << "\nPeer #" << selector_pid_ << " Result of Rarest First:\n";
     for (const int no : target_pieces)
         std::cout << no << std::endl;
     std::cout << std::endl;

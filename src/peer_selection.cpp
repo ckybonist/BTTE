@@ -45,7 +45,24 @@ Neighbor* IPeerSelect::AllocNeighbors()
 IntSet IPeerSelect::ExcludeSelf(const IntSet& in_swarm_set)
 {
     IntSet cand_pid_set(in_swarm_set);
-    cand_pid_set.erase(cand_pid_set.find(selector_pid_));
+    IntSetIter sel = cand_pid_set.find(selector_pid_);
+
+    // DEBUG
+    std::cout << "ERASE PID of PEER SELECTOR: " << selector_pid_ << std::endl;
+    std::cout << "FOUND ERASE PID of PEER SELECTOR: " << *sel << std::endl;
+
+    bool found = false;
+    for (const int pid : in_swarm_set)
+    {
+        if (pid == selector_pid_)
+            found = true;
+    }
+    if (!found)
+    {
+        std::cout << "SELECTOR NOT FOUND" << std::endl;
+    }
+
+    cand_pid_set.erase(sel);
 
     return cand_pid_set;
 }
