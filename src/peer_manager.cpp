@@ -61,8 +61,6 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
         }
     }
 
-    IntSet on_req_peers = client.get_on_req_peer_set();
-
     // TODO 要去除掉正在要求過程中的目標節點
     return owners;
 }
@@ -72,7 +70,7 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     IntSet owners = GetPieceOwners(no, client_pid);
     IntSet on_req_peers = g_peers.at(client_pid).get_on_req_peer_set();
 
-    IntVec result(owners.size());
+    IntVec result(owners.size(), -1);
 
     // 從這個 piece 的持有者中再去除掉之前有送過要求但還沒拿到 piece 的持有者，
     // 也就是不要對同一個 neighbor 送超過一個要求。
@@ -83,12 +81,12 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     IntVec::iterator it = result.begin();
     for (; it != result.end(); ++it)
     {
-        if (*it == 0) break;
+        if (*it == -1) break;
     }
     result.erase(it, result.end());
 
     if (result.size() == 0)
-        std::cout << "Owner of all pieces are on request. Can't found possible request\n";
+        std::cout << "Owners of all pieces are on request. Can't found possible request\n";
     else
         for (const int pid : result)
             std::cout << "Non Req Piece Owner: " << pid << std::endl;

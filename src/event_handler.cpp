@@ -539,8 +539,10 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     for (auto const& msg : ev.uploaded_reqs)
     {
         Peer& peer = g_peers.at(msg.src_pid);
+
         // 得到 piece
         peer.download_piece(msg.piece_no);
+
         // 刪除每一個要求者中有關於"送要求接收者"的紀錄
         peer.erase_on_req_peer(client_pid);
     }
