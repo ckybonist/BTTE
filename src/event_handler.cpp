@@ -298,7 +298,7 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                                       const int next_index,
                                       const int pid)
 {
-    float next_etime = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));;
+    float next_etime = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));
 
     Event depart_event(Event::Type::DEPARTURE,
                        type_bt,
@@ -307,42 +307,6 @@ void EventHandler::PushDepartureEvent(const Event::Type4BT type_bt,
                        next_etime);
     event_list_.push_back(depart_event);
     event_list_.sort();  // 確保離開事件不會發生於再抵達事件之前
-}
-
-
-float EventHandler::ComputeArrivalEventTime(const Event& ev, const Event::Type4BT derived_type_bt)
-{
-    float time = ev.time;
-    Event::Type4BT dtbt = derived_type_bt;
-
-    if (dtbt == Event::PEERLIST_REQ_RECV ||
-        dtbt == Event::PEERLIST_GET)
-    {
-        time += g_kTrackerPGDelay;
-    }
-    else if (dtbt == Event::PEER_JOIN ||
-             dtbt == Event::PEER_LEAVE)
-    {
-        time += ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-    }
-    else if (dtbt == Event::PIECE_ADMIT)
-    {
-        const float trans_time = g_kPieceSize / g_peers.at(ev.pid).get_bandwidth().downlink;
-        time += trans_time;
-    }
-    else if (dtbt == Event::PIECE_REQ_RECV ||
-             dtbt == Event::PIECE_GET)
-    {
-        time += ev.pg_delay;
-    }
-
-    return time;
-}
-
-float EventHandler::ComputeDepartureEventTime()
-{
-    float time = current_time_ + ExpRand(mu_, Rand(RSC::EVENT_TIME));
-    return time;
 }
 
 void EventHandler::PushDerivedEvent(Event const& ev)

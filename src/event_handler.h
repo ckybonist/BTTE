@@ -35,11 +35,6 @@ class EventHandler
     void ProcessDeparture(Event const& ev);
     void ProcessEvent(Event& ev);
 
-    float ComputeArrivalEventTime(Event const& ev,
-                                  const Event::Type4BT derived_type_bt);
-    float ComputeDepartureEventTime();
-
-
   private:
     bool ReqTimeout(Event const& ev);   // TODO
     void SendPieceReqs(Event& ev);
