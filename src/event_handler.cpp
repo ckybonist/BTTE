@@ -122,6 +122,32 @@ void EventHandler::GenrPieceReqRecvEvents(Event const& ev)
     }
 }
 
+void EventHandler::GenrPieceAdmitEvent(Event const& ev, const bool is_first_admit)
+{
+    float time = 0.0;
+    if (is_first_admit)
+    {
+        // 因為跟前一個事件(Piece-Req-Recv) 的 peer 是一樣的，
+        // 所以不用任何傳輸時間 (pg_delay or trans_time)
+        time = ev.time;
+    }
+    else
+    {
+        Peer const& client = g_peers.at(ev.pid);
+        time = ev.time + client.get_trans_time();
+    }
+
+    // Generate Piece Admit Events
+    Event next_ev = Event(Event::Type::ARRIVAL,
+                          Event::PIECE_ADMIT,
+                          ++next_event_idx_,
+                          ev.pid,
+                          time);
+    next_ev.admitted_reqs = ev.admitted_reqs;
+
+    PushArrivalEvent(next_ev);
+}
+
 /* Create Derived Events of Peer-Join Event */
 void EventHandler::EC_1(Event const& ev)
 {
@@ -168,20 +194,7 @@ void EventHandler::EC_3(Event const& ev)
 void EventHandler::EC_4(Event const& ev)
 {
     assert(ev.type_bt == Event::PIECE_REQ_RECV);
-
-    // 因為跟前一個事件(Piece-Req-Recv) 的 peer 是一樣的，
-    // 所以不用任何傳輸時間 (pg_delay or trans_time)
-    const float time = ev.time;
-
-    // Generate Piece Admit Events
-    Event next_ev = Event(Event::Type::ARRIVAL,
-                          Event::PIECE_ADMIT,
-                          ++next_event_idx_,
-                          ev.pid,
-                          time);
-    next_ev.admitted_reqs = ev.admitted_reqs;
-
-    PushArrivalEvent(next_ev);
+    GenrPieceAdmitEvent(ev, true);
 }
 
 /* Create Derived Events of Piece-Admit Event */
@@ -203,7 +216,6 @@ void EventHandler::EC_5(Event const& ev)
                               ++next_event_idx_,
                               msg.src_pid,
                               time);
-        next_ev.admitted_reqs = ev.admitted_reqs;
 
         PushArrivalEvent(next_ev);
     }
@@ -212,18 +224,9 @@ void EventHandler::EC_5(Event const& ev)
     Peer const& client = g_peers.at(client_pid);
 
     // Generate Next Admit Events
-    // GenrAdmitEvents(ev);
     if (ev.admitted_reqs.size() != 0)
     {
-        const float time = ev.time + client.get_trans_time();
-
-        Event next_ev = Event(Event::Type::ARRIVAL,
-                              Event::PIECE_ADMIT,
-                              ++next_event_idx_,
-                              ev.pid,
-                              time);
-
-        PushArrivalEvent(next_ev);
+        GenrPieceAdmitEvent(ev, false);
     }
 }
 

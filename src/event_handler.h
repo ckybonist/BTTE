@@ -50,6 +50,9 @@ class EventHandler
 
     void GetNewPeerList(Event const& ev);
     void GenrPieceReqRecvEvents(Event const& ev);
+    // is_first_admit: 代表如果當前所 admit 的要求是最新的就為 true, 反之，
+    // 如果要求是之前 wating 的就為 false。這牽涉到 event 到達時間的計算。
+    void GenrPieceAdmitEvent(Event const& ev, const bool is_first_admit);
     void EC_3(Event const& ev);
 
     void EC_4(Event const& ev);
