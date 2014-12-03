@@ -19,7 +19,7 @@ class EventHandler
 
   private:
     void MapEventFuncs();
-    void MapEventCreators();
+    void MapEventFlow();
     void MapFlowDownEventDependencies();
 
     void PushInitEvent();
@@ -77,7 +77,7 @@ class EventHandler
     typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
 
     FuncMap_1 event_func_map_;
-    FuncMap_2 event_creator_map_;  // dv : derived event
+    FuncMap_2 event_flow_map_;  // dv : derived event
     std::map<Event::Type4BT, Event::Type4BT> event_map_;
 
     std::list<Event> event_list_;

@@ -39,7 +39,7 @@ EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
 
     MapEventFuncs();
     //MapFlowDownEventDependencies();
-    MapEventCreators();
+    MapEventFlow();
 }
 
 EventHandler::~EventHandler()
@@ -59,16 +59,16 @@ void EventHandler::MapEventFuncs()
     event_func_map_[Event::PEER_LEAVE] = &EventHandler::PeerLeaveEvent;
 }
 
-void EventHandler::MapEventCreators()
+void EventHandler::MapEventFlow()
 {
     /* Map Functions */
-    event_creator_map_[Event::PEER_JOIN]         = &EventHandler::EC_1;
-    event_creator_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::EC_2;
-    event_creator_map_[Event::PEERLIST_GET]      = &EventHandler::EC_3;
-    event_creator_map_[Event::PIECE_REQ_RECV]    = &EventHandler::EC_4;
-    event_creator_map_[Event::PIECE_ADMIT]       = &EventHandler::EC_5;
-    event_creator_map_[Event::PIECE_GET]         = &EventHandler::EC_6;
-    event_creator_map_[Event::COMPLETED]         = &EventHandler::EC_7;
+    event_flow_map_[Event::PEER_JOIN]         = &EventHandler::EC_1;
+    event_flow_map_[Event::PEERLIST_REQ_RECV] = &EventHandler::EC_2;
+    event_flow_map_[Event::PEERLIST_GET]      = &EventHandler::EC_3;
+    event_flow_map_[Event::PIECE_REQ_RECV]    = &EventHandler::EC_4;
+    event_flow_map_[Event::PIECE_ADMIT]       = &EventHandler::EC_5;
+    event_flow_map_[Event::PIECE_GET]         = &EventHandler::EC_6;
+    event_flow_map_[Event::COMPLETED]         = &EventHandler::EC_7;
 }
 
 void EventHandler::MapFlowDownEventDependencies()
@@ -341,7 +341,7 @@ float EventHandler::ComputeDepartureEventTime()
 void EventHandler::PushDerivedEvent(Event const& ev)
 {
     // 根據此次事件，衍生接下來的事件
-    event_creator_map_[ev.type_bt](*this, ev);
+    event_flow_map_[ev.type_bt](*this, ev);
 
     /* Old Version */
     //int pid = ev.pid;
