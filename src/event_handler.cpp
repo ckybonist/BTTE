@@ -479,7 +479,6 @@ void EventHandler::SendPieceReqs(Event& ev)
 
 void EventHandler::PeerJoinEvent(Event& ev)
 {
-    //pm_->NewPeer(ev.pid, ev.time);
     pm_->NewPeer(ev.pid);
     g_peers.at(ev.pid).set_join_time(current_time_);
     pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
