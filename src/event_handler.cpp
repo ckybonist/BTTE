@@ -590,6 +590,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 
 void EventHandler::ProcessEvent(Event& ev)
 {
+    // 如果 peer 已經離開，就不去處理其所屬的事件
     const bool in_swarm = g_peers_reg_info[ev.pid];
     if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
 
