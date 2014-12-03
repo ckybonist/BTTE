@@ -590,6 +590,11 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 
 void EventHandler::ProcessEvent(Event& ev)
 {
+    const bool in_swarm = g_peers_reg_info[ev.pid];
+    if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
+
+    EventInfo(ev, current_time_);  // DEBUG
+
     if (ev.type == Event::Type::ARRIVAL)
         ProcessArrival(ev);
     else
@@ -607,8 +612,6 @@ void EventHandler::StartRoutine()
         Event head = event_list_.front();
 
         event_list_.pop_front();
-
-        EventInfo(head, current_time_);  // DEBUG
 
         ProcessEvent(head);
     }
