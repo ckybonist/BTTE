@@ -124,12 +124,13 @@ IntSet RarestFirst::GetRarestPiecesSet() const
 
                 dup_count_pieces.insert(no);
 
-                if (num_target_ == 2)
+                if (num_target_ == 2 || i == num_target_ - 1)
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
                 }
+
             }
             else
             {
