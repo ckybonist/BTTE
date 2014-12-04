@@ -77,6 +77,7 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     for (PieceMsg const& msg : send_msg_buf)
     {
         on_req_peers.insert(msg.dest_pid);
+        std::cout << "On req peer: " << msg.dest_pid << std::endl;
     }
 
     // 從這個 piece 的持有者中再去除掉之前有送過要求但還沒拿到 piece 的持有者，
@@ -95,11 +96,8 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     result.erase(it, result.end());
 
     // DEBUG
-    if (result.size() == 0)
-        std::cout << "Owners of all pieces are on request. Can't found possible request\n";
-    else
-        for (const int pid : result)
-            std::cout << "Non Req Piece Owner: " << pid << std::endl;
+    for (const int pid : result)
+        std::cout << "Non Req Piece Owner: " << pid << std::endl;
 
     return result;
 }
@@ -374,13 +372,6 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
 
-    // TEST (之後會放到別的函式）: Remove pieces which on request
-    MsgList send_msg_buf = g_peers.at(client_pid).get_send_msg_buf();
-    for (PieceMsg const& msg : send_msg_buf)
-    {
-        target_pieces.erase(msg.piece_no);
-    }
-
     MsgList req_msgs;
     if (target_pieces.size() == 0)
         std::cout << "\nNO TARGET PIECES CAN REQUEST\n";
@@ -545,8 +536,8 @@ void PeerManager::InitLeeches()
         NewPeerData(Peer::LEECH, p, prob_leech);
     }
 
-    for (size_t p = start; p < end; p++)
-        AllotNeighbors(p);
+    //for (size_t p = start; p < end; p++)
+    //    AllotNeighbors(p);
 
     std::cout << "============================\n";
 }

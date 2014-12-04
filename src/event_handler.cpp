@@ -20,6 +20,7 @@ typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
 void EventInfo(Event const& head, float cur_sys_time);
+size_t GetAboriginSize();
 
 }
 
@@ -280,7 +281,8 @@ void EventHandler::PushInitEvent()
 {
     const size_t NUM_SEED = g_btte_args.get_num_seed();
     const size_t NUM_LEECH = g_btte_args.get_num_leech();
-    const int initial_pid = NUM_SEED + NUM_LEECH;
+    //const int initial_pid = NUM_SEED + NUM_LEECH;
+    const int initial_pid = NUM_SEED;
     const int initial_idx = 1;
     const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
@@ -320,48 +322,6 @@ void EventHandler::PushDerivedEvent(Event const& ev)
 {
     // 根據此次事件，衍生接下來的事件
     event_flow_map_[ev.type_bt](*this, ev);
-
-    /* Old Version */
-    //int pid = ev.pid;
-    //Event::Type base_etype = Event::Type::ARRIVAL;
-    //Event::Type4BT derived_tbt = event_map_[ev.type_bt];  // tbt == type_bt
-    //float time = ComputeArrivalEventTime(ev, derived_tbt);
-
-    //Event next_event = Event(base_etype, derived_tbt, ++next_event_idx_, pid, time);
-    //PushArrivalEvent(next_event);
-
-    //switch (ev.type_bt)
-    //{
-    //    case Event::PEERLIST_GET:  // generate initial piece-req events
-    //        for (const PieceMsg& msg : ev.req_msgs)
-    //        {
-    //            next_event.client_pid = msg.src_pid;
-    //            next_event.pid = msg.dest_pid;
-    //            PushArrivalEvent(next_event);
-    //            // prepare another request for timeout situation
-    //            //derived_tbt = Event::PIECE_REQ_RECV;
-    //            //time += kTimeout_;
-    //        }
-    //        return;  // already generate derived events
-    //        break;
-
-    //    case Event::PIECE_REQ_RECV:
-    //        next_event.client_pid = ev.client_pid;
-    //        break;
-
-    //    case Event::PIECE_ADMIT:
-    //        next_event.pid = ev.client_pid;
-    //        break;
-
-    //    case Event::PIECE_GET:  // if get one piece, generate another piece-req event
-    //        if (!g_peers.at(pid).get_type() == Peer::SEED)
-    //            derived_tbt = Event::PIECE_REQ_RECV;
-    //        break;
-
-    //    default:
-    //        break;
-    //}
-    //PushArrivalEvent(next_event);
 }
 
 void EventHandler::PushPeerJoinEvent(Event const& ev)
@@ -370,18 +330,34 @@ void EventHandler::PushPeerJoinEvent(Event const& ev)
     //  (因為節點加入順序是按照陣列索引）, 直到數量滿足 NUM_PEER
     const int next_join_pid = ev.pid + 1;
     const size_t NUM_PEER = g_btte_args.get_num_peer();
+    const size_t kAborigin = GetAboriginSize();
 
-    if ((size_t)next_join_pid < NUM_PEER &&
-            !g_peers_reg_info[next_join_pid])
+    //if ((size_t)next_join_pid < NUM_PEER &&
+    //            !g_peers_reg_info[next_join_pid])
+    //{
+//        float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+//        Event event = Event(Event::Type::ARRIVAL,
+//                            Event::PEER_JOIN,
+//                            ++next_event_idx_,
+//                            next_join_pid,
+//                            time);
+//        PushArrivalEvent(event);
+    //}
+    //
+    if ((size_t)next_join_pid < NUM_PEER)
     {
-        //float time = ComputeArrivalEventTime(ev, Event::PEER_JOIN);
-        float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-        Event event = Event(Event::Type::ARRIVAL,
-                            Event::PEER_JOIN,
-                            ++next_event_idx_,
-                            next_join_pid,
-                            time);
-        PushArrivalEvent(event);
+        if (next_join_pid < kAborigin ||
+                !g_peers_reg_info[next_join_pid])
+        {
+            float time = ev.time + ExpRand(lambda_,
+                                           Rand(RSC::EVENT_TIME));
+            Event event = Event(Event::Type::ARRIVAL,
+                                Event::PEER_JOIN,
+                                ++next_event_idx_,
+                                next_join_pid,
+                                time);
+            PushArrivalEvent(event);
+        }
     }
 }
 
@@ -392,14 +368,14 @@ void EventHandler::ProcessArrival(Event& ev)
     /* Timeout 機制 */
     // 如果 request event 已經 timeout, 直接忽略(跳出函式)
     //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout)
-    {
+    //{
         // 刪除要求者中 "正在要求中的 peers (on_req_peers)"
         // 這個紀錄裡面的 接收者ID (ev.pid)
         // 這樣避免在重新尋找這個 piece 的目標節點時，找不到當前的接收者
         //g_peers.at(ev.client_pid).erase_on_req_peer(ev.pid);
         //
         //return;
-    }
+    //}
 
     system_.push_back(ev);
 
@@ -479,9 +455,14 @@ void EventHandler::SendPieceReqs(Event& ev)
 
 void EventHandler::PeerJoinEvent(Event& ev)
 {
-    pm_->NewPeer(ev.pid);
-    g_peers.at(ev.pid).set_join_time(current_time_);
-    pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
+    const size_t kAborigin = GetAboriginSize();
+
+    if (ev.pid >= kAborigin)  // 不是 leecher 就要新增節點資料
+    {
+        pm_->NewPeer(ev.pid);
+        g_peers.at(ev.pid).set_join_time(current_time_);
+        pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
+    }
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& ev)
@@ -616,6 +597,14 @@ void EventHandler::StartRoutine()
 
 namespace
 {
+
+size_t GetAboriginSize()
+{
+    const size_t NUM_SEED = g_btte_args.get_num_seed();
+    const size_t NUM_LEECH = g_btte_args.get_num_leech();
+    const size_t kAborigin = NUM_SEED + NUM_LEECH;
+    return kAborigin;
+}
 
 void Event2Str(TBTmapStr& tbt2str)
 {
