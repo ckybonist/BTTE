@@ -565,12 +565,6 @@ void EventHandler::PieceGetEvent(Event& ev)
         // download incomplete, so execute Piece Selection
         SendPieceReqs(ev);
     }
-
-    std::cout << "Piece Get!, Print piece status of peer #" << ev.pid << std::endl;
-    bool const* pieces = client.get_piece_info();
-    for (int i = 0; i < g_btte_args.get_num_piece(); ++i)
-        std::cout << pieces[i] << std::endl;
-    pieces = nullptr;
 }
 
 void EventHandler::CompletedEvent(Event& ev)
