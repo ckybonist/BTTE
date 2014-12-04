@@ -497,30 +497,6 @@ void EventHandler::PeerListGetEvent(Event& ev)
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
     std::cout << "Peer #" << ev.pid << " execute Piece Selection" << "\n";
     SendPieceReqs(ev);
-
-    // DEBUG of Choking
-    //std::set<int> dest_set;
-    //for (auto const& msg : ev.req_msgs)
-    //    dest_set.insert(msg.dest_pid);
-    //std::list<std::list<PieceMsg>> all_admit_msgs;
-    //for (const int pid : dest_set)
-    //{
-    //    all_admit_msgs.push_back(Choking(pid));
-    //}
-
-    //std::cout << "\n=========================\n";
-    //std::cout << "\nAdmit Messages :\n";
-    //for (auto const& msg_list : all_admit_msgs)
-    //{
-    //    for (auto const& msg : msg_list)
-    //    {
-    //        std::cout << "SRC: " << msg.src_pid << std::endl;
-    //        std::cout << "DEST: " << msg.dest_pid << std::endl;
-    //        std::cout << "PIECE-NO: " << msg.piece_no << std::endl;
-    //        std::cout << "SRC UPLOAD BANDWIDTH: " << msg.src_up_bw << std::endl;
-    //        std::cout << "--------------------------------\n\n";
-    //    }
-    //}
 }
 
 void EventHandler::PieceReqRecvEvent(Event& ev)
@@ -546,6 +522,11 @@ void EventHandler::PieceAdmitEvent(Event& ev)
         // 得到 piece
         peer.download_piece(msg.piece_no);
 
+        // DEBUG
+        std::cout << "Piece #" << msg.piece_no << std::endl;
+        std::cout << "Peer #" << client_pid
+                  << " send to peer #" << msg.src_pid << std::endl;
+
         // 刪除每一個要求者中有關於"送出去的要求"的紀錄
         peer.remove_send_msg(msg);
     }
@@ -559,24 +540,20 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     std::cout << std::flush;
     std::cout << "\nAdmit Msg List:";
     std::cout << "\nSize of Admit Msg List: " << ev.admitted_reqs.size() << std::endl;
-
-    //if (ev.admitted_reqs.size() != 0)
-    //{
-    //    for (auto const& msg : ev.admitted_reqs)
-    //    {
-    //        std::cout << "SRC: " << msg.src_pid << std::endl;
-    //        std::cout << "DEST: " << msg.dest_pid << std::endl;
-    //        std::cout << "PIECE-NO: " << msg.piece_no << std::endl;
-    //        std::cout << "SRC UPLOAD BANDWIDTH: " << msg.src_up_bw << std::endl;
-    //        std::cout << "--------------------------------\n\n";
-    //    }
-    //}
 }
 
 void EventHandler::PieceGetEvent(Event& ev)
 {
     // Check client is complete
     Peer& client = g_peers.at(ev.pid);
+
+    // DEBUG
+    std::cout << "\nPiece Get, print piece status:\n";
+    bool const* pieces = client.get_piece_info();
+    for (int i = 0; i < g_btte_args.get_num_piece(); ++i)
+        std::cout << pieces[i] << std::endl;
+    pieces = nullptr;
+
     if (pm_->CheckAllPiecesGet(ev.pid))
     {
         std::cout << "DETECT All PIECES GET" << std::endl;
