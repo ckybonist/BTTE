@@ -30,7 +30,6 @@ void RarestFirst::CountNumPeerOwnPiece()
     for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
     {
         int counts = 0;
-        std::cout << "\nOwners of piece #" << *p_no << std::endl;
         for (auto& nei : neighbors)
         {
             // NOTE: Not only check weather having this piece, but also
@@ -38,7 +37,6 @@ void RarestFirst::CountNumPeerOwnPiece()
             if (HavePiece(nei.first, *p_no) &&
                     g_peers_reg_info[nei.first])
             {
-                std::cout << nei.first << std::endl;
                 ++counts;
             }
         }
@@ -82,15 +80,6 @@ void RarestFirst::SortByPieceCounts()
           num_target_,
           sizeof(PeerOwnCounts),
           cmp);
-
-    // debug info
-    //std::cout << "\nPiece Count Info (piece-no, counts) :\n";
-    //for (size_t i = 0; i < num_target_; ++i)
-    //{
-    //    std::cout << "(" << counts_info_[i].piece_no << ",   "
-    //              << counts_info_[i].counts << ")\n";
-    //}
-    //std::cout << std::endl;
 }
 
 IntSet RarestFirst::GetRarestPiecesSet() const
@@ -177,11 +166,6 @@ IntSet RarestFirst::StartSelection(const int client_pid)
     SortByPieceCounts();
 
     IntSet target_pieces = GetRarestPiecesSet();
-
-    std::cout << "\nPeer #" << selector_pid_ << " Result of Rarest First:\n";
-    for (const int no : target_pieces)
-        std::cout << no << std::endl;
-    std::cout << std::endl;
 
     RefreshInfo();
 

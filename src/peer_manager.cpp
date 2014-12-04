@@ -50,7 +50,6 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
 {
     IntSet owners;
     Peer const& client = g_peers.at(client_pid);
-    std::cout << "Original owners of piece #" << piece_no << std::endl;
     for (auto const& nei : client.get_neighbors())
     {
         const int pid = nei.first;
@@ -59,7 +58,6 @@ IntSet GetPieceOwners(const int piece_no, const int client_pid)
         if (HavePiece(pid, piece_no) &&
                     g_peers_reg_info[pid])
         {
-            std::cout << pid << std::endl;
             owners.insert(pid);
         }
     }
@@ -77,7 +75,6 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
     for (PieceMsg const& msg : send_msg_buf)
     {
         on_req_peers.insert(msg.dest_pid);
-        std::cout << "On req peer: " << msg.dest_pid << std::endl;
     }
 
     // 從這個 piece 的持有者中再去除掉之前有送過要求但還沒拿到 piece 的持有者，
@@ -94,10 +91,6 @@ IntVec GetNonReqPieceOwners(const int no, const int client_pid)
         if (*it == -1) break;
     }
     result.erase(it, result.end());
-
-    // DEBUG
-    for (const int pid : result)
-        std::cout << "Non Req Piece Owner: " << pid << std::endl;
 
     return result;
 }
@@ -373,21 +366,21 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
 
     MsgList req_msgs;
-    if (target_pieces.size() == 0)
-        std::cout << "\nNO TARGET PIECES CAN REQUEST\n";
-    else
-        req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
+    //if (target_pieces.size() == 0)
+    //    std::cout << "\nNO TARGET PIECES CAN REQUEST\n";
+    //else
+    req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     // DEBUG
-    for (PieceMsg const& msg : req_msgs)
-    {
-        // debug
-        std::cout << "Piece Reqest Msg:" << std::endl;
-        std::cout << "   src: " << msg.src_pid << std::endl;
-        std::cout << "   dest: " << msg.dest_pid << std::endl;
-        std::cout << "   wanted piece: " << msg.piece_no << std::endl;
-        std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
-    }
+    //for (PieceMsg const& msg : req_msgs)
+    //{
+    //    // debug
+    //    std::cout << "Piece Reqest Msg:" << std::endl;
+    //    std::cout << "   src: " << msg.src_pid << std::endl;
+    //    std::cout << "   dest: " << msg.dest_pid << std::endl;
+    //    std::cout << "   wanted piece: " << msg.piece_no << std::endl;
+    //    std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
+    //}
 
     return req_msgs;
 }
