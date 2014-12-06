@@ -9,12 +9,12 @@ namespace btte_piece_selection
 
 class RandomFirstPiece : public IPieceSelect
 {
-public:
-    RandomFirstPiece(Args args) : IPieceSelect(args) {};
+  public:
+    RandomFirstPiece() : IPieceSelect() {};
 
-private:
-    PRMVec StartSelection(const int self_pid) override;
-    PieceReqMsg CreateReqMsg(const int target_piece_no);  // for Random First Piece
+  private:
+    IntSet StartSelection(const int client_pid) override;
+    IntSet GetTargetPieces(const size_t num_target) const;
     void RefreshInfo();
 };
 

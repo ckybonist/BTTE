@@ -10,7 +10,7 @@
 
 class Convert
 {
-public:
+  public:
     template <typename T>
     static std::string T_to_str(T const& val)
     {

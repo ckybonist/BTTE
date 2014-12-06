@@ -7,15 +7,17 @@
 
 namespace
 {
-    const long long kInitSeed = 377003613;
 
-    void RandForInternal(const RSC& rsc)
-    {
-        const int iRSC = static_cast<int>(rsc);
+const long long kInitSeed = 377003613;
 
-        /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
-        g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
-    }
+void RandForInternal(const RSC& rsc)
+{
+    const int iRSC = static_cast<int>(rsc);
+
+    /*  Formula for generating rand num : X(n-1) * 7^5 % (2^31 - 1) */
+    g_rand_grp[iRSC] = 16807 * g_rand_grp[iRSC] % RAND_MAX;
+}
+
 }
 
 
@@ -33,7 +35,7 @@ namespace uniformrand {
 
 const int kInterval = 1000000;
 
-long long Rand(const RSC& rsc)
+long long Rand(const RSC rsc)
 {
     const int iRSC = static_cast<int>(rsc);
 

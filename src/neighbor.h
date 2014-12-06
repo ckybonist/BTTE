@@ -8,15 +8,15 @@
  *
  * NOTE: Spliting the range to 4 class-intervals so that it could be use for determining
  *       that peers are in same cluster or not (CLUSTER-BASED PEER SELECTION algorithm).
- * * */
+ * * * * * * */
 struct Neighbor
 {
     Neighbor();
-    Neighbor(const int id, const float pg_delay);
+    //Neighbor(const int id, const float pg_delay);
+    Neighbor(const float pg_delay);
 
-    int id;
+    //int id;
     float pg_delay;
-    bool exist;
 };
 
 #endif // for #ifndef _NEIGHBOR_H

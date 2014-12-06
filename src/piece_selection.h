@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <set>
 
 #include "args.h"
@@ -24,21 +25,19 @@ typedef enum class TypePieceSelect
     USER_DEFINED_2,
 } PieceSelect_T;
 
-typedef std::vector<PieceReqMsg> PRMVec;
-
 class IPieceSelect
 {
-public:
-    IPieceSelect(Args args);
+  public:
+    IPieceSelect();
     virtual ~IPieceSelect();
-    virtual PRMVec StartSelection(const int self_pid) = 0;
+    virtual IntSet StartSelection(const int client_pid) = 0;
 
-protected:
+  protected:
     void CheckNeighbors();
-    void SetTargetPieces();
+    void CollectNoDownloadPieces();
+    bool HavePiece(const int pid, const int piece_no) const;
 
-    IntSet targets_set_;
-    Args args_;
+    IntSet no_download_pieces_set_;
     int selector_pid_;
 };
 

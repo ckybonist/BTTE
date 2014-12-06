@@ -27,6 +27,8 @@ bin/*
 
 # Ctags
 tags
+<<<<<<< HEAD
+=======
 
 # CScope
 cscope.*
