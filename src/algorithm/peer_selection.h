@@ -3,10 +3,11 @@
 
 #include <set>
 
-#include "args.h"
-#include "peer.h"
-#include "random.h"
-#include "neighbor.h"
+#include "../args.h"
+#include "../error.h"
+#include "../peer.h"
+#include "../random.h"
+#include "../neighbor.h"
 
 
 namespace btte_peer_selection
@@ -23,17 +24,15 @@ typedef enum class TypePeerSelect
 } PeerSelect_T;
 
 
-class IPeerSelect
+class IPeerSelection
 {
   public:
-    IPeerSelect();
-    virtual ~IPeerSelect();  // ensuring destructor of derived class will be invoked
-    //virtual Neighbor* StartSelection(const int client_pid, const IntSet& in_swarm_set) = 0;
+    IPeerSelection();
+    virtual ~IPeerSelection();  // ensuring destructor of derived class will be invoked
     virtual NeighborMap StartSelection(const int client_pid, const IntSet& in_swarm_set) = 0;
 
   protected:
     Neighbor* AllocNeighbors();
-    //void DebugInfo(NeighborMap* neighbors) const;
     void DebugInfo(NeighborMap const& neighbors, const int client_pid) const;
 
     IntSet ExcludeSelf(const IntSet& in_swarm_set);

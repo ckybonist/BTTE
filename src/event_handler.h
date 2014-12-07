@@ -35,21 +35,20 @@ class EventHandler
     void ProcessDeparture(Event const& ev);
     void ProcessEvent(Event& ev);
 
-  private:
     bool ReqTimeout(Event const& ev);   // TODO
     void SendPieceReqs(Event& ev);
 
     /* Event Creators (EC) */
-    void EC_1(Event const& ev);
-    void EC_2(Event const& ev);
-
     void GetNewPeerList(Event const& ev);
     void GenrPieceReqRecvEvents(Event const& ev);
+
     // is_first_admit: 代表如果當前所 admit 的要求是最新的就為 true, 反之，
     // 如果要求是之前 wating 的就為 false。這牽涉到 event 到達時間的計算。
     void GenrPieceAdmitEvent(Event const& ev, const bool is_first_admit);
-    void EC_3(Event const& ev);
 
+    void EC_1(Event const& ev);
+    void EC_2(Event const& ev);
+    void EC_3(Event const& ev);
     void EC_4(Event const& ev);
     void EC_5(Event const& ev);
     void EC_6(Event const& ev);
@@ -66,11 +65,8 @@ class EventHandler
     void CompletedEvent(Event& ev);
     void PeerLeaveEvent(Event& ev);
 
-
-  private:
-    //typedef void (EventHandler::*Fptr)(Event&);
-    typedef std::function<void(EventHandler&, Event&)> FuncProto_1;  // function to process event
-    typedef std::function<void(EventHandler&, Event const&)> FuncProto_2;  // function to process event
+    typedef std::function<void(EventHandler&, Event&)> FuncProto_1;
+    typedef std::function<void(EventHandler&, Event const&)> FuncProto_2;
     typedef std::map<Event::Type4BT, FuncProto_1> FuncMap_1;
     typedef std::map<Event::Type4BT, FuncProto_2> FuncMap_2;
 
@@ -81,8 +77,7 @@ class EventHandler
     std::list<Event> event_list_;
     std::list<Event> system_;
 
-    // external
-    PeerManager* pm_;
+    int next_event_idx_;
 
     // rate
     float lambda_;
@@ -92,10 +87,11 @@ class EventHandler
     float total_sys_size_;
     float current_time_;
     float waiting_time_;
-
-    int next_event_idx_;
-
     static const float kTimeout_;
+
+    // external
+    PeerManager* pm_;
+
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

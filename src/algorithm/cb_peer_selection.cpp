@@ -1,7 +1,6 @@
-#include "error.h"
-#include "pg_delay.h"
-#include "cluster_info.h"
-#include "CB_peer_selection.h"
+#include "../pg_delay.h"
+#include "../cluster_info.h"
+#include "cb_peer_selection.h"
 
 
 using namespace uniformrand;
@@ -10,7 +9,8 @@ using namespace uniformrand;
 namespace btte_peer_selection
 {
 
-float ClusterBased::ComputePGDelayByCluster(const int client_cid, const int cand_cid)
+float ClusterBasedRule::ComputePGDelayByCluster(const int client_cid,
+                                                const int cand_cid)
 {
     const float min_delay = 0.01;
     const float same_cid_bound = 1.00 / static_cast<float>(g_kNumClusters);
@@ -34,8 +34,7 @@ float ClusterBased::ComputePGDelayByCluster(const int client_cid, const int cand
     return pg_delay;
 }
 
-//void ClusterBased::AssignNeighbors(Neighbor* const neighbors,
-void ClusterBased::AssignNeighbors(NeighborMap& neighbors,
+void ClusterBasedRule::AssignNeighbors(NeighborMap& neighbors,
                                    const size_t cand_size,
                                    const int client_cid)
 {
@@ -51,30 +50,23 @@ void ClusterBased::AssignNeighbors(NeighborMap& neighbors,
 
         Neighbor nei_info = Neighbor(pg_delay);
         neighbors.insert(std::pair<int, Neighbor>(pid, nei_info));
-        //const int cand_pid = candidates_[i];
-        //const int cand_cid = g_peers.at(cand_pid).cid;
-        //neighbors[i].id = cand_pid;
-        //neighbors[i].exist = true;
-        //float pg_delay = ComputePGDelayByCluster(self_cid, cand_cid);
-        //neighbors[i].pg_delay = pg_delay;
         g_peers.at(pid).incr_neighbor_counts(1);
     }
 }
 
-void ClusterBased::RefreshInfo()
+void ClusterBasedRule::RefreshInfo()
 {
     delete [] candidates_;
     candidates_ = nullptr;
 }
 
-//Neighbor* ClusterBased::StartSelection(const int client_pid, const IntSet& in_swarm_set)
-NeighborMap ClusterBased::StartSelection(const int client_pid, const IntSet& in_swarm_set)
+NeighborMap ClusterBasedRule::StartSelection(const int client_pid,
+                                             const IntSet& in_swarm_set)
 {
     g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
 
     selector_pid_ = client_pid;
 
-    //Neighbor* neighbors = AllocNeighbors();
     NeighborMap neighbors;
 
     // Set parameter of sort_cid_flag to true, in order to get

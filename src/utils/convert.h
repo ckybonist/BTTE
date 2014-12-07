@@ -2,11 +2,10 @@
 #define _CONVERT_H
 
 #include <iostream>
-// #include <string>
 #include <sstream>
 #include <typeinfo>
 
-#include "error.h"
+#include "../error.h"
 
 class Convert
 {

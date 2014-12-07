@@ -1,5 +1,4 @@
 #include "error.h"
-#include "algo.h"
 #include "random.h"
 
 #include "peer.h"
@@ -7,11 +6,12 @@
 #include "peer_level.h"
 #include "cluster_info.h"
 
-#include "STD_peer_selection.h"
-#include "LB_peer_selection.h"
-#include "CB_peer_selection.h"
-#include "RFP_piece_selection.h"
-#include "RF_piece_selection.h"
+#include "algorithm/general_algo.h"
+#include "algorithm/std_peer_selection.h"
+#include "algorithm/lb_peer_selection.h"
+#include "algorithm/cb_peer_selection.h"
+#include "algorithm/rfp_piece_selection.h"
+#include "algorithm/rf_piece_selection.h"
 
 #include "peer_manager.h"
 
@@ -102,7 +102,6 @@ std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int c
     // 蒐集所有 piece 的持有者（已過濾）
     for (const int no : target_pieces)
         piece_owner_map[no] = GetNonReqPieceOwners(no, client_pid);
-        //piece_owner_map[no] = GetPieceOwners(no, client_pid);
 
     return piece_owner_map;
 }
@@ -164,19 +163,19 @@ void PeerManager::InitAbstractObj()
     {
         case PeerSelect_T::STANDARD:
             obj_peerselect_ =
-                static_cast<IPeerSelect*>(new Standard());
+                static_cast<IPeerSelection*>(new StandardRule());
             std::cout << "\n----Using Standard Peer Selection----\n\n";
             break;
 
         case PeerSelect_T::LOAD_BALANCING:
             obj_peerselect_ =
-                static_cast<IPeerSelect*>(new LoadBalancing());
+                static_cast<IPeerSelection*>(new LoadBalancingRule());
             std::cout << "\n----Using Load Balancing Peer Selection----\n\n";
             break;
 
         case PeerSelect_T::CLUSTER_BASED:
             obj_peerselect_ =
-                static_cast<IPeerSelect*>(new ClusterBased());
+                static_cast<IPeerSelection*>(new ClusterBasedRule());
             std::cout << "\n----Using Cluster Based Peer Selection----\n\n";
             break;
 
@@ -187,13 +186,13 @@ void PeerManager::InitAbstractObj()
     }
 
     //const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(args_->TYPE_PIECESELECT);
-    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(0);  // test rarest first, default is random-first-piece
+    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(0);  // rarest_first
     switch (type_piece_select)
     {
         case PieceSelect_T::BUILTIN:
             //obj_pieceselect_ = static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
             //std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
-            obj_pieceselect_ = static_cast<IPieceSelect*>(new RarestFirst());
+            obj_pieceselect_ = static_cast<IPieceSelection*>(new RarestFirst());
             std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
             break;
         case PieceSelect_T::USER_DEFINED_1:
@@ -347,7 +346,6 @@ bool PeerManager::CheckAllPiecesGet(const int pid) const
 
 void PeerManager::AllotNeighbors(const int pid) const
 {
-    //Neighbor* neighbors = obj_peerselect_->StartSelection(pid, in_swarm_set_);
     const size_t NUM_PEER = g_btte_args.get_num_peer();
     IntSet in_swarm_set;
 
@@ -427,7 +425,7 @@ void PeerManager::CreatePeers()
     }
     std::cout << "\n\n\n";
 
-    // Allocate memroy space for all peers (array)
+    // allocate memroy for peers
     //AllocPeersSpace();
     InitSeeds();
     InitLeeches();
@@ -528,9 +526,6 @@ void PeerManager::InitLeeches()
         double prob_leech = Roll<double>(RSC::PROB_LEECH, 0.1, 0.9);
         NewPeerData(Peer::LEECH, p, prob_leech);
     }
-
-    //for (size_t p = start; p < end; p++)
-    //    AllotNeighbors(p);
 
     std::cout << "============================\n";
 }

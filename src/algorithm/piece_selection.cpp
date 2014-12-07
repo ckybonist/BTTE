@@ -3,15 +3,15 @@
 namespace btte_piece_selection
 {
 
-IPieceSelect::IPieceSelect()
+IPieceSelection::IPieceSelection()
 {
 }
 
-IPieceSelect::~IPieceSelect()
+IPieceSelection::~IPieceSelection()
 {
 }
 
-void IPieceSelect::CheckNeighbors()
+void IPieceSelection::CheckNeighbors()
 {
     //if (nullptr == g_peers.at(selector_pid_).neighbors)
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
@@ -22,7 +22,7 @@ void IPieceSelect::CheckNeighbors()
     }
 }
 
-void IPieceSelect::CollectNoDownloadPieces()
+void IPieceSelection::CollectNoDownloadPieces()
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
 
@@ -34,7 +34,7 @@ void IPieceSelect::CollectNoDownloadPieces()
     }
 }
 
-bool IPieceSelect::HavePiece(const int pid, const int piece_no) const
+bool IPieceSelection::HavePiece(const int pid, const int piece_no) const
 {
     bool have = g_peers.at(pid).get_nth_piece_info(piece_no);
     return have;

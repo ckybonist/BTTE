@@ -6,7 +6,8 @@
 #include "piece.h"
 #include "pg_delay.h"
 #include "peer_level.h"
-#include "choking.h"
+#include "algorithm/choking.h"
+
 #include "event_handler.h"
 
 

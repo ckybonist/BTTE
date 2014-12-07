@@ -8,10 +8,10 @@
 namespace btte_piece_selection
 {
 
-class RarestFirst : public IPieceSelect
+class RarestFirst : public IPieceSelection
 {
   public:
-    RarestFirst() : IPieceSelect() {};
+    RarestFirst() : IPieceSelection() {};
     ~RarestFirst();
 
   private:

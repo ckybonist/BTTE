@@ -30,7 +30,6 @@ class Peer
                     const int NUM_PIECE,
                     const double main_prob = 0.0);
 
-  public:
     /* setter */
     void set_in_swarm(const bool st);
     void set_pid(const int pid);
@@ -82,8 +81,8 @@ class Peer
     int neighbor_counts;  // counts of peer being served(selected) as neighbor
 
     bool* pieces;
+
     NeighborMap neighbors;  // <nid, nei_info>
-    //Neighbor* neighbors;
 
     MsgList send_msg_buf;
     MsgList recv_msg_buf;
@@ -94,7 +93,6 @@ class Peer
     float leave_time;      // end time of all pieces have been downloaded
 };
 
-//extern Peer* g_peers;
 extern std::vector<Peer> g_peers;
 extern bool* g_peers_reg_info;
 

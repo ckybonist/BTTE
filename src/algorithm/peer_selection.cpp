@@ -1,4 +1,3 @@
-#include "error.h"
 #include "peer_selection.h"
 
 
@@ -8,27 +7,21 @@ using namespace uniformrand;
 namespace btte_peer_selection
 {
 
-IPeerSelect::IPeerSelect()
+IPeerSelection::IPeerSelection()
 {
     candidates_ = nullptr;
 }
 
-IPeerSelect::~IPeerSelect()
+IPeerSelection::~IPeerSelection()
 {
     if (candidates_ != nullptr)
     {
         delete [] candidates_;
         candidates_ = nullptr;
     }
-
-    //for(int pid = args_.NUM_SEED; (size_t)pid < args_.NUM_PEER; pid++)
-    //{
-    //    delete [] g_peers.at(pid).neighbors;
-    //    g_peers.at(pid).neighbors = nullptr;
-    //}
 }
 
-Neighbor* IPeerSelect::AllocNeighbors()
+Neighbor* IPeerSelection::AllocNeighbors()
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
     Neighbor* neighbors = new Neighbor[NUM_PEERLIST];
@@ -42,7 +35,7 @@ Neighbor* IPeerSelect::AllocNeighbors()
 }
 
 // The peer-info of swarm which exclude selector itself
-IntSet IPeerSelect::ExcludeSelf(const IntSet& in_swarm_set)
+IntSet IPeerSelection::ExcludeSelf(const IntSet& in_swarm_set)
 {
     IntSet cand_pid_set(in_swarm_set);
     IntSetIter sel = cand_pid_set.find(selector_pid_);
@@ -62,7 +55,9 @@ IntSet IPeerSelect::ExcludeSelf(const IntSet& in_swarm_set)
 // return size of candidates
 // NOTE: if sort_cid_flag is true, then put peers that have
 // same cid as selector at the prior of array
-size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, const RSC rsc, bool sort_cid_flag)
+size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
+                                     const RSC rsc,
+                                     bool sort_cid_flag)
 {
     // Erase self first, then, shuffle the index and
     // select other peers which in swarm.
@@ -118,7 +113,8 @@ size_t IPeerSelect::SetCandidates(const IntSet& in_swarm_set, const RSC rsc, boo
     return cand_pid_set.size();
 }
 
-void IPeerSelect::DebugInfo(NeighborMap const& neighbors, const int client_pid) const
+void IPeerSelection::DebugInfo(NeighborMap const& neighbors,
+                               const int client_pid) const
 {
     // debug info
     std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
@@ -130,20 +126,6 @@ void IPeerSelect::DebugInfo(NeighborMap const& neighbors, const int client_pid) 
                   << g_peers.at(it.first).get_neighbor_counts() << ",  "
                   << it.second.pg_delay << ")" << std::endl;
     }
-
-    //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
-    //{
-        //Neighbor nei = neighbors[n];
-        //if (nei.id == -1)
-        //{
-        //    std::cout << "None\n";
-        //    continue;
-        //}
-        //std::cout << "(" << nei.id << ",  "
-        //          << g_peers.at(nei.id).cid << ",  "
-        //          << g_peers.at(nei.id).neighbor_counts << ",  "
-        //          << nei.pg_delay << ")" << std::endl;
-    //}
     std::cout << std::endl;
 }
 

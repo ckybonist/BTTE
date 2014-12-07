@@ -6,10 +6,10 @@
 #include <deque>
 #include <set>
 
-#include "args.h"
-#include "random.h"
-#include "peer.h"
-#include "neighbor.h"
+#include "../args.h"
+#include "../random.h"
+#include "../peer.h"
+#include "../neighbor.h"
 
 
 namespace btte_piece_selection
@@ -25,11 +25,11 @@ typedef enum class TypePieceSelect
     USER_DEFINED_2,
 } PieceSelect_T;
 
-class IPieceSelect
+class IPieceSelection
 {
   public:
-    IPieceSelect();
-    virtual ~IPieceSelect();
+    IPieceSelection();
+    virtual ~IPieceSelection();
     virtual IntSet StartSelection(const int client_pid) = 0;
 
   protected:

@@ -8,6 +8,6 @@ OutputIterator btte_set_diff(InputIterator1 first1, InputIterator1 last1,
                              InputIterator2 first2, InputIterator2 last2,
                              OutputIterator result);
 
-#include "algo.tpp"
+#include "general_algo.tpp"
 
 #endif // for #ifndef _ALGO_H

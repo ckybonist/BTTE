@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "error.h"
+#include "../error.h"
 #include "config.h"
 
 Config::Config(const std::string& fname)

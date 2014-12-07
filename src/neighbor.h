@@ -12,7 +12,6 @@
 struct Neighbor
 {
     Neighbor();
-    //Neighbor(const int id, const float pg_delay);
     Neighbor(const float pg_delay);
 
     //int id;

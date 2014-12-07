@@ -1,4 +1,4 @@
-#include "RFP_piece_selection.h"
+#include "rfp_piece_selection.h"
 
 using namespace uniformrand;
 

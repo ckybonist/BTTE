@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 
-// the unit of pg_delay is "level"
+// the unit of propagation delay is "level"
 // level 0 ~ level 100
 extern const size_t g_kMaxPGdelay;
 

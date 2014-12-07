@@ -7,10 +7,10 @@
 namespace btte_piece_selection
 {
 
-class RandomFirstPiece : public IPieceSelect
+class RandomFirstPiece : public IPieceSelection
 {
   public:
-    RandomFirstPiece() : IPieceSelect() {};
+    RandomFirstPiece() : IPieceSelection() {};
 
   private:
     IntSet StartSelection(const int client_pid) override;

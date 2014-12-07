@@ -1,6 +1,6 @@
-#include "config.h"
-#include "peer_selection.h"
-#include "piece_selection.h"
+#include "utils/config.h"
+#include "algorithm/peer_selection.h"
+#include "algorithm/piece_selection.h"
 #include "args.h"
 
 
