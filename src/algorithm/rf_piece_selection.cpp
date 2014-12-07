@@ -41,15 +41,7 @@ void RarestFirst::CountNumPeerOwnPiece()
                 ++counts;
             }
         }
-        //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
-        //{
-        //    if (neighbors[n].exist)  // ensure the neighbor is exist
-        //    {
-        //        const int nid = neighbors[n].id;
-        //        bool is_get_piece = g_peers.at(nid).pieces[*it];
-        //        if (is_get_piece) ++counts;
-        //    }
-        //}
+
         if (counts > 0)
         {
             PeerOwnCounts info = {*p_no, counts};
@@ -65,7 +57,6 @@ void RarestFirst::CountNumPeerOwnPiece()
     std::copy(tmp_vec.begin(), tmp_vec.end(), counts_info_);
 
     tmp_vec.clear();
-    //neighbors = nullptr;
 }
 
 void RarestFirst::SortByPieceCounts()
@@ -97,16 +88,17 @@ IntSet RarestFirst::GetRarestPiecesSet() const
     {
         // Check peer-count of each piece iteratively, if appear same-peer-count situation,
         // then randomly choose one.
-        // FIXME : BUG, 太冗長
+        // FIXME :  太冗長，應該有更好的邏輯算法
         for (size_t i = 1; i < num_target_; ++i)
         {
             const int no = counts_info_[i].piece_no;
             const int count = counts_info_[i].counts;
             const int prev_count = counts_info_[i - 1].counts;
+            const int last_idx = num_target_ - 1;
 
             if (count == prev_count)
             {
-                if (i == 1)
+                if (dup_count_pieces.empty())
                 {
                     const int prev_no = counts_info_[i - 1].piece_no;
                     dup_count_pieces.insert(prev_no);
@@ -114,32 +106,38 @@ IntSet RarestFirst::GetRarestPiecesSet() const
 
                 dup_count_pieces.insert(no);
 
-                if (num_target_ == 2 || i == num_target_ - 1)
+                if (i == last_idx)
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
                 }
-
             }
             else
             {
+                int target_no = -1;
+
                 if (i == 1)
                 {
                     const int prev_no = counts_info_[i - 1].piece_no;
-                    target_pieces.insert(prev_no);
+                    target_no = prev_no;
                 }
-                else if (i == num_target_ - 1 ||
-                         dup_count_pieces.size() == 0)
+                else if (i == last_idx &&
+                         dup_count_pieces.empty())
                 {
-                    target_pieces.insert(no);
+                    target_no = no;
                 }
                 else
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
-                    target_pieces.insert(rand_no);
+                    target_no = rand_no;
                     dup_count_pieces.clear();
                 }
+
+                if (target_no == -1)
+                    ExitError("Error in piece selection");
+
+                target_pieces.insert(target_no);
             }
         }
     }

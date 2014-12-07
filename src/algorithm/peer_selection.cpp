@@ -27,9 +27,7 @@ Neighbor* IPeerSelection::AllocNeighbors()
     Neighbor* neighbors = new Neighbor[NUM_PEERLIST];
 
     if (neighbors == nullptr)
-    {
         ExitError("Memory Allocation Fault!");
-    }
 
     return neighbors;
 }
@@ -38,16 +36,7 @@ Neighbor* IPeerSelection::AllocNeighbors()
 IntSet IPeerSelection::ExcludeSelf(const IntSet& in_swarm_set)
 {
     IntSet cand_pid_set(in_swarm_set);
-    IntSetIter sel = cand_pid_set.find(selector_pid_);
-
-    bool found = false;
-    for (const int pid : in_swarm_set)
-    {
-        if (pid == selector_pid_)
-            found = true;
-    }
-
-    cand_pid_set.erase(sel);
+    cand_pid_set.erase(selector_pid_);
 
     return cand_pid_set;
 }
@@ -71,7 +60,7 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     // Shuffle the set of candidates to ensure the selection is random
     Shuffle<int>(rsc, candidates_, kCandSize);
 
-    // for cluster-based
+    // for cluster-based, FIXME : 太冗長，可再縮減
     if (sort_cid_flag)
     {
         IntSet same_cluster_peers;
