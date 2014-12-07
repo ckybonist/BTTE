@@ -1,29 +1,35 @@
 REL=$(notdir $(CURDIR))
 BETA=$(REL)g
 
+EXT = cpp
+
 SRC = src
-INC = include
-ALGORITHM = algorithm
+CUSTOM_ALGO = src/custom
+
+SRC_SUBDIRS = \
+          $(SRC)/algorithm \
+		  $(SRC)/utils \
+		  $(CUSTOM_ALGO)
 
 OBJ = obj/bin
 DBG = obj/dbg
 LIB = lib
 OUT = bin
 
-INCLUDES=-I. -I$(INC) -I$(ALGORITHM)
+INCLUDES=-I. -I$(wildcard $(SRC)/%.h) $(foreach d,$(SRC_SUBDIRS),-I$d)
 LIBS=
 #LIBS=-lstdc++
 
+
 #CC=gcc
 CXX = g++
-
 CFLAGS = -std=c++11 -Wall -Wextra $(3RD_CFLAGS)
 CDEBUG = -std=c++11 -g -Wall -Wextra $(3RD_CFLAGS)
-
 LDFLAG = -L$(LIB)
 
-SOURCES = $(wildcard $(SRC)/*.cpp $(ALGORITHM)/*.cpp)
-OBJS = $(notdir $(patsubst %.cpp,%.o,*.$(SOURCES)))
+
+SOURCES = $(shell find $(SRC) -name "*.$(EXT)")
+OBJS = $(notdir $(SOURCES:.$(EXT)=.o))
 REL_OBJS = $(addprefix $(OBJ)/,$(OBJS))
 DBG_OBJS = $(addprefix $(DBG)/,$(OBJS))
 
@@ -38,14 +44,36 @@ DBG_OBJS = $(addprefix $(DBG)/,$(OBJS))
 # delete the default suffixes
 .SUFFIXES:
 # define our suffix list
-.SUFFIXES: .o .cpp .tpp
+.SUFFIXES: .o .$(EXT) .tpp
 
 # Create object files
-$(OBJ)/%.o: $(SRC)/%.cpp $(INC)/%.h
+# src/
+$(OBJ)/%.o: $(SRC)/%.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBG)/%.o: $(SRC)/%.cpp
 	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
 
-$(DBG)/%.o: $(SRC)/%.cpp $(INC)/%.h
-	$(CXX) -o $@ -c $< $(CFLAGS) $(INCLUDES)
+# src/algorithm
+$(OBJ)/%.o: $(SRC)/algorithm/%.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBG)/%.o: $(SRC)/algorithm/%.cpp
+	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+# src/utils
+$(OBJ)/%.o: $(SRC)/utils/%.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBG)/%.o: $(SRC)/utils/%.cpp
+	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+# custom/
+$(OBJ)/%.o: $(SRC)/custom/%.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBG)/%.o: $(SRC)/custom/%.cpp
+	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
 
 all: release debug
 
