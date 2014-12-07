@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <time.h>
 
 #include "debug.h"
 #include "error.h"
@@ -34,27 +35,37 @@ void RSC2Str(RSmapStr& rs2str)
     rs2str[RSC::FREE_4] = "FREE";
 }
 
+void PrintRandSeeds()
+{
+    RSmapStr rs2str;
+    RSC2Str(rs2str);
+
+    for (int i = 0; i < g_kNumRSeeds; i++)
+    {
+        if (i == 11) { std::cout << "\nUnused Rand Seeds: \n"; }
+        RSC type_rsc = static_cast<RSC>(i);
+        std::string rsc_str = rs2str[type_rsc];
+        std::cout << std::left << rsc_str << " : \n";
+        std::cout << "\t\t\t\t" << g_rand_grp[i] << "\n\n";
+    }
+    std::cout << "\n\n";
+}
+
 }
 
 int main(int argc, const char* argv[])
 {
+    clock_t start_time = clock();
+
+
+    // -------------- Start Simulation --------------------
     /////////////////////////////
     // 1. init random seeds group
     //
     uniformrand::InitRandSeeds();
 
-    //std::cout << "Initial Random Seeds:\n"; //RSmapStr rs2str;
-    //RSC2Str(rs2str);
-    //for (int i = 0; i < g_kNumRSeeds; i++)
-    //{
-    //    if (i == 11) { std::cout << "\nUnused Rand Seeds: \n"; }
-    //    RSC type_rsc = static_cast<RSC>(i);
-    //    std::string rsc_str = rs2str[type_rsc];
-    //    std::cout << std::left << rsc_str << " : \n";
-    //    std::cout << "\t\t\t\t" << g_rand_grp[i] << "\n\n";
-    //}
-    //std::cout << "\n\n";
-
+    //std::cout << "Initial Random Seeds:\n";
+    //PrintRandSeeds();
 
     ////////////////////
     // 2. read arguments
@@ -81,18 +92,17 @@ int main(int argc, const char* argv[])
 
     ShowDbgInfo();
 
-
     /////////////////////////////////
     // 4. check seeds was being used
     //std::cout << "\n\nFinal Random Seeds:\n";
-    //for (int i = 0; i < g_kNumRSeeds; i++)
-    //{
-    //    if (i == 11) { std::cout << "\nUnused rand seeds: \n"; }
-    //    RSC type_rsc = static_cast<RSC>(i);
-    //    std::string rsc_str = rs2str[type_rsc];
-    //    std::cout << std::left << rsc_str << " : \n";
-    //    std::cout << "\t\t\t\t" << g_rand_grp[i] << "\n\n";
-    //}
+    //PrintRandSeeds();
+
+    // ----------------- End Simulation --------------------
+
+
+    clock_t end_time = clock();
+    double time_taken = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    std::cout << "Time taken: " << time_taken << " s\n";
 
     return 0;
 }
