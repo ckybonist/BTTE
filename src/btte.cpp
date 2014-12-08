@@ -69,7 +69,7 @@ int main(int argc, const char* argv[])
 
     ////////////////////
     // 2. read arguments
-    //
+
     if (argc == 1)
     {
         ExitError("First argument: path of config file");
@@ -80,6 +80,7 @@ int main(int argc, const char* argv[])
     }
 
     g_btte_args.InitArgs(argv[1]);
+    //g_btte_args.InitArgs("../btte.conf.dbg"); // gdb usage
 
     ///////////////////////
     // 3. start simulating

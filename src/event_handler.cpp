@@ -484,6 +484,7 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     const int client_pid = ev.pid;
     for (auto const& msg : ev.uploaded_reqs)
     {
+        //std::cout << "\nSRC PID IN MSG: " << msg.src_pid << std::endl;
         Peer& peer = g_peers.at(msg.src_pid);
 
         // 得到 piece
@@ -537,11 +538,11 @@ void EventHandler::ProcessEvent(Event& ev)
     if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
 
     // DEMO
-    if (ev.type_bt == Event::PEER_JOIN ||
-            ev.type_bt == Event::PEER_LEAVE)
-    {
-        EventInfo(ev, current_time_);
-    }
+    //if (ev.type_bt == Event::PEER_JOIN ||
+    //        ev.type_bt == Event::PEER_LEAVE)
+    //{
+    //    EventInfo(ev, current_time_);
+    //}
 
     if (ev.type == Event::Type::ARRIVAL)
         ProcessArrival(ev);

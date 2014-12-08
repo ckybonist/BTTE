@@ -216,11 +216,9 @@ void PeerManager::InitAbstractObj()
 
 PeerManager::PeerManager()
 {
-    // Reserve spaces for vector of peers
     const size_t NUM_PEER = g_btte_args.get_num_peer();
-    g_peers.reserve(NUM_PEER);
 
-    // Init regestration of peers
+    // Init regestration info of peers
     if (g_peers_reg_info == nullptr)
     {
         g_peers_reg_info = new bool[NUM_PEER];
@@ -416,6 +414,10 @@ PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
 
 void PeerManager::CreatePeers()
 {
+    // Reserve spaces for vector of peers
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+    g_peers.reserve(NUM_PEER);
+
     // DEBUG
     for (int i = 0; i < g_kNumLevel; i++)
     {
