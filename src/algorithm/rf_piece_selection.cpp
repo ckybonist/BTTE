@@ -11,10 +11,10 @@ namespace btte_piece_selection
 
 RarestFirst::~RarestFirst()
 {
-    if (counts_info_ != nullptr)
+    if (count_info_ != nullptr)
     {
-        delete [] counts_info_;
-        counts_info_ = nullptr;
+        delete [] count_info_;
+        count_info_ = nullptr;
     }
 }
 
@@ -24,7 +24,7 @@ void RarestFirst::CountNumPeerOwnPiece()
     auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     int index = 0;
-    std::vector<PeerOwnCounts> tmp_vec;
+    std::vector<POC> tmp_vec;
     IntSetIter begin = no_download_pieces_set_.begin();
     IntSetIter end = no_download_pieces_set_.end();
 
@@ -41,45 +41,36 @@ void RarestFirst::CountNumPeerOwnPiece()
                 ++counts;
             }
         }
-        //for (int n = 0; (size_t)n < args_.NUM_PEERLIST; n++)
-        //{
-        //    if (neighbors[n].exist)  // ensure the neighbor is exist
-        //    {
-        //        const int nid = neighbors[n].id;
-        //        bool is_get_piece = g_peers.at(nid).pieces[*it];
-        //        if (is_get_piece) ++counts;
-        //    }
-        //}
+
         if (counts > 0)
         {
-            PeerOwnCounts info = {*p_no, counts};
+            POC info = {*p_no, counts};
             tmp_vec.push_back(info);
         }
     }
 
     num_target_ = tmp_vec.size();
-    counts_info_ = new PeerOwnCounts[num_target_];
-    if (nullptr == counts_info_)
+    count_info_ = new POC[num_target_];
+    if (nullptr == count_info_)
         ExitError("Memory Allocation Error");
 
-    std::copy(tmp_vec.begin(), tmp_vec.end(), counts_info_);
+    std::copy(tmp_vec.begin(), tmp_vec.end(), count_info_);
 
     tmp_vec.clear();
-    //neighbors = nullptr;
 }
 
 void RarestFirst::SortByPieceCounts()
 {
     auto cmp = [] (const void* l, const void* r) {
-        const PeerOwnCounts* myl = (PeerOwnCounts*)l;
-        const PeerOwnCounts* myr = (PeerOwnCounts*)r;
-        return myl->counts - myr->counts;
+        const POC* myl = (POC*)l;
+        const POC* myr = (POC*)r;
+        return myl->count - myr->count;
     };
 
     // sort pieces counts info
-    qsort(counts_info_,
+    qsort(count_info_,
           num_target_,
-          sizeof(PeerOwnCounts),
+          sizeof(POC),
           cmp);
 }
 
@@ -88,57 +79,57 @@ IntSet RarestFirst::GetRarestPiecesSet() const
     IntSet target_pieces;
     IntSet dup_count_pieces;
 
-    if (num_target_ == 1)
+    if (num_target_ == 1)  // only one
     {
-        const int no = counts_info_[0].piece_no;
+        const int no = count_info_[0].piece_no;
         target_pieces.insert(no);
     }
     else
     {
         // Check peer-count of each piece iteratively, if appear same-peer-count situation,
         // then randomly choose one.
-        // FIXME : BUG, 太冗長
+        // FIXME :  太冗長，應該有更好的處理邏輯
         for (size_t i = 1; i < num_target_; ++i)
         {
-            const int no = counts_info_[i].piece_no;
-            const int count = counts_info_[i].counts;
-            const int prev_count = counts_info_[i - 1].counts;
+            const int cur_no = count_info_[i].piece_no;
+            const int count = count_info_[i].count;
+            const int prev_count = count_info_[i - 1].count;
+            const int last_idx = num_target_ - 1;
 
             if (count == prev_count)
             {
-                if (i == 1)
+                if (dup_count_pieces.empty())
                 {
-                    const int prev_no = counts_info_[i - 1].piece_no;
+                    const int prev_no = count_info_[i - 1].piece_no;
                     dup_count_pieces.insert(prev_no);
                 }
 
-                dup_count_pieces.insert(no);
+                dup_count_pieces.insert(cur_no);
 
-                if (num_target_ == 2 || i == num_target_ - 1)
+                if (i == last_idx)
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
                 }
-
             }
             else
             {
                 if (i == 1)
                 {
-                    const int prev_no = counts_info_[i - 1].piece_no;
+                    const int prev_no = count_info_[i - 1].piece_no;
                     target_pieces.insert(prev_no);
                 }
-                else if (i == num_target_ - 1 ||
-                         dup_count_pieces.size() == 0)
-                {
-                    target_pieces.insert(no);
-                }
-                else
+                else if (!dup_count_pieces.empty())
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
+                }
+                else if (i == last_idx &&
+                         dup_count_pieces.empty())
+                {
+                    target_pieces.insert(cur_no);
                 }
             }
         }
@@ -149,8 +140,8 @@ IntSet RarestFirst::GetRarestPiecesSet() const
 
 void RarestFirst::RefreshInfo()
 {
-    delete [] counts_info_;
-    counts_info_ = nullptr;
+    delete [] count_info_;
+    count_info_ = nullptr;
     no_download_pieces_set_.clear();
 }
 

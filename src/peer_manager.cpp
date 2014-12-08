@@ -216,20 +216,18 @@ void PeerManager::InitAbstractObj()
 
 PeerManager::PeerManager()
 {
-    // Reserve spaces for vector of peers
     const size_t NUM_PEER = g_btte_args.get_num_peer();
-    g_peers.reserve(NUM_PEER);
 
-    // Init regestration of peers
-    if (g_peers_reg_info == nullptr)
-    {
-        g_peers_reg_info = new bool[NUM_PEER];
-        if (g_peers_reg_info == nullptr)
-           ExitError("Memory Allocation Error");
+    // Init regestration info of peers
+    //if (g_peers_reg_info == nullptr)
+    //{
+    //    g_peers_reg_info = new bool[NUM_PEER];
+    //    if (g_peers_reg_info == nullptr)
+    //       ExitError("Memory Allocation Error");
 
-        for (size_t i = 0; i < NUM_PEER; i++)
-            g_peers_reg_info[i] = false;
-    }
+    //    for (size_t i = 0; i < NUM_PEER; i++)
+    //        g_peers_reg_info[i] = false;
+    //}
 
     // Init object of algorithm execution
     InitAbstractObj();
@@ -289,7 +287,7 @@ void PeerManager::NewPeerData(Peer::Type type,
     Bandwidth const& bw = g_kPeerLevel[level].bandwidth;
 
     g_peers.push_back(Peer(type, pid, cid, bw));
-    UpdateSwarmInfo(ISF::JOIN, pid);
+    UpdatePeerRegStatus(ISF::JOIN, pid);
 
     Peer& peer = g_peers.at(pid);
     switch (type)
@@ -315,7 +313,7 @@ void PeerManager::NewPeer(const int pid)
     NewPeerData(Peer::NORMAL, pid);
 }
 
-void PeerManager::UpdateSwarmInfo(const ISF isf, const int pid)
+void PeerManager::UpdatePeerRegStatus(const ISF isf, const int pid)
 {
     const size_t NUM_PEER = g_btte_args.get_num_peer();
     if (isf == ISF::JOIN)
@@ -404,7 +402,6 @@ PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
     return msg;
 }
 
-
 //void PeerManager::AllocPeersSpace()
 //{
 //    g_peers = new Peer[args_->NUM_PEER];
@@ -414,8 +411,35 @@ PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
 //    }
 //}
 
-void PeerManager::CreatePeers()
+void PeerManager::InitPeerRegInfo()
 {
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+
+    if (g_peers_reg_info == nullptr)
+    {
+        g_peers_reg_info = new bool[NUM_PEER];
+        if (g_peers_reg_info == nullptr)
+           ExitError("Memory Allocation Error");
+
+        for (size_t i = 0; i < NUM_PEER; i++)
+            g_peers_reg_info[i] = false;
+    }
+}
+
+void PeerManager::InitAboriginalPeers()
+{
+    InitSeeds();
+    InitLeeches();
+}
+
+void PeerManager::CreateSwarm()
+{
+    InitPeerRegInfo();
+
+    // Reserve spaces for vector of peers
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+    g_peers.reserve(NUM_PEER);
+
     // DEBUG
     for (int i = 0; i < g_kNumLevel; i++)
     {
@@ -427,8 +451,8 @@ void PeerManager::CreatePeers()
 
     // allocate memroy for peers
     //AllocPeersSpace();
-    InitSeeds();
-    InitLeeches();
+
+    InitAboriginalPeers();
 }
 
 void PeerManager::DeployPeersLevel()

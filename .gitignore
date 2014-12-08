@@ -31,5 +31,8 @@ tags
 # CScope
 cscope.*
 
+# config (debug)
+btte.conf.dbg
+
 # Doxygen Output
 doxygen

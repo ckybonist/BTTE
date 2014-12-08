@@ -13,11 +13,12 @@ class EventHandler
   public:
     EventHandler(PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
-    void StartRoutine();
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
   private:
+    void StartRoutine();  // main routine
+
     void MapEventFuncs();
     void MapEventFlow();
     void MapFlowDownEventDependencies();
@@ -92,6 +93,7 @@ class EventHandler
     // external
     PeerManager* pm_;
 
+    friend class EnvManager;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

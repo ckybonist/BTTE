@@ -2,10 +2,7 @@
 #define _ENV_MANAGER_H
 
 #include <iostream>
-#include <string>
 
-#include "args.h"
-#include "peer_manager.h"
 
 // Singleton
 class EnvManager
@@ -15,9 +12,7 @@ class EnvManager
 
     void Init(const std::string filename);
 
-    //void RunEvents();
-
-    void Destroy();
+    void Simulate();
 
   private:
     EnvManager() {};
