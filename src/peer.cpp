@@ -32,6 +32,7 @@ Peer::Peer(const Type type,
     this->bandwidth = bandwidth;
 
     join_time = 0.0;
+    complete_time = 0.0;
     leave_time = 0.0;
 
     neighbor_counts = 0;

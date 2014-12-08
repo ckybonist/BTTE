@@ -432,7 +432,7 @@ void EventHandler::PeerJoinEvent(Event& ev)
 {
     const size_t kAborigin = GetAboriginSize();
 
-    if (ev.pid >= kAborigin)  // 不是 leecher 就要新增節點資料
+    if (ev.pid >= kAborigin)  // 如不是 leecher，就要新增節點資料
     {
         pm_->NewPeer(ev.pid);
         g_peers.at(ev.pid).set_join_time(ev.time);
