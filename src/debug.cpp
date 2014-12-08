@@ -88,6 +88,12 @@ void ShowDbgInfo()
         if (pid >= NUM_SEED)
             NeighborInfo(pid, NUM_PEERLIST);
 
+        // Total download time
+        Peer const& peer = g_peers.at(pid);
+        const float time_to_complete = peer.get_complete_time() - peer.get_join_time();
+        cout << "\nUsed Time for Getting All Pieces : "
+             << time_to_complete << std::endl;
+
         cout << "\n===========================\n\n";
     }
 
@@ -97,7 +103,6 @@ void ShowDbgInfo()
     //    cout << "Piece #" << i << " : "
     //         << piece_own_counter[i] << endl;
     //}
-    cout << endl;
 
     delete [] piece_own_counter;
 }

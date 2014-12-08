@@ -51,6 +51,7 @@ void Peer::download_piece(const int n)       { pieces[n] = true; }
 void Peer::set_neighbor_counts(const int c)  { neighbor_counts = c; }
 void Peer::incr_neighbor_counts(const int n) { neighbor_counts += n; }
 void Peer::set_join_time(const float t)      { join_time = t; }
+void Peer::set_complete_time(const float t)  { complete_time = t; }
 void Peer::set_leave_time(const float t)     { leave_time = t; }
 
 void Peer::set_neighbors(NeighborMap const& ns)
@@ -98,6 +99,7 @@ int Peer::get_neighbor_counts() const                      { return neighbor_cou
 float Peer::get_trans_time() const                         { return g_kPieceSize / bandwidth.uplink; }
 float Peer::get_neighbor_pgdelay(const int nid) const      { return neighbors.at(nid).pg_delay; }
 float Peer::get_join_time() const                          { return join_time; }
+float Peer::get_complete_time() const                      { return complete_time; }
 float Peer::get_leave_time() const                         { return leave_time; }
 bool Peer::check_in_swarm() const                          { return in_swarm; }
 

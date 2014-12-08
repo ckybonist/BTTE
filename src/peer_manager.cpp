@@ -251,8 +251,6 @@ PeerManager::PeerManager()
 
 PeerManager::~PeerManager()
 {
-    std::cout << "\nDestructor of PeerManager\n";
-
     delete [] reserved_peer_levels_;
     reserved_peer_levels_ = nullptr;
 
