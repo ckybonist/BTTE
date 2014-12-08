@@ -435,7 +435,7 @@ void EventHandler::PeerJoinEvent(Event& ev)
     if (ev.pid >= kAborigin)  // 不是 leecher 就要新增節點資料
     {
         pm_->NewPeer(ev.pid);
-        g_peers.at(ev.pid).set_join_time(current_time_);
+        g_peers.at(ev.pid).set_join_time(ev.time);
         pm_->UpdatePeerRegStatus(PeerManager::ISF::JOIN, ev.pid);
     }
 }
@@ -494,6 +494,7 @@ void EventHandler::PieceGetEvent(Event& ev)
     {
         client.to_seed();
         ev.is_complete = true;
+        client.set_complete_time(ev.time);
     }
     else
     {
@@ -512,7 +513,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 {
     Peer& client = g_peers.at(ev.pid);
     client.set_in_swarm(false);
-    client.set_leave_time(current_time_);
+    client.set_leave_time(ev.time);
     pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
