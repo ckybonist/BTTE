@@ -325,18 +325,6 @@ void EventHandler::PushPeerJoinEvent(Event const& ev)
     const size_t NUM_PEER = g_btte_args.get_num_peer();
     const size_t kAborigin = GetAboriginSize();
 
-    //if ((size_t)next_join_pid < NUM_PEER &&
-    //            !g_peers_reg_info[next_join_pid])
-    //{
-//        float time = ev.time + ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-//        Event event = Event(Event::Type::ARRIVAL,
-//                            Event::PEER_JOIN,
-//                            ++next_event_idx_,
-//                            next_join_pid,
-//                            time);
-//        PushArrivalEvent(event);
-    //}
-    //
     if ((size_t)next_join_pid < NUM_PEER)
     {
         if (next_join_pid < kAborigin ||
@@ -378,9 +366,6 @@ void EventHandler::ProcessArrival(Event& ev)
 
     // 只要不是 Peer Leave 事件，就產生衍生事件
     if (ev.type_bt != Event::PEER_LEAVE)  { PushDerivedEvent(ev); }
-
-    // debug (remove after)
-    //if (ev.type_bt == Event::PEER_JOIN) { PushPeerJoinEvent(ev); }
 
     // 如果系統中只有一個事件，就產生離開事件
     if (system_.size() == 1)
@@ -451,7 +436,7 @@ void EventHandler::PeerJoinEvent(Event& ev)
     {
         pm_->NewPeer(ev.pid);
         g_peers.at(ev.pid).set_join_time(current_time_);
-        pm_->UpdateSwarmInfo(PeerManager::ISF::JOIN, ev.pid);
+        pm_->UpdatePeerRegStatus(PeerManager::ISF::JOIN, ev.pid);
     }
 }
 
@@ -484,6 +469,7 @@ void EventHandler::PieceAdmitEvent(Event& ev)
     const int client_pid = ev.pid;
     for (auto const& msg : ev.uploaded_reqs)
     {
+        //std::cout << "\nSRC PID IN MSG: " << msg.src_pid << std::endl;
         Peer& peer = g_peers.at(msg.src_pid);
 
         // 得到 piece
@@ -527,7 +513,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
     Peer& client = g_peers.at(ev.pid);
     client.set_in_swarm(false);
     client.set_leave_time(current_time_);
-    pm_->UpdateSwarmInfo(PeerManager::ISF::LEAVE, ev.pid);
+    pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
 void EventHandler::ProcessEvent(Event& ev)
@@ -537,11 +523,14 @@ void EventHandler::ProcessEvent(Event& ev)
     if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
 
     // DEMO
-    if (ev.type_bt == Event::PEER_JOIN ||
-            ev.type_bt == Event::PEER_LEAVE)
-    {
-        EventInfo(ev, current_time_);
-    }
+    //if (ev.type_bt == Event::PEER_JOIN ||
+    //        ev.type_bt == Event::PEER_LEAVE)
+    //{
+    //    EventInfo(ev, current_time_);
+    //}
+
+    // Print info of all events
+    EventInfo(ev, current_time_);
 
     if (ev.type == Event::Type::ARRIVAL)
         ProcessArrival(ev);

@@ -22,12 +22,13 @@ class RarestFirst : public IPieceSelection
     IntSet GetRarestPiecesSet() const;
     void RefreshInfo();
 
-    struct PeerOwnCounts
+    typedef struct PieceOwnersCount
     {
         int piece_no;
-        int counts;
-    };
-    PeerOwnCounts* counts_info_;
+        int count;
+    } POC;
+
+    POC* count_info_;
 
     size_t num_target_;
 };

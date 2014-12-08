@@ -23,24 +23,32 @@ class PeerManager
     PeerManager();
     ~PeerManager();
 
-    bool CheckAllPiecesGet(const int pid) const;
-    void UpdateSwarmInfo(const ISF isf, const int pid);
+    void UpdatePeerRegStatus(const ISF isf, const int pid);
     void NewPeer(const int pid);  // for peer_join event
+
     void AllotNeighbors(const int client_pid) const;      // Peer Selection
+
+    bool CheckAllPiecesGet(const int pid) const;
     MsgList GenrAllPieceReqs(const int client_pid);       // Piece Selection
     PieceMsg ReGenrPieceReq(const int piece_no,
                             const int client_pid);        // for req-timeout
-    void CreatePeers();
+    friend class EnvManager;
 
   private:
+    void InitAbstractObj();
+
+    void CreateSwarm();
+
+    void InitAboriginalPeers();
+    void InitPeerRegInfo();
+    void InitSeeds();
+    void InitLeeches();
     void NewPeerData(Peer::Type type,
                      const int pid,
                      double prob_leech = 0.1);
+
     void DeployPeersLevel();
     void DeployClusterIDs();  //cluster-based usage
-    void InitSeeds();
-    void InitLeeches();
-    void InitAbstractObj();
 
     IPeerSelection* obj_peerselect_;
     IPieceSelection* obj_pieceselect_;

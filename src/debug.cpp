@@ -1,7 +1,10 @@
 #include <iostream>
 
-#include "peer.h"
+#include "args.h"
 #include "error.h"
+#include "random.h"
+#include "peer.h"
+
 #include "debug.h"
 
 
@@ -22,8 +25,45 @@ void PieceInfo(const int pid,
 void NeighborInfo(const int pid,
                   const size_t NUM_PEERLIST);
 
+typedef std::map<RSC, std::string> RSmapStr;
+
+void RSC2Str(RSmapStr& rs2str)
+{
+    rs2str[RSC::PEER_LEVEL] = "Peer Level";
+    rs2str[RSC::PROB_LEECH] = "Base Prob. of Leech";
+    rs2str[RSC::PROB_PIECE] = "Prob of Each Leech's Piece";
+    rs2str[RSC::EVENT_TIME] = "Event Time";
+    rs2str[RSC::PGDELAY] = "Propagation Delay";
+    rs2str[RSC::STD_PEERSELECT] = "Standard Peer Selection";
+    rs2str[RSC::LB_PEERSELECT] = "Load Balancing Peer Selection";
+    rs2str[RSC::CB_PEERSELECT] = "Cluster-Based Peer Selection";
+    rs2str[RSC::RFP_PIECESELECT] = "Random Piece Selection";
+    rs2str[RSC::RF_PIECESELECT] = "Rarest First Piece Selection";
+    rs2str[RSC::CHOKING] = "Choking";
+    rs2str[RSC::FREE_1] = "FREE";
+    rs2str[RSC::FREE_2] = "FREE";
+    rs2str[RSC::FREE_3] = "FREE";
+    rs2str[RSC::FREE_4] = "FREE";
 }
 
+} // anonymous namespace
+
+
+void PrintRandSeeds()
+{
+    RSmapStr rs2str;
+    RSC2Str(rs2str);
+
+    for (int i = 0; i < g_kNumRSeeds; i++)
+    {
+        if (i == 11) { std::cout << "\nUnused Rand Seeds: \n"; }
+        RSC type_rsc = static_cast<RSC>(i);
+        std::string rsc_str = rs2str[type_rsc];
+        std::cout << std::left << rsc_str << " : \n";
+        std::cout << "\t\t\t\t" << g_rand_grp[i] << "\n\n";
+    }
+    std::cout << "\n\n";
+}
 
 void ShowDbgInfo()
 {
@@ -67,8 +107,6 @@ namespace
 
 void PeerInfo(const int pid)
 {
-    ////////////////////////
-    // id info
     cout << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
     cout << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
     cout << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
@@ -98,8 +136,6 @@ void PieceInfo(const int pid,
                const size_t NUM_SEED,
                int* counter)
 {
-    ///////////////////
-    // pieces info
     int piece_count = 0;
 
     for (size_t c = 0; c < NUM_PIECE; c++)
@@ -123,8 +159,6 @@ void NeighborInfo(const int pid, const size_t NUM_PEERLIST)
     //for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
     for (auto& nei : g_peers.at(pid).get_neighbors())
     {
-        //Neighbor neighbor = g_peers.at(pid).neighbors[k];
-        //const int nid = neighbor.id;
         const int nid = nei.first;
         Neighbor const& nei_info = nei.second;
         cout << "    (" << nid

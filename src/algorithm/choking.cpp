@@ -11,28 +11,27 @@ using namespace uniformrand;
 
 typedef std::list<PieceMsg> MsgList;
 
+// FIXME : Bug, large src_pid number
 namespace
 {
     void OptimisticUnchoke(const MsgList& recv_msgs,
                            MsgList& unchoke_list,
-                           const size_t buf_size,
                            const int client_pid)
     {
-        int pos = Rand(RSC::CHOKING) % buf_size - 1;
-        MsgList::const_iterator it = recv_msgs.begin();
-        for (size_t i = 0; i < pos; it++, i++)
-        unchoke_list.push_back(*it);
+        const size_t buf_size = recv_msgs.size();
+        PieceMsg msg = RandChooseElementInContainer(RSC::CHOKING, recv_msgs);
+        unchoke_list.push_back(msg);
     }
 
     void Unchoke(const MsgList& recv_msgs,
                  MsgList& unchoke_list,
-                 const size_t buf_size,
                  const int client_pid)
     {
         int counts;
         bool do_ou = false;
         const size_t NUM_UNCHOKE = g_btte_args.get_num_choking();
         const size_t NUM_OU = g_btte_args.get_num_ou();
+        const size_t buf_size = recv_msgs.size();
 
         if (buf_size >= NUM_UNCHOKE + NUM_OU)
         {
@@ -57,7 +56,6 @@ namespace
         {
             OptimisticUnchoke(recv_msgs,
                               unchoke_list,
-                              buf_size,
                               client_pid);
         }
     }
@@ -69,8 +67,11 @@ MsgList Choking(const int client_pid)
     MsgList const& recv_msgs = client.get_recv_msg_buf();
     MsgList unchoke_list;
 
+    // Sort request msgs by upload bandwidth of sender
     g_peers.at(client_pid).sort_recv_msg();
-    Unchoke(recv_msgs, unchoke_list, recv_msgs.size(), client_pid);
+
+    // Do choking
+    Unchoke(recv_msgs, unchoke_list, client_pid);
 
     return unchoke_list;
 }
