@@ -1,10 +1,12 @@
 #include <iostream>
 
-#include "config.h"
+#include "debug.h"
+#include "args.h"
+#include "event_handler.h"
+//#include "peer_manager.h"
 #include "env_manager.h"
 
 
-/* Class definition */
 EnvManager& EnvManager::GetInstance()
 {
     static EnvManager instance;
@@ -13,17 +15,27 @@ EnvManager& EnvManager::GetInstance()
 
 void EnvManager::Init(const std::string filename)
 {
-    /*
-    Config cfg(fname);
+    /* Rand Init */
+    uniformrand::InitRandSeeds();
 
-    pm = PeerManager(args);
-    pm.CreatePeers();
+    std::cout << "Initial Random Seeds:\n";
+    PrintRandSeeds();
 
-    DebugInfo(args.NUM_PEER, args.NUM_PIECE);
-    */
+    /* Simulation Args Init */
+    g_btte_args.InitArgs(filename);
+    //g_btte_args.InitArgs("../btte.conf.dbg"); // gdb usage
 }
 
-void EnvManager::Destroy()
+void EnvManager::Simulate()
 {
-    //pm.DestroyPeers();
+    /* Create Initial Swarm*/
+    PeerManager pm = PeerManager();
+    pm.CreateSwarm();
+
+    EventHandler evh(&pm, 0.2, 0.5);
+    evh.StartRoutine();
+
+    ShowDbgInfo();
+    std::cout << "\n\nFinal Random Seeds:\n";
+    PrintRandSeeds();
 }
