@@ -1,3 +1,4 @@
+#include "args.h"
 #include "error.h"
 #include "random.h"
 #include "piece.h"
@@ -103,6 +104,21 @@ float Peer::get_join_time() const                          { return join_time; }
 float Peer::get_complete_time() const                      { return complete_time; }
 float Peer::get_leave_time() const                         { return leave_time; }
 bool Peer::check_in_swarm() const                          { return in_swarm; }
+bool Peer::is_complete() const
+{
+    const size_t NUM_PIECE = g_btte_args.get_num_piece();
+    bool flag = true;
+    for (int i = 0; i < NUM_PIECE; i++)
+    {
+        if (pieces[i] == false)
+        {
+            flag = false;
+            break;
+        }
+    }
+
+    return flag;
+}
 
 bool Peer::get_nth_piece_info(const int n) const
 {

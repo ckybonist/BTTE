@@ -57,6 +57,7 @@ class Peer
     int get_pid() const;
     int get_cid() const;
     int get_neighbor_counts() const;
+    bool is_complete() const;
     float get_trans_time() const;
     float get_neighbor_pgdelay(const int nid) const;
     float get_join_time() const;

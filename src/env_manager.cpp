@@ -23,7 +23,6 @@ void EnvManager::Init(const std::string filename)
 
     /* Simulation Args Init */
     g_btte_args.InitArgs(filename);
-    //g_btte_args.InitArgs("../btte.conf.dbg"); // gdb usage
 }
 
 void EnvManager::Simulate()
