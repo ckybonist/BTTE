@@ -54,12 +54,9 @@ NeighborMap StandardRule::StartSelection(const int client_pid,
                                            RSC::STD_PEERSELECT,
                                            false);
 
-    // Randomly select peers
-    //Shuffle<int>(RSC::STD_PEERSELECT, candidates_, (int)candidates_size);
-
     AssignNeighbors(neighbors, candidates_size);
 
-    //DebugInfo(neighbors, client_pid);
+    DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 
