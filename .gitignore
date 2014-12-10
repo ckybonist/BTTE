@@ -2,9 +2,12 @@
 *.slo
 *.lo
 *.o
-*.obj
-obj/bin/*
-obj/dbg/*
+#*.obj
+#obj/bin/*
+#obj/dbg/*
+
+# CMake build
+build/
 
 # Compiled Dynamic libraries
 *.so
