@@ -109,7 +109,7 @@ void EventHandler::GenrPieceReqRecvEvents(Event const& ev)
         for (PieceMsg const& msg : ev.req_msgs)
         {
             Peer const& client = g_peers.at(ev.pid);
-            const float pg_delay = client.get_neighbor_pgdelay(msg.dest_pid);
+            const float pg_delay = msg.pg_delay;
             const float time = ev.time + pg_delay;
 
             Event next_ev = Event(Event::Type::ARRIVAL,
@@ -210,7 +210,7 @@ void EventHandler::EC_5(Event const& ev)
     for (PieceMsg const& msg : ev.uploaded_reqs)
     {
         Peer const& peer = g_peers.at(msg.src_pid);  // sender of request
-        const float pg_delay = peer.get_neighbor_pgdelay(client_pid);
+        const float pg_delay = msg.pg_delay;
         const float time = ev.time + pg_delay;
 
         Event next_ev = Event(Event::Type::ARRIVAL,
@@ -432,17 +432,20 @@ void EventHandler::PeerJoinEvent(Event& ev)
 {
     const size_t kAborigin = GetAboriginSize();
 
-    if (ev.pid >= kAborigin)  // 不是 leecher 就要新增節點資料
+    if (ev.pid >= kAborigin)  // 如不是 leecher，就要新增節點資料
     {
         pm_->NewPeer(ev.pid);
-        g_peers.at(ev.pid).set_join_time(current_time_);
+        g_peers.at(ev.pid).set_join_time(ev.time);
         pm_->UpdatePeerRegStatus(PeerManager::ISF::JOIN, ev.pid);
     }
 }
 
 void EventHandler::PeerListReqRecvEvent(Event& ev)
 {
-    if (g_peers_reg_info[ev.pid])
+    Peer const& client = g_peers.at(ev.pid);
+
+    if (g_peers_reg_info[ev.pid] &&
+            !client.is_complete())
     {
         pm_->AllotNeighbors(ev.pid);
     }
@@ -451,25 +454,26 @@ void EventHandler::PeerListReqRecvEvent(Event& ev)
 void EventHandler::PeerListGetEvent(Event& ev)
 {
     // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
-    SendPieceReqs(ev);
+    Peer const& client = g_peers.at(ev.pid);
+
+    if (!client.is_complete()) SendPieceReqs(ev);
 }
 
 void EventHandler::PieceReqRecvEvent(Event& ev)
 {
-    // TODO 檢查要求者的 piece 狀態，只要有一個是完全沒拿到 piece
+    // 檢查要求者的 piece 狀態，只要有一個是完全沒拿到 piece
     // 就做 choking (先不採用）
     ev.admitted_reqs = Choking(ev.pid);
 }
 
 void EventHandler::PieceAdmitEvent(Event& ev)
 {
-    // TODO : 將 piece 送給要求者並產生 PieceGet 事件
+    // 將 piece 送給要求者並產生 PieceGet 事件
     ev.uploaded_reqs = ev.admitted_reqs;
 
     const int client_pid = ev.pid;
     for (auto const& msg : ev.uploaded_reqs)
     {
-        //std::cout << "\nSRC PID IN MSG: " << msg.src_pid << std::endl;
         Peer& peer = g_peers.at(msg.src_pid);
 
         // 得到 piece
@@ -481,7 +485,7 @@ void EventHandler::PieceAdmitEvent(Event& ev)
 
     ev.admitted_reqs.clear();
 
-    // TODO: 執行 choking 來產生下一次的 Piece Admit
+    // 執行 choking 來產生下一次的 Piece Admit
     ev.admitted_reqs = Choking(client_pid);
 }
 
@@ -494,6 +498,7 @@ void EventHandler::PieceGetEvent(Event& ev)
     {
         client.to_seed();
         ev.is_complete = true;
+        client.set_complete_time(ev.time);
     }
     else
     {
@@ -512,7 +517,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
 {
     Peer& client = g_peers.at(ev.pid);
     client.set_in_swarm(false);
-    client.set_leave_time(current_time_);
+    client.set_leave_time(ev.time);
     pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
@@ -520,7 +525,7 @@ void EventHandler::ProcessEvent(Event& ev)
 {
     // 如果 peer 已經離開，就不去處理其所屬的事件
     const bool in_swarm = g_peers_reg_info[ev.pid];
-    if (ev.type_bt != Event::PEER_JOIN && !in_swarm) return;
+    if (ev.type_bt != Event::PEER_JOIN && !in_swarm) { return; }
 
     // DEMO
     //if (ev.type_bt == Event::PEER_JOIN ||

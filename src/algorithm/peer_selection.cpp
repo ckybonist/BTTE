@@ -51,14 +51,14 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     // Erase self first, then, shuffle the index and
     // select other peers which in swarm.
     IntSet cand_pid_set = ExcludeSelf(in_swarm_set);
-    const int kCandSize = cand_pid_set.size();
+    const size_t kCandSize = cand_pid_set.size();
 
-    candidates_ = new int[cand_pid_set.size()];
-    if (nullptr == candidates_)
-        ExitError("\nMemory Allocation Fault in SetCandidates\n");
+    int* tmp_arr = new int[kCandSize];
+    if (tmp_arr == nullptr)
+        ExitError("Memory Allocation Error");
+    const int kUnvalidVal = -1;
+    for(size_t i = 0; i < kCandSize; i++) { tmp_arr[i] = kUnvalidVal; }
 
-    // Shuffle the set of candidates to ensure the selection is random
-    Shuffle<int>(rsc, candidates_, kCandSize);
 
     // for cluster-based, FIXME : 太冗長，可再縮減
     if (sort_cid_flag)
@@ -79,15 +79,15 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
         size_t index = 0;
         for (IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
         {
-            if (index >= cand_pid_set.size()) break;
-            candidates_[index] = *pid;
+            if (index >= kCandSize) break;
+            tmp_arr[index] = *pid;
         }
 
         // peers with different cid put on tail of array
         for (IntSetIter pid = diff_cluster_peers.begin(); pid != diff_cluster_peers.end(); pid++, index++)
         {
-            if (index >= cand_pid_set.size()) break;
-            candidates_[index] = *pid;
+            if (index >= kCandSize) break;
+            tmp_arr[index] = *pid;
         }
     }
     else  // for standard or load-balancing
@@ -95,11 +95,28 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
         int index = 0;
         for (IntSetIter it = cand_pid_set.begin(); it != cand_pid_set.end(); it++, index++)
         {
-            candidates_[index] = *it;
+            tmp_arr[index] = *it;
         }
     }
 
-    return cand_pid_set.size();
+    // Shuffle the set of candidates to ensure the selection is random
+    Shuffle<int>(rsc, tmp_arr, kCandSize);
+
+    // Copy result
+    candidates_ = new int[kCandSize];
+    if (nullptr == candidates_)
+        ExitError("\nMemory Allocation Fault\n");
+
+    for (size_t i = 0; i < kCandSize; i++)
+    {
+        if (tmp_arr[i] == kUnvalidVal) { break; }
+        else { candidates_[i] = tmp_arr[i]; }
+    }
+
+    delete [] tmp_arr;
+    tmp_arr = nullptr;
+
+    return kCandSize;
 }
 
 void IPeerSelection::DebugInfo(NeighborMap const& neighbors,

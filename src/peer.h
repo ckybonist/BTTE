@@ -41,6 +41,7 @@ class Peer
     void set_neighbor_counts(const int c);
     void incr_neighbor_counts(const int n);
     void set_join_time(const float t);
+    void set_complete_time(const float t);
     void set_leave_time(const float t);
 
     void push_send_msg(PieceMsg const& msg);
@@ -56,9 +57,11 @@ class Peer
     int get_pid() const;
     int get_cid() const;
     int get_neighbor_counts() const;
+    bool is_complete() const;
     float get_trans_time() const;
     float get_neighbor_pgdelay(const int nid) const;
     float get_join_time() const;
+    float get_complete_time() const;
     float get_leave_time() const;
     bool check_in_swarm() const;
     bool* get_piece_info() const;
@@ -89,8 +92,9 @@ class Peer
 
     Bandwidth bandwidth;
 
-    float join_time;     // start time of peer run the routine
-    float leave_time;      // end time of all pieces have been downloaded
+    float join_time;
+    float complete_time;   // time of peer getting all pieces
+    float leave_time;
 };
 
 extern std::vector<Peer> g_peers;
