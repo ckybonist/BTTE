@@ -1,0 +1,4 @@
+#!/bin/sh
+
+./script/init_dirs.sh
+./script/init_build.sh
