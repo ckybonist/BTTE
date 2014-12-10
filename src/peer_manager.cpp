@@ -134,9 +134,10 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
             // 紀錄
             if (!IsDupDest(dest_peers, dest_pid))
             {
+                const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
                 const float src_up_bw = client.get_bandwidth().uplink;
 
-                PieceMsg msg(client_pid, dest_pid, piece_no, src_up_bw);
+                PieceMsg msg(client_pid, dest_pid, piece_no, pg_delay, src_up_bw);
                 req_msgs.push_back(msg);
 
                 dest_peers.insert(dest_pid);
@@ -251,8 +252,6 @@ PeerManager::PeerManager()
 
 PeerManager::~PeerManager()
 {
-    std::cout << "\nDestructor of PeerManager\n";
-
     delete [] reserved_peer_levels_;
     reserved_peer_levels_ = nullptr;
 
@@ -360,18 +359,18 @@ void PeerManager::AllotNeighbors(const int pid) const
 MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
-
-    MsgList req_msgs;
     //if (target_pieces.size() == 0)
     //    std::cout << "\nNO TARGET PIECES CAN REQUEST\n";
     //else
+
+    MsgList req_msgs;
     req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     // DEBUG
     //for (PieceMsg const& msg : req_msgs)
     //{
     //    // debug
-    //    std::cout << "Piece Reqest Msg:" << std::endl;
+    //    std::cout << "\nPiece Reqest Msg:" << std::endl;
     //    std::cout << "   src: " << msg.src_pid << std::endl;
     //    std::cout << "   dest: " << msg.dest_pid << std::endl;
     //    std::cout << "   wanted piece: " << msg.piece_no << std::endl;
@@ -395,8 +394,9 @@ PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
     if (owners.size() != 0)
     {
         const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
+        const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
         const float src_up_bw = client.get_bandwidth().uplink;
-        msg = PieceMsg(client_pid, dest_pid, piece_no, src_up_bw);
+        msg = PieceMsg(client_pid, dest_pid, piece_no, pg_delay, src_up_bw);
     }
 
     return msg;
