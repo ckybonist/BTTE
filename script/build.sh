@@ -26,7 +26,7 @@ fi
 # Build project
 BUILD_DIR='build'
 if [ ! -d $BUILD_DIR ]; then
-    ./init_proj $COMPILE_FLAG
+    ./init_project $COMPILE_FLAG
 else
     cd $BUILD_DIR/$COMPILE_FLAG
     if [ "$CLEAN_FLAG" != "" ]; then
