@@ -18,8 +18,8 @@ void EnvManager::Init(const std::string filename)
     /* Rand Init */
     uniformrand::InitRandSeeds();
 
-    std::cout << "Initial Random Seeds:\n";
-    PrintRandSeeds();
+    //std::cout << "Initial Random Seeds:\n";
+    //PrintRandSeeds();
 
     /* Simulation Args Init */
     g_btte_args.InitArgs(filename);
@@ -35,6 +35,6 @@ void EnvManager::Simulate()
     evh.StartRoutine();
 
     ShowDbgInfo();
-    std::cout << "\n\nFinal Random Seeds:\n";
-    PrintRandSeeds();
+    //std::cout << "\n\nFinal Random Seeds:\n";
+    //PrintRandSeeds();
 }
