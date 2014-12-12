@@ -165,19 +165,16 @@ void PeerManager::InitAbstractObj()
         case PeerSelect_T::STANDARD:
             obj_peerselect_ =
                 static_cast<IPeerSelection*>(new StandardRule());
-            std::cout << "\n----Using Standard Peer Selection----\n\n";
             break;
 
         case PeerSelect_T::LOAD_BALANCING:
             obj_peerselect_ =
                 static_cast<IPeerSelection*>(new LoadBalancingRule());
-            std::cout << "\n----Using Load Balancing Peer Selection----\n\n";
             break;
 
         case PeerSelect_T::CLUSTER_BASED:
             obj_peerselect_ =
                 static_cast<IPeerSelection*>(new ClusterBasedRule());
-            std::cout << "\n----Using Cluster Based Peer Selection----\n\n";
             break;
 
         default:
@@ -192,20 +189,16 @@ void PeerManager::InitAbstractObj()
     {
         case PieceSelect_T::BUILTIN:
             //obj_pieceselect_ = static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
-            //std::cout << "\n----Builtin method: Random First Piece Selection----\n\n";
             obj_pieceselect_ = static_cast<IPieceSelection*>(new RarestFirst());
-            std::cout << "\n----Builtin method: Rarest First Selection----\n\n";
             break;
         case PieceSelect_T::USER_DEFINED_1:
             //obj_pieceselect_ =
             //    static_cast<IPieceSelect*>(new UserDefined1(*args_));
-            //std::cout << "\n----Using First User Defined Piece Selection----\n\n";
             break;
 
         case PieceSelect_T::USER_DEFINED_2:
             //obj_pieceselect_ =
             //    static_cast<IPieceSelect*>(new UserDefined2(*args_));
-            //std::cout << "\n----Using Second User Defined Piece Selection----\n\n";
             break;
 
         default:
@@ -219,21 +212,10 @@ PeerManager::PeerManager()
 {
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
-    // Init regestration info of peers
-    //if (g_peers_reg_info == nullptr)
-    //{
-    //    g_peers_reg_info = new bool[NUM_PEER];
-    //    if (g_peers_reg_info == nullptr)
-    //       ExitError("Memory Allocation Error");
-
-    //    for (size_t i = 0; i < NUM_PEER; i++)
-    //        g_peers_reg_info[i] = false;
-    //}
-
-    // Init object of algorithm execution
+    /* Init object of algorithm execution */
     InitAbstractObj();
 
-    // Init member data
+    /* Init member data */
     reserved_peer_levels_ = new int[NUM_PEER];
     if (nullptr == reserved_peer_levels_)
         ExitError("Memory Allocation Fault");
@@ -261,11 +243,10 @@ PeerManager::~PeerManager()
     for (size_t p = 0; (size_t)p < g_btte_args.get_num_peer(); p++)
         g_peers.at(p).destroy_pieces();
 
-    // also call the destructor to delete neighbors
-    delete obj_peerselect_; // MUST BEFORE THE DELETION OF G_PEERS
+    delete obj_peerselect_; // MUST BEFORE THE DELETION OF g_peers (if it is array)
     obj_peerselect_ = nullptr;
 
-    delete obj_pieceselect_; // MUST BEFORE THE DELETION OF G_PEERS
+    delete obj_pieceselect_; // MUST BEFORE THE DELETION OF g_peers (if it is array)
     obj_pieceselect_ = nullptr;
 
     //delete [] g_peers;

@@ -17,6 +17,8 @@ using std::endl;
 namespace
 {
 
+void SimuArgsInfo();
+
 void TTInfo(std::ofstream& ofs);
 
 void PeerInfo(std::ofstream& ofs, const int pid);
@@ -82,12 +84,14 @@ void ShowDbgInfo()
     if (nullptr == piece_own_counter)
         ExitError("Memory Allocation Fault");
 
+    /* Simulation Arguments Info */
+    SimuArgsInfo();
+
     std::ofstream ofs;
     ofs.open("peer_info.txt");
 
     /* Transmission Time Info */
     TTInfo(ofs);
-
 
     /* Show debug info */
     ofs.precision(3);
@@ -124,12 +128,44 @@ void ShowDbgInfo()
 namespace
 {
 
+void SimuArgsInfo()
+{
+    cout << "Simulation Arguments:\n";
+    cout << "NUM_PEER : " << g_btte_args.get_num_peer() << endl;
+    cout << "NUM_SEED : " << g_btte_args.get_num_seed() << endl;
+    cout << "NUM_LEECH : " << g_btte_args.get_num_leech() << endl;
+    cout << "NUM_PEERLIST : " << g_btte_args.get_num_peerlist() << endl;
+    cout << "NUM_PIECE : " << g_btte_args.get_num_piece() << endl;
+
+    cout << "NUM_CHOKING : " << g_btte_args.get_num_choking() << endl;
+    cout << "NUM_OU (Optimistic Unchoking) : " << g_btte_args.get_num_ou() << endl;
+
+    std::string ns_algo = "";
+    switch (g_btte_args.get_type_peerselect())
+    {
+        case 0:
+            ns_algo = "Standard";
+            break;
+        case 1:
+            ns_algo = "Load Balancing";
+            break;
+        case 2:
+            ns_algo = "Cluster Based";
+            break;
+        default:
+            break;
+    }
+    cout << "Peer Selection Type : " << ns_algo;
+    cout << endl << endl;
+}
+
 void TTInfo(std::ofstream& ofs)
 {
+    ofs << "@ Transmission Time of Piece:\n";
     for (int i = 0; i < g_kNumLevel; i++)
     {
         const float up_bandwidth = g_kPeerLevel[i].bandwidth.downlink;
-        ofs << "Transmission Time of level " << i << " : "
+        ofs << "   Level " << i << " : "
             << g_kPieceSize / up_bandwidth << std::endl;
     }
     ofs << "\n\n\n";
@@ -157,8 +193,8 @@ void PeerInfo(std::ofstream& ofs, const int pid)
     }
 
     auto& bandwidth = peer.get_bandwidth();
-    ofs << "Upload Bandwidth: " << bandwidth.uplink << endl;
-    ofs << "Download Bandwidth: " << bandwidth.downlink << endl;
+    ofs << "Upload Bandwidth (bps): " << bandwidth.uplink << endl;
+    ofs << "Download Bandwidth (bps): " << bandwidth.downlink << endl;
 }
 
 void PieceInfo(std::ofstream& ofs,

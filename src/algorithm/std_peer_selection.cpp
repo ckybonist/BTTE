@@ -56,7 +56,7 @@ NeighborMap StandardRule::StartSelection(const int client_pid,
 
     AssignNeighbors(neighbors, candidates_size);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 
