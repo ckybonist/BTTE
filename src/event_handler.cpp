@@ -275,19 +275,44 @@ void EventHandler::PushInitEvent()
     const size_t NUM_SEED = g_btte_args.get_num_seed();
     const size_t NUM_LEECH = g_btte_args.get_num_leech();
     //const int initial_pid = NUM_SEED + NUM_LEECH;
-    const int initial_pid = NUM_SEED;
-    const int initial_idx = 1;
-    const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    //const int initial_pid = NUM_SEED;
+    //const int initial_idx = 1;
+    //const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
 
+    /* 先將每個 leechers 的 Piece-Get 事件產生 */
+    int pid = NUM_SEED;
+    int ev_idx = 1;
+    while (pid < GetAboriginSize())
+    {
+        const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+        Event ev(Event::Type::ARRIVAL,
+                 Event::PIECE_GET,
+                 ev_idx,
+                 pid,
+                 time);
+        event_list_.push_back(ev);
+
+        ++ev_idx;
+        ++pid;
+    }
+
+    /* 再產生第一個 normal peer 的 Join 事件 */
+    const float time = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
     Event first_event(Event::Type::ARRIVAL,
                       Event::PEER_JOIN,
-                      initial_idx,
-                      initial_pid,
+                      ev_idx,
+                      pid,
                       time);
+    //Event first_event(Event::Type::ARRIVAL,
+    //                  Event::PEER_JOIN,
+    //                  initial_idx,
+    //                  initial_pid,
+    //                  time);
 
     event_list_.push_back(first_event);
 
-    next_event_idx_ = initial_idx;  // init next event index
+    next_event_idx_ = ev_idx;  // init next event index
+    //next_event_idx_ = initial_idx;  // init next event index
 }
 
 void EventHandler::PushArrivalEvent(Event const& ev)

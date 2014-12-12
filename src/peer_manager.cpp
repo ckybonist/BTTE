@@ -298,6 +298,7 @@ void PeerManager::NewPeerData(Peer::Type type,
 
         case Peer::LEECH:
             peer.InitPieces(type, NUM_PIECE, prob_leech);
+            AllotNeighbors(peer.get_pid());
             break;
 
         default:
