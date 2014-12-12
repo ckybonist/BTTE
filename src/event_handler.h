@@ -16,8 +16,7 @@ class EventHandler
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
-  private:
-    void StartRoutine();  // main routine
+  private: void StartRoutine();  // main routine
 
     void MapEventFuncs();
     void MapEventFlow();
@@ -34,7 +33,7 @@ class EventHandler
 
     void ProcessArrival(Event& ev);
     void ProcessDeparture(Event const& ev);
-    void ProcessEvent(Event& ev);
+    void ProcessEvent(Event& ev, std::ofstream& ofs);
 
     bool ReqTimeout(Event const& ev);   // TODO
     void SendPieceReqs(Event& ev);

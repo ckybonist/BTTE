@@ -441,15 +441,6 @@ void PeerManager::CreateSwarm()
     const size_t NUM_PEER = g_btte_args.get_num_peer();
     g_peers.reserve(NUM_PEER);
 
-    // DEBUG
-    for (int i = 0; i < g_kNumLevel; i++)
-    {
-        const float up_bandwidth = g_kPeerLevel[i].bandwidth.downlink;
-        std::cout << "Transmission Time of level " << i << " : "
-                  << g_kPieceSize / up_bandwidth << std::endl;
-    }
-    std::cout << "\n\n\n";
-
     // allocate memroy for peers
     //AllocPeersSpace();
 
@@ -480,13 +471,13 @@ void PeerManager::DeployPeersLevel()
         }
     }
 
-    std::cout << "\n";
-    for (int i = 0; i < 3; i++)
-    {
-        std::cout << "Amount of level " << i + 1 << " peers: "
-                  << count[i] << "\n";
-    }
-    std::cout << "\n";
+    //std::cout << "\n";
+    //for (int i = 0; i < 3; i++)
+    //{
+    //    std::cout << "Amount of level " << i + 1 << " peers: "
+    //              << count[i] << "\n";
+    //}
+    //std::cout << "\n";
 }
 
 void PeerManager::DeployClusterIDs()
@@ -551,6 +542,4 @@ void PeerManager::InitLeeches()
         double prob_leech = Roll<double>(RSC::PROB_LEECH, 0.1, 0.9);
         NewPeerData(Peer::LEECH, p, prob_leech);
     }
-
-    std::cout << "============================\n";
 }

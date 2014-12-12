@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fstream>
 #include <cassert>
 #include <cmath>
 
@@ -20,9 +20,12 @@ namespace
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
-void EventInfo(Event const& head, float cur_sys_time);
+void WriteEventInfo(std::ofstream& ofs,
+                    Event const& head,
+                    float cur_sys_time);
 size_t GetAboriginSize();
 
+TBTmapStr tbt2str;
 }
 
 
@@ -546,7 +549,7 @@ void EventHandler::PeerLeaveEvent(Event& ev)
     pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
-void EventHandler::ProcessEvent(Event& ev)
+void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
 {
     // DEMO
     //if (ev.type_bt == Event::PEER_JOIN ||
@@ -555,8 +558,7 @@ void EventHandler::ProcessEvent(Event& ev)
     //    EventInfo(ev, current_time_);
     //}
 
-    // Print info of all events
-    EventInfo(ev, current_time_);
+    WriteEventInfo(ofs, ev, current_time_);
 
     if (ev.type == Event::Type::ARRIVAL)
     {
@@ -577,14 +579,20 @@ void EventHandler::StartRoutine()
     //const int num_avg_peer = args_.NUM_PEER - aborigin;
     PushInitEvent();
 
+    Event2Str(tbt2str);  // debug
+    std::ofstream ofs;
+    ofs.open("event_log.txt");
+
     while (!event_list_.empty())
     {
         Event head = event_list_.front();
 
         event_list_.pop_front();
 
-        ProcessEvent(head);
+        ProcessEvent(head, ofs);
     }
+
+    ofs.close();
 }
 
 
@@ -611,27 +619,24 @@ void Event2Str(TBTmapStr& tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
-void EventInfo(Event const& head, float sys_cur_time)
+void WriteEventInfo(std::ofstream& ofs,
+                    Event const& head,
+                    float sys_cur_time)
 {
-    std::cout.precision(5);
+    ofs.precision(5);
 
-    TBTmapStr tbt2str;
-    Event2Str(tbt2str);
-
-    std::cout << std::flush;
     if (head.type == Event::Type::ARRIVAL)
     {
-        std::cout << "\nEvent #" << head.index << " arrival at " << head.time;
-        std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
+        ofs << "\nEvent #" << head.index << " arrival at " << head.time;
+        ofs << "\nCurrent System time: " << sys_cur_time << "\n";
     }
     else
     {
-        std::cout << "\nEvent #" << head.index << " departure at " << head.time;
-        std::cout << "\nCurrent System time: " << sys_cur_time << "\n";
+        ofs << "\nEvent #" << head.index << " departure at " << head.time;
+        ofs << "\nCurrent System time: " << sys_cur_time << "\n";
     }
-    std::cout << "It is a " << tbt2str[head.type_bt];
-    std::cout << "\nThis event belongs to peer #" << head.pid
-              << "\n\n\n";
+    ofs <<  tbt2str[head.type_bt];
+    ofs << "\nBelongs to peer #" << head.pid << "\n\n";
 }
 
 }  // namespace
