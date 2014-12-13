@@ -17,9 +17,6 @@ void LoadBalancingRule::RefreshInfo()
 {
     delete [] nbc_info_;
     nbc_info_ = nullptr;
-
-    delete [] candidates_;
-    candidates_ = nullptr;
 }
 
 void LoadBalancingRule::AllocNBCInfo(const size_t N)
@@ -41,7 +38,7 @@ void LoadBalancingRule::GatherNeighborCounts(const size_t cand_size)
     }
 }
 
-void LoadBalancingRule::SortCountsInfo(const size_t cand_size)
+void LoadBalancingRule::SortCountsInfo(const size_t num_candidates)
 {
     auto func_comp = [] (const void* a, const void* b) {
         const NBCountsInfo* pa = (NBCountsInfo*)a;
@@ -50,12 +47,12 @@ void LoadBalancingRule::SortCountsInfo(const size_t cand_size)
     };
 
     qsort(nbc_info_,
-          cand_size,
+          num_candidates,
           sizeof(NBCountsInfo),
           func_comp);
 
     std::cout << "\nNBC Info (pid, neighbor_counts):\n";
-    for (size_t i = 0; i < cand_size; i++)
+    for (size_t i = 0; i < num_candidates; i++)
     {
         std::cout << "(" << nbc_info_[i].pid
                   << ",  " << nbc_info_[i].counts << ")\n";
@@ -64,16 +61,17 @@ void LoadBalancingRule::SortCountsInfo(const size_t cand_size)
 }
 
 void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
-                                        const size_t cand_size)
+                                        const size_t num_candidates)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
 
     for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
-        if (i < cand_size)
+        if (i < num_candidates)
         {
             const int cand_pid = nbc_info_[i].pid;
             float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
+
             Neighbor nei_info = Neighbor(pg_delay);
             neighbors.insert(std::pair<int, Neighbor>(cand_pid, nei_info));
             g_peers.at(cand_pid).incr_neighbor_counts(1);  // Important
@@ -83,6 +81,7 @@ void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
     }
 }
 
+// FIXME : Maybe has bug : peer not complete
 NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
                                               const IntSet& in_swarm_set)
 {
@@ -92,14 +91,15 @@ NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
 
     NeighborMap neighbors;
 
-    size_t candidates_size = SetCandidates(in_swarm_set, RSC::LB_PEERSELECT, false);
+    size_t num_candidates = SetCandidates(in_swarm_set,
+                                          RSC::LB_PEERSELECT);
 
-    GatherNeighborCounts(candidates_size);
+    GatherNeighborCounts(num_candidates);
 
     // Sort neighbor counts (low to high)
-    SortCountsInfo(candidates_size);
+    SortCountsInfo(num_candidates);
 
-    AssignNeighbors(neighbors, candidates_size);
+    AssignNeighbors(neighbors, num_candidates);
 
     //DebugInfo(neighbors, client_pid);
 
