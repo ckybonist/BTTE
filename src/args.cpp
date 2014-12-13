@@ -1,4 +1,8 @@
+#include <cmath>
+
 #include "utils/config.h"
+#include "peer_level.h"
+#include "cluster_info.h"
 #include "algorithm/peer_selection.h"
 #include "algorithm/piece_selection.h"
 #include "args.h"
@@ -6,7 +10,6 @@
 
 using namespace btte_peer_selection;
 using namespace btte_piece_selection;
-
 
 Args g_btte_args;
 
@@ -33,6 +36,50 @@ void Args::InitArgs(const std::string filename)
                        static_cast<int>(PieceSelect_T::BUILTIN));
 
     //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
+
+    CheckArgs();
+}
+
+void Args::CheckArgs()
+{
+    auto not_integer = [=] (const float num) {
+        return num != std::floor(num);
+    };
+
+    bool exist_err = false;
+
+    if (not_integer(NUM_PEER * lv1_ratio) ||
+        not_integer(NUM_PEER * lv2_ratio) ||
+        not_integer(NUM_PEER * lv3_ratio))
+    {
+        std::cout << "ValueError: NUM_PEER (value multiply by ratio of peer-level is not integer)";
+        exist_err = true;
+    }
+    else if (NUM_PEER % g_kNumClusters != 0)
+    {
+        std::cout << "ValueError: NUM_PEER (value divided by number of clusters is not divisible)";
+        exist_err = true;
+    }
+    else if (NUM_SEED + NUM_LEECH >= NUM_PEER)
+    {
+        std::cout << "ValueError: NUM_SEED or NUM_LEECH (sum of NUM_PEER and NUM_LEECH must smaller than NUM_PEER)";
+        exist_err = true;
+    }
+    else if (NUM_PEERLIST > 50)
+    {
+        std::cout << "ValueError: NUM_PEERLIST (must smaller or equal 50)";
+        exist_err = true;
+    }
+    else if (TYPE_PEERSELECT < (int)PeerSelect_T::STANDARD ||
+             TYPE_PEERSELECT > (int)PeerSelect_T::CLUSTER_BASED ||
+             TYPE_PIECESELECT < (int)PieceSelect_T::BUILTIN ||
+             TYPE_PIECESELECT > (int)PieceSelect_T::USER_DEFINED_2)
+    {
+        std::cout << "ValueError: Type of Algorithm";
+        exist_err = true;
+    }
+
+    if (exist_err) exit(1);
 }
 
 /* getter */

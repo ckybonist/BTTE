@@ -22,6 +22,8 @@ class Args
     float get_arrival_rate() const;
 
   private:
+    void CheckArgs();
+
     size_t NUM_PEER;
     size_t NUM_SEED;
     size_t NUM_LEECH;
