@@ -93,8 +93,10 @@ void Shuffle(const RSC rsc, T* arr, size_t N);
  *	   except numbers in that exclusive set
  *
  * */
-template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size]);
+template<typename T>
+T RangeRandNumExceptEx(const RSC rsc,
+                       const size_t set_size,
+                       const T* exclude_set);
 
 
 // For STL containers except set

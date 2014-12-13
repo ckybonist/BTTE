@@ -436,7 +436,9 @@ void PeerManager::DeployPeersLevel()
 
     for (size_t p = 0; p < NUM_PEER; p++)
     {
-        int level = RangeRandNumExceptEx<int, g_kNumLevel>(RSC::PEER_LEVEL, exclude_set);
+        int level = RangeRandNumExceptEx<int>(RSC::PEER_LEVEL,
+                                              g_kNumLevel,
+                                              exclude_set);
         const int idx = level - 1;
 
         reserved_peer_levels_[p] = idx;
@@ -471,7 +473,9 @@ void PeerManager::DeployClusterIDs()
     // the volume (NUM_PEER / g_kNumClusters) of cluster
     for (size_t p = 0; p < NUM_PEER; p++)
     {
-        int cid = RangeRandNumExceptEx<int, g_kNumClusters>(RSC::CB_PEERSELECT, exclude_set);
+        int cid = RangeRandNumExceptEx<int>(RSC::CB_PEERSELECT,
+                                            g_kNumClusters,
+                                            exclude_set);
         const int idx = cid - 1;
 
         reserved_cids_[p] = cid;

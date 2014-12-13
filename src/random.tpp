@@ -98,9 +98,13 @@ void Shuffle(const RSC rsc, T *arr, size_t N)
     }
 }
 
-template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size])
+template<typename T>
+T RangeRandNumExceptEx(const RSC rsc,
+                       const size_t set_size,
+                       const T* exclude_set)
 {
+    assert(sizeof(exclude_set) / sizeof(*exclude_set) == set_size);  // check array size
+
 	int target = 0;
 	bool flag = true;
     const int low = 1;  // NOTE: don't use 0, it will conflict with loop counter
