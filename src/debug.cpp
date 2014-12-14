@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 
 #include "args.h"
 #include "error.h"
 #include "random.h"
+#include "peer_level.h"
 #include "peer.h"
 
 #include "debug.h"
@@ -15,14 +17,20 @@ using std::endl;
 namespace
 {
 
-void PeerInfo(const int pid);
+void SimuArgsInfo();
 
-void PieceInfo(const int pid,
+void TTInfo(std::ofstream& ofs);
+
+void PeerInfo(std::ofstream& ofs, const int pid);
+
+void PieceInfo(std::ofstream& ofs,
+               const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter);
 
-void NeighborInfo(const int pid,
+void NeighborInfo(std::ofstream& ofs,
+                  const int pid,
                   const size_t NUM_PEERLIST);
 
 typedef std::map<RSC, std::string> RSmapStr;
@@ -76,25 +84,34 @@ void ShowDbgInfo()
     if (nullptr == piece_own_counter)
         ExitError("Memory Allocation Fault");
 
-    cout.precision(3);
-    cout << "\n\n\n\n@ Peer Info: \n\n";
+    /* Simulation Arguments Info */
+    SimuArgsInfo();
 
+    std::ofstream ofs;
+    ofs.open("peer_info.txt");
+
+    /* Transmission Time Info */
+    TTInfo(ofs);
+
+    /* Show debug info */
+    ofs.precision(3);
+    ofs << "@ Peer Info:\n\n";
     for (size_t pid = 0; pid < NUM_PEER; pid++)
     {
-        PeerInfo(pid);
+        PeerInfo(ofs, pid);
 
-        PieceInfo(pid, NUM_PIECE, NUM_SEED, piece_own_counter);
+        PieceInfo(ofs, pid, NUM_PIECE, NUM_SEED, piece_own_counter);
 
         if (pid >= NUM_SEED)
-            NeighborInfo(pid, NUM_PEERLIST);
+            NeighborInfo(ofs, pid, NUM_PEERLIST);
 
-        // Total download time
         Peer const& peer = g_peers.at(pid);
-        const float time_to_complete = peer.get_complete_time() - peer.get_join_time();
-        cout << "\nUsed Time for Getting All Pieces : "
-             << time_to_complete << std::endl;
+        const float time_to_complete = peer.get_complete_time() -
+                                                peer.get_join_time();
+        ofs << "\nUsed Time for Getting All Pieces : "
+            << time_to_complete << std::endl;
 
-        cout << "\n===========================\n\n";
+        ofs << "\n===========================\n\n";
     }
 
     //cout << "\nNumber of peers own each piece:\n";
@@ -104,39 +121,84 @@ void ShowDbgInfo()
     //         << piece_own_counter[i] << endl;
     //}
 
+    ofs.close();
     delete [] piece_own_counter;
 }
 
 namespace
 {
 
-void PeerInfo(const int pid)
+void SimuArgsInfo()
 {
-    cout << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
-    cout << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
-    cout << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
+    cout << "Simulation Arguments:\n";
+    cout << "NUM_PEER : " << g_btte_args.get_num_peer() << endl;
+    cout << "NUM_SEED : " << g_btte_args.get_num_seed() << endl;
+    cout << "NUM_LEECH : " << g_btte_args.get_num_leech() << endl;
+    cout << "NUM_PEERLIST : " << g_btte_args.get_num_peerlist() << endl;
+    cout << "NUM_PIECE : " << g_btte_args.get_num_piece() << endl;
+
+    cout << "NUM_CHOKING : " << g_btte_args.get_num_choking() << endl;
+    cout << "NUM_OU (Optimistic Unchoking) : " << g_btte_args.get_num_ou() << endl;
+
+    std::string ns_algo = "";
+    switch (g_btte_args.get_type_peerselect())
+    {
+        case 0:
+            ns_algo = "Standard";
+            break;
+        case 1:
+            ns_algo = "Load Balancing";
+            break;
+        case 2:
+            ns_algo = "Cluster Based";
+            break;
+        default:
+            break;
+    }
+    cout << "Peer Selection Type : " << ns_algo;
+    cout << endl << endl;
+}
+
+void TTInfo(std::ofstream& ofs)
+{
+    ofs << "@ Transmission Time of Piece:\n";
+    for (int i = 0; i < g_kNumLevel; i++)
+    {
+        const float up_bandwidth = g_kPeerLevel[i].bandwidth.downlink;
+        ofs << "   Level " << i << " : "
+            << g_kPieceSize / up_bandwidth << std::endl;
+    }
+    ofs << "\n\n\n";
+}
+
+void PeerInfo(std::ofstream& ofs, const int pid)
+{
+    ofs << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
+    ofs << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
+    ofs << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
 
     auto peer = g_peers.at(pid);
 
     if (peer.get_type() == Peer::SEED)
     {
-        cout << "Peer type: Seed" << endl;
+        ofs << "Peer type: Seed" << endl;
     }
     else if (peer.get_type() == Peer::LEECH)
     {
-        cout << "Peer type: Leech" << endl;
+        ofs << "Peer type: Leech" << endl;
     }
     else
     {
-        cout << "Peer type: Average" << endl;
+        ofs << "Peer type: Average" << endl;
     }
 
     auto& bandwidth = peer.get_bandwidth();
-    cout << "Upload Bandwidth: " << bandwidth.uplink << endl;
-    cout << "Download Bandwidth: " << bandwidth.downlink << endl;
+    ofs << "Upload Bandwidth (bps): " << bandwidth.uplink << endl;
+    ofs << "Download Bandwidth (bps): " << bandwidth.downlink << endl;
 }
 
-void PieceInfo(const int pid,
+void PieceInfo(std::ofstream& ofs,
+               const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter)
@@ -151,26 +213,27 @@ void PieceInfo(const int pid,
             if ((size_t)pid >= NUM_SEED) ++counter[c];
         }
     }
-    cout << "\nPieces status:\n";
-    cout << "    * Get: " << piece_count << endl;
-    cout << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
+    ofs << "\nPieces status:\n";
+    ofs << "    * Get: " << piece_count << endl;
+    ofs << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
 }
 
-void NeighborInfo(const int pid, const size_t NUM_PEERLIST)
+void NeighborInfo(std::ofstream& ofs,
+                  const int pid,
+                  const size_t NUM_PEERLIST)
 {
     /////////////////////////
     // neighbors info
-    cout << "\nNeighbors info (pid, cid, neighbor_counts, pg_delay):\n";
-    //for(int k = 0; (size_t)k < NUM_PEERLIST; k++)
+    ofs << "\nNeighbors info (pid, cid, neighbor_counts, pg_delay):\n";
     for (auto& nei : g_peers.at(pid).get_neighbors())
     {
         const int nid = nei.first;
         Neighbor const& nei_info = nei.second;
-        cout << "    (" << nid
-             << ",  " << g_peers.at(nid).get_cid()
-             << ",  " << g_peers.at(nid).get_neighbor_counts()
-             << ",  " << nei_info.pg_delay
-             << ")" << endl;
+        ofs << "    (" << nid
+            << ",  " << g_peers.at(nid).get_cid()
+            << ",  " << g_peers.at(nid).get_neighbor_counts()
+            << ",  " << nei_info.pg_delay
+            << ")" << endl;
     }
 }
 

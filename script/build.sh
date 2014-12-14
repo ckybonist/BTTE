@@ -3,7 +3,7 @@
 # Check arguments
 if [ $# -ge 1 ]; then
     COMPILE_FLAG=$1
-    if [[ "$COMPILE_FLAG" != "debug" && "$COMPILE_FLAG" != "release" ]]; then
+    if [[ "$COMPILE_FLAG" != "debug" && "$COMPILE_FLAG" != "release" && $COMPILE_FLAG != "all" ]]; then
         echo "Give me \"debug\" or \"release\" as first argument otherwise empty string"
         exit 1
     fi
@@ -26,12 +26,19 @@ fi
 # Build project
 BUILD_DIR='build'
 if [ ! -d $BUILD_DIR ]; then
-    ./init_proj $COMPILE_FLAG
+    ./init_project $COMPILE_FLAG
 else
-    cd $BUILD_DIR/$COMPILE_FLAG
-    if [ "$CLEAN_FLAG" != "" ]; then
-        make clean
+    if [ $COMPILE_FLAG == "all" ]; then
+        cd $BUILD_DIR/release
+        make clean && make
+        cd ../debug
+        make clean && make
+    else
+        cd $BUILD_DIR/$COMPILE_FLAG
+        if [ "$CLEAN_FLAG" != "" ]; then
+            make clean
+        fi
+        make
     fi
-    make
 fi
 

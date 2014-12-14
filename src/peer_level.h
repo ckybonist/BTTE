@@ -18,35 +18,11 @@ struct PeerLevel
     Bandwidth bandwidth;
 };
 
-const int g_kNumLevel = 3;
-const PeerLevel g_kPeerLevel[g_kNumLevel] =
-{
-    // fatest
-    {
-        0.3,
-        {
-            10 * 1024 * 1024,
-            10 * 1024 * 1024
-        }
-    },
+extern const size_t g_kNumLevel;  // equal to 3
+extern const float lv1_ratio;
+extern const float lv2_ratio;
+extern const float lv3_ratio;
 
-    // average
-    {
-        0.5,
-        {
-            128 * 1024,
-            1.5 * 1024 * 1024
-        }
-    },
-
-    // slowest
-    {
-        0.2,
-        {
-            56 * 1024,
-            56 * 1024
-        }
-    },
-};
+extern const PeerLevel g_kPeerLevel[];
 
 #endif // for #ifndef _PEER_LEVEL_H
