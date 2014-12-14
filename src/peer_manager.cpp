@@ -341,9 +341,6 @@ void PeerManager::AllotNeighbors(const int pid) const
 MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
 {
     IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
-    //if (target_pieces.size() == 0)
-    //    std::cout << "\nNO TARGET PIECES CAN REQUEST\n";
-    //else
 
     MsgList req_msgs;
     req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
@@ -453,14 +450,6 @@ void PeerManager::DeployPeersLevel()
                 exclude_set[idx] = level;
         }
     }
-
-    //std::cout << "\n";
-    //for (int i = 0; i < 3; i++)
-    //{
-    //    std::cout << "Amount of level " << i + 1 << " peers: "
-    //              << count[i] << "\n";
-    //}
-    //std::cout << "\n";
 }
 
 void PeerManager::DeployClusterIDs()

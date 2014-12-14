@@ -23,7 +23,7 @@ void LoadBalancingRule::AllocNBCInfo(const size_t N)
 {
     nbc_info_ = new NBCountsInfo[N];
     if (nbc_info_ == nullptr)
-        std::cout << "Memory Allocation Fault!";
+        ExitError("Memory Allocation Fault!");
 }
 
 void LoadBalancingRule::GatherNeighborCounts(const size_t cand_size)
@@ -70,7 +70,7 @@ void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
         if (i < num_candidates)
         {
             const int cand_pid = nbc_info_[i].pid;
-            float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
+            float pg_delay = Roll(RSC::LB_PEERSELECT, 0.01, 1.0);
 
             Neighbor nei_info = Neighbor(pg_delay);
             neighbors.insert(std::pair<int, Neighbor>(cand_pid, nei_info));
@@ -81,7 +81,6 @@ void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
     }
 }
 
-// FIXME : Maybe has bug : peer not complete
 NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
                                               const IntSet& in_swarm_set)
 {
@@ -101,7 +100,7 @@ NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
 
     AssignNeighbors(neighbors, num_candidates);
 
-    //DebugInfo(neighbors, client_pid);
+    DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

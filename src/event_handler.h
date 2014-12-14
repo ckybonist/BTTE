@@ -13,14 +13,16 @@ class EventHandler
   public:
     EventHandler(PeerManager* const pm, float lambda, float mu);
     ~EventHandler();
+
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
-  private: void StartRoutine();  // main routine
+
+  private:
+    void StartRoutine();  // main routine
 
     void MapEventFuncs();
     void MapEventFlow();
-    void MapFlowDownEventDependencies();
 
     void PushInitEvent();
     void PushDerivedEvent(Event const& ev);
@@ -42,23 +44,27 @@ class EventHandler
     void GetNewPeerList(Event const& ev);
     void GenrPieceReqRecvEvents(Event const& ev);
 
-    // is_first_admit: 代表如果當前所 admit 的要求是最新的就為 true, 反之，
-    // 如果要求是之前 wating 的就為 false。這牽涉到 event 到達時間的計算。
-    void GenrPieceAdmitEvent(Event const& ev, const bool is_first_admit);
+    // 參數 is_first_admit 代表如果當前 admit 的要求是"最新"的就為 true,
+    // 反之， 如果是之前 wating 的就為 false。(牽涉到 event 到達時間的計算)
+    void GenrPieceAdmitEvent(Event const& ev,
+                             const bool is_first_admit);
 
-    void EC_1(Event const& ev);
-    void EC_2(Event const& ev);
-    void EC_3(Event const& ev);
-    void EC_4(Event const& ev);
-    void EC_5(Event const& ev);
-    void EC_6(Event const& ev);
-    void EC_7(Event const& ev);
+    void CheckNonProcessedReqs(Event const& ev);
+
+    void EC_1(Event const& ev);  // for Peer-Join event
+    void EC_2(Event const& ev);  // for Peer-List-Req-Recv event
+    void EC_3(Event const& ev);  // for Piece-Req event
+    void EC_4(Event const& ev);  // for Piece-Req-Recv event
+    void EC_5(Event const& ev);  // for Piece-Admit event
+    void EC_6(Event const& ev);  // for Piece-Get event
+    void EC_7(Event const& ev);  // for Completed event
+    void EC_8(Event const& ev);  // for Peer-Leave event
 
 
     /* Main BitTorrent Events */
     void PeerJoinEvent(Event& ev);
     void PeerListReqRecvEvent(Event& ev);
-    void PeerListGetEvent(Event& ev);
+    void PieceReqEvent(Event& ev);
     void PieceReqRecvEvent(Event& ev);
     void PieceAdmitEvent(Event& ev);
     void PieceGetEvent(Event& ev);
