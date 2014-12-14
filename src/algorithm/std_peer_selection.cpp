@@ -16,18 +16,16 @@ StandardRule::~StandardRule()
 
 void StandardRule::RefreshInfo()
 {
-    delete [] candidates_;
-    candidates_ = nullptr;
 }
 
 void StandardRule::AssignNeighbors(NeighborMap& neighbors,
-                               const size_t cand_size)
+                               const size_t num_candidates)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
 
     for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
-        if (i < cand_size)
+        if (i < num_candidates)
         {
             const int cand_pid = candidates_[i];
             float pg_delay = Roll(RSC::STD_PEERSELECT, 0.01, 1.0);
@@ -50,13 +48,12 @@ NeighborMap StandardRule::StartSelection(const int client_pid,
 
     NeighborMap neighbors;
 
-    size_t candidates_size = SetCandidates(in_swarm_set,
-                                           RSC::STD_PEERSELECT,
-                                           false);
+    size_t num_candidates = SetCandidates(in_swarm_set,
+                                          RSC::STD_PEERSELECT);
 
-    AssignNeighbors(neighbors, candidates_size);
+    AssignNeighbors(neighbors, num_candidates);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

@@ -108,9 +108,9 @@ bool Peer::is_complete() const
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
     bool flag = true;
-    for (int i = 0; i < NUM_PIECE; i++)
+    for (size_t i = 0; i < NUM_PIECE; i++)
     {
-        if (pieces[i] == false)
+        if (!pieces[i])
         {
             flag = false;
             break;

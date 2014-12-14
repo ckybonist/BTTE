@@ -15,8 +15,14 @@ class ClusterBasedRule : public IPeerSelection
   private:
     NeighborMap StartSelection(const int client_pid,
                                const IntSet& in_swarm_set) override;
+
     float ComputePGDelayByCluster(const int self_cid,
                                   const int cand_cid);
+
+    void AddNeighborData(NeighborMap& neighbors,
+                         const int pid,
+                         const int client_cid);
+
     void AssignNeighbors(NeighborMap& neighbors,
                          const size_t cand_size,
                          const int self_cid);

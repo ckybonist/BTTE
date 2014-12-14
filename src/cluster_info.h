@@ -3,6 +3,6 @@
 
 #include <cstdlib>
 
-const size_t g_kNumClusters = 4;
+extern const size_t g_kNumClusters;
 
 #endif // for #ifndef _CLUSTER_INFO_H

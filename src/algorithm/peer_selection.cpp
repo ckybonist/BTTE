@@ -9,16 +9,24 @@ namespace btte_peer_selection
 
 IPeerSelection::IPeerSelection()
 {
-    candidates_ = nullptr;
+    //candidates_ = nullptr;
 }
 
 IPeerSelection::~IPeerSelection()
 {
-    if (candidates_ != nullptr)
-    {
-        delete [] candidates_;
-        candidates_ = nullptr;
-    }
+    //if (candidates_ != nullptr)
+    //{
+    //    delete [] candidates_;
+    //    candidates_ = nullptr;
+    //}
+}
+
+void IPeerSelection::RefreshCandidates()
+{
+    //delete [] candidates_;
+    //candidates_ = nullptr;
+    if (!candidates_.empty())
+        candidates_.clear();
 }
 
 Neighbor* IPeerSelection::AllocNeighbors()
@@ -45,78 +53,53 @@ IntSet IPeerSelection::ExcludeSelf(const IntSet& in_swarm_set)
 // NOTE: if sort_cid_flag is true, then put peers that have
 // same cid as selector at the prior of array
 size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
-                                     const RSC rsc,
-                                     bool sort_cid_flag)
+                                     const RSC rsc)
 {
+    RefreshCandidates();
+
     // Erase self first, then, shuffle the index and
     // select other peers which in swarm.
     IntSet cand_pid_set = ExcludeSelf(in_swarm_set);
-    const size_t kCandSize = cand_pid_set.size();
+    const size_t num_candidates = cand_pid_set.size();
 
-    int* tmp_arr = new int[kCandSize];
-    if (tmp_arr == nullptr)
-        ExitError("Memory Allocation Error");
-    const int kUnvalidVal = -1;
-    for(size_t i = 0; i < kCandSize; i++) { tmp_arr[i] = kUnvalidVal; }
+    //int* tmp_arr = new int[num_candidates];
+    //if (tmp_arr == nullptr)
+    //    ExitError("Memory Allocation Error");
 
+    //const int init_val = -1;
+    //for(size_t i = 0; i < num_candidates; i++) { tmp_arr[i] = init_val; }
 
-    // for cluster-based, FIXME : 太冗長，可再縮減
-    if (sort_cid_flag)
+    //int index = 0;
+    //for (auto const& it : cand_pid_set)
+    //{
+    //    tmp_arr[index] = it;
+    //    ++index;
+    //}
+
+    for (const int pid : cand_pid_set)
     {
-        IntSet same_cluster_peers;
-        IntSet diff_cluster_peers;
-        const int self_cid = g_peers.at(selector_pid_).get_cid();
-
-        for (const int pid : cand_pid_set)
-        {
-            if (g_peers.at(pid).get_cid() == self_cid)
-                same_cluster_peers.insert(pid);
-            else
-                diff_cluster_peers.insert(pid);
-        }
-
-        // assign peers with same cid at front of array
-        size_t index = 0;
-        for (IntSetIter pid = same_cluster_peers.begin(); pid != same_cluster_peers.end(); pid++, index++)
-        {
-            if (index >= kCandSize) break;
-            tmp_arr[index] = *pid;
-        }
-
-        // peers with different cid put on tail of array
-        for (IntSetIter pid = diff_cluster_peers.begin(); pid != diff_cluster_peers.end(); pid++, index++)
-        {
-            if (index >= kCandSize) break;
-            tmp_arr[index] = *pid;
-        }
-    }
-    else  // for standard or load-balancing
-    {
-        int index = 0;
-        for (IntSetIter it = cand_pid_set.begin(); it != cand_pid_set.end(); it++, index++)
-        {
-            tmp_arr[index] = *it;
-        }
+        candidates_.push_back(pid);
     }
 
     // Shuffle the set of candidates to ensure the selection is random
-    Shuffle<int>(rsc, tmp_arr, kCandSize);
+    //Shuffle<int>(rsc, tmp_arr, num_candidates);
+    RandomShuffle(candidates_.begin(), candidates_.end());
 
     // Copy result
-    candidates_ = new int[kCandSize];
-    if (nullptr == candidates_)
-        ExitError("\nMemory Allocation Fault\n");
+    //candidates_ = new int[num_candidates];
+    //if (nullptr == candidates_)
+    //    ExitError("\nMemory Allocation Fault\n");
 
-    for (size_t i = 0; i < kCandSize; i++)
-    {
-        if (tmp_arr[i] == kUnvalidVal) { break; }
-        else { candidates_[i] = tmp_arr[i]; }
-    }
+    //for (size_t i = 0; i < num_candidates; i++)
+    //{
+    //    if (tmp_arr[i] == init_val) { break; }  // the values start here are not,
+    //    else { candidates_[i] = tmp_arr[i]; }
+    //}
 
-    delete [] tmp_arr;
-    tmp_arr = nullptr;
+    //delete [] tmp_arr;
+    //tmp_arr = nullptr;
 
-    return kCandSize;
+    return num_candidates;
 }
 
 void IPeerSelection::DebugInfo(NeighborMap const& neighbors,

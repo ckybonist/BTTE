@@ -1,3 +1,5 @@
+#include <list>
+
 #include "../pg_delay.h"
 #include "../cluster_info.h"
 #include "cb_peer_selection.h"
@@ -34,30 +36,68 @@ float ClusterBasedRule::ComputePGDelayByCluster(const int client_cid,
     return pg_delay;
 }
 
+void ClusterBasedRule::AddNeighborData(NeighborMap& neighbors,
+                                       const int pid,
+                                       const int client_cid)
+{
+    const int cid = g_peers.at(pid).get_cid();
+    float pg_delay = ComputePGDelayByCluster(client_cid, cid);
+
+    Neighbor nei_info = Neighbor(pg_delay);
+    neighbors.insert(std::pair<int, Neighbor>(pid, nei_info));
+    g_peers.at(pid).incr_neighbor_counts(1);
+
+}
+
 void ClusterBasedRule::AssignNeighbors(NeighborMap& neighbors,
-                                   const size_t cand_size,
+                                   const size_t num_candidates,
                                    const int client_cid)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
 
-    for (size_t i = 0; i < cand_size; i++)
+    std::list<int> nearby;   // peer and selector are in same cluster
+    std::list<int> faraway;  // in different cluster
+
+    for (size_t i = 0; i < num_candidates; i++)
     {
-        if (i >= NUM_PEERLIST) break;
+        //const int pid = candidates_[i];
+        const int pid = candidates_.at(i);
+        Peer const& client = g_peers.at(selector_pid_);
+        Peer const& peer = g_peers.at(pid);
 
-        const int pid = candidates_[i];
-        const int cid = g_peers.at(pid).get_cid();
-        float pg_delay = ComputePGDelayByCluster(client_cid, cid);
+        if (peer.get_cid() == client.get_cid())
+        {
+            nearby.push_back(pid);
+        }
+        else
+        {
+            faraway.push_back(pid);
+        }
+    }
 
-        Neighbor nei_info = Neighbor(pg_delay);
-        neighbors.insert(std::pair<int, Neighbor>(pid, nei_info));
-        g_peers.at(pid).incr_neighbor_counts(1);
+    int total_neighbors = 0;
+    for (const int pid : nearby)
+    {
+        if (total_neighbors == NUM_PEERLIST) break;
+
+        AddNeighborData(neighbors, pid, client_cid);
+
+        ++total_neighbors;
+    }
+
+    if (total_neighbors < NUM_PEERLIST)
+    {
+        for (const int pid : faraway)
+        {
+            if (total_neighbors == NUM_PEERLIST) break;
+            AddNeighborData(neighbors, pid, client_cid);
+            ++total_neighbors;
+        }
     }
 }
 
 void ClusterBasedRule::RefreshInfo()
 {
-    delete [] candidates_;
-    candidates_ = nullptr;
 }
 
 NeighborMap ClusterBasedRule::StartSelection(const int client_pid,
@@ -72,12 +112,13 @@ NeighborMap ClusterBasedRule::StartSelection(const int client_pid,
     // Set parameter of sort_cid_flag to true, in order to get
     // candidates (most part, not all) which have
     // same cluster id as selector.
-    size_t candidates_size = SetCandidates(in_swarm_set, RSC::CB_PEERSELECT, true);
+    size_t num_candidates = SetCandidates(in_swarm_set,
+                                           RSC::CB_PEERSELECT);
 
     const int client_cid = g_peers.at(client_pid).get_cid();
-    AssignNeighbors(neighbors, candidates_size, client_cid);
+    AssignNeighbors(neighbors, num_candidates, client_cid);
 
-    //DebugInfo(neighbors, client_pid);
+    DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

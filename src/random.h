@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
+#include <iterator>
 #include <set>
 
 #include "error.h"
@@ -75,7 +76,11 @@ T* DistinctRandNum(const RSC rsc,
                    const T rand_limit);
 
 template<typename T>
-void Shuffle(const RSC rsc, T* arr, size_t N);
+void Shuffle(const RSC rsc, T* arr, const size_t N);
+
+/* Only work for vector or deque which have iterator */
+template <class RandomIt>
+void RandomShuffle(RandomIt first, RandomIt last);
 
 
 /*
@@ -93,8 +98,10 @@ void Shuffle(const RSC rsc, T* arr, size_t N);
  *	   except numbers in that exclusive set
  *
  * */
-template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size]);
+template<typename T>
+T RangeRandNumExceptEx(const RSC rsc,
+                       const size_t set_size,
+                       const T* exclude_set);
 
 
 // For STL containers except set

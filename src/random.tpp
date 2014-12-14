@@ -77,7 +77,7 @@ T* DistinctRandNum(const RSC rsc,
 }
 
 template<typename T>
-void Shuffle(const RSC rsc, T *arr, size_t N)
+void Shuffle(const RSC rsc, T *arr, const size_t N)
 {
     if (arr == nullptr)
     {
@@ -98,8 +98,23 @@ void Shuffle(const RSC rsc, T *arr, size_t N)
     }
 }
 
-template<typename T, size_t set_size>
-T RangeRandNumExceptEx(const RSC rsc, const T (&exclude_set)[set_size])
+template <class RandomIt>
+void RandomShuffle(RandomIt first, RandomIt last)
+{
+     typename std::iterator_traits<RandomIt>::difference_type i, n;
+     n = last - first;
+     for (i = n-1; i > 0; --i)
+     {
+         using std::swap;
+         swap(first[i], first[std::rand() % (i+1)]);
+     }
+}
+
+
+template<typename T>
+T RangeRandNumExceptEx(const RSC rsc,
+                       const size_t set_size,
+                       const T* exclude_set)
 {
 	int target = 0;
 	bool flag = true;
