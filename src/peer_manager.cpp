@@ -427,8 +427,14 @@ void PeerManager::CreateSwarm()
 
 void PeerManager::DeployPeersLevel()
 {
-    int count[g_kNumLevel] = { 0 };
-    int exclude_set[g_kNumLevel] = { 0 };
+    int count[g_kNumLevel];
+    int exclude_set[g_kNumLevel];
+    for (size_t i = 0; i < g_kNumLevel; i++)
+    {
+        count[i] = 0;
+        exclude_set[i] = 0;
+    }
+
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     for (size_t p = 0; p < NUM_PEER; p++)
@@ -454,8 +460,14 @@ void PeerManager::DeployPeersLevel()
 
 void PeerManager::DeployClusterIDs()
 {
-    int count[g_kNumClusters] = { 0 };
-    int exclude_set[g_kNumClusters] = { 0 };
+    int count[g_kNumClusters];
+    int exclude_set[g_kNumClusters];
+    for (size_t i = 0; i < g_kNumClusters; i++)
+    {
+        count[i] = 0;
+        exclude_set[i] = 0;
+    }
+
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     // assing a cid to each peer, and don't exceed
