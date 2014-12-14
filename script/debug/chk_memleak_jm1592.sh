@@ -1,8 +1,3 @@
 #!/bin/sh
 
-if [ -f ../bin/BTTE ]; then
-    /home/jm1592/bin/valgrind/bin/valgrind --leak-check=full --track-origins=yes --log-file=leak.log ../bin/BTTE btte.conf.dbg > simu.log
-else
-    echo "No binary found"
-    exit 1
-fi
+/home/jm1592/bin/valgrind/bin/valgrind --leak-check=full --track-origins=yes --log-file=leak.log ../../build/debug/bin/BTTE btte.conf.dbg > simu.log
