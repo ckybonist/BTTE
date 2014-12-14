@@ -1,6 +1,10 @@
 #include "event.h"
 
-Event::Event(Type t, Type4BT t_bt, int idx, int pid, float ti)
+Event::Event(Type t,
+             Type4BT t_bt,
+             int idx,
+             int pid,
+             float ti)
 {
     type = t;
     type_bt = t_bt;

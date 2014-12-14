@@ -3,8 +3,9 @@
 
 #include <deque>
 
-#include "piece.h"
 #include "peer.h"
+#include "piece.h"
+
 
 class Event
 {
@@ -19,7 +20,7 @@ class Event
     {
         PEER_JOIN,
         PEERLIST_REQ_RECV,
-        PEERLIST_GET,
+        PIECE_REQ,
         PIECE_REQ_RECV,
         PIECE_ADMIT,
         PIECE_GET,
@@ -30,7 +31,7 @@ class Event
     Event() {};
     Event(Type t,        // arrival, departure
           Type4BT t_bt,  // type of BT event
-          int index,
+          int idx,
           int pid,       // which peer belongs to this event
           float ti);     // arrival time of event
 
