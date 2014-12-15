@@ -176,6 +176,8 @@ void PeerInfo(std::ofstream& ofs, const int pid)
     ofs << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
     ofs << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
     ofs << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
+    ofs << "\nFinish time (not yet): " << g_peers.at(pid).get_complete_time() << endl;
+    ofs << "\nDeparture time (not yet): " << g_peers.at(pid).get_leave_time() << endl;
 
     auto peer = g_peers.at(pid);
 

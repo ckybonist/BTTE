@@ -16,10 +16,11 @@ EnvManager& EnvManager::GetInstance()
 void EnvManager::Init(const std::string filename)
 {
     /* Rand Init */
-    uniformrand::InitRandSeeds();
+    const int init_seed = 1;
+    uniformrand::InitRandSeeds(init_seed);
 
-    //std::cout << "Initial Random Seeds:\n";
-    //PrintRandSeeds();
+    std::cout << "Initial Random Seeds: " << init_seed << "\n";
+    PrintRandSeeds();
 
     /* Simulation Args Init */
     g_btte_args.InitArgs(filename);
