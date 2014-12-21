@@ -7,9 +7,14 @@ fi
 
 BUILD_DIR="$PROJ_ROOT/build"
 LOG_DIR="$PROJ_ROOT/log"
+PLOT_OUTPUT="$PROJ_ROOT/plot/output"
 
 if [ ! -d $LOG_DIR ]; then
     mkdir $LOG_DIR
+fi
+
+if [ ! -d $PLOT_OUTPUT ]; then
+    mkdir $PLOT_OUTPUT
 fi
 
 if [ ! -d $BUILD_DIR ]; then
