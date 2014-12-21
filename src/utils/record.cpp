@@ -20,10 +20,10 @@ std::string GenrFileName()
             ns_algo = "Standard";
             break;
         case 1:
-            ns_algo = "Load Balancing";
+            ns_algo = "LoadBalance";
             break;
         case 2:
-            ns_algo = "Cluster Based";
+            ns_algo = "ClusterBased";
             break;
         default:
             break;
