@@ -45,7 +45,7 @@ std::string GenrFileName()
 void WriteRecord()
 {
     std::ofstream ofs;
-    ofs.open(GenrFileName());
+    ofs.open(GenrFileName(), std::ios_base::app);
 
     // write comment at head line
     std::string comment("# peer_id\tjoin_time\tfinish_time\tdeparture_time\n");
@@ -67,6 +67,7 @@ void WriteRecord()
         std::string record = oss.str();
         ofs << record;
     }
+    ofs << ";\n";  // separate record of each simulation
 
     ofs.close();
 }
