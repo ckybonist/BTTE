@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 
 #include "args.h"
 #include "debug.h"
@@ -17,11 +18,12 @@ EnvManager& EnvManager::GetInstance()
 void EnvManager::Init(const std::string filename)
 {
     /* Rand Init */
-    const int init_seed = 1;
-    uniformrand::InitRandSeeds(init_seed);
+    //const int init_seed = 1;
+    //uniformrand::InitRandSeeds(init_seed);
+    uniformrand::InitRandSeeds((unsigned) std::time(0));
 
-    std::cout << "Initial Random Seeds: " << init_seed << "\n";
-    PrintRandSeeds();
+    //std::cout << "Initial Random Seeds: " << init_seed << "\n";
+    //PrintRandSeeds();
 
     /* Simulation Args Init */
     g_btte_args.InitArgs(filename);
