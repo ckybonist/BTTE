@@ -7,14 +7,22 @@ fi
 
 BUILD_DIR="$PROJ_ROOT/build"
 LOG_DIR="$PROJ_ROOT/log"
-PLOT_OUTPUT="$PROJ_ROOT/plot/output"
+PLOT_DIR="$PROJ_ROOT/plot/"
 
 if [ ! -d $LOG_DIR ]; then
     mkdir $LOG_DIR
 fi
 
-if [ ! -d $PLOT_OUTPUT ]; then
-    mkdir $PLOT_OUTPUT
+if [ ! -d $PLOT_DIR/output ]; then
+    mkdir $PLOT_DIR/output
+fi
+
+if [ ! -d $PLOT_DIR/time_piece ]; then
+    mkdir $PLOT_DIR/time_piece
+fi
+
+if [ ! -d $PLOT_DIR/time_peer ]; then
+    mkdir $PLOT_DIR/time_peer
 fi
 
 if [ ! -d $BUILD_DIR ]; then
