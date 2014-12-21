@@ -8,7 +8,7 @@ set output outfile
 # Labels
 set title 'Piece-Time Graph'
 set xlabel xlabelname
-set ylabel "complete time"
+set ylabel "average complete time"
 
 # Keys (圖上的曲線或點)
 set key outside
