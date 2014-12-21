@@ -61,7 +61,7 @@ long long Rand(const RSC rsc);
 
 void Srand(const int iRsc, const int seed);
 
-void InitRandSeeds();
+void InitRandSeeds(long long seed);
 
 float ExpRand(float rate, long long rand_num);
 
