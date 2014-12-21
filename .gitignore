@@ -39,3 +39,6 @@ btte.conf.dbg
 
 # Doxygen Output
 doxygen
+
+# Log
+log/
