@@ -1,4 +1,4 @@
 #!/bin/sh
 
 ./genr_plot_dat.py 'time_piece'
-/usr/bin/gnuplot -e "dat='output/time_piece.dat'; outfile='output/time_piece.png'; xlabelname='piece'" plot.plg
+/usr/bin/gnuplot -e "dat_prefix='output/time_piece_'; outfile='output/time_piece.png'; xlabelname='piece'" plot.plg
