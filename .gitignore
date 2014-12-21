@@ -42,3 +42,8 @@ doxygen
 
 # Log
 log/
+
+# plot data
+plot/output/
+plot/time_piece/
+plot/time_peer/
