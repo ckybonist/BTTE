@@ -587,7 +587,7 @@ void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
     //    EventInfo(ev, current_time_);
     //}
 
-    WriteEventInfo(ofs, ev, current_time_);
+    //WriteEventInfo(ofs, ev, current_time_);  // debug
 
     if (ev.type == Event::Type::ARRIVAL)
     {

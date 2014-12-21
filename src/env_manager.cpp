@@ -1,8 +1,9 @@
 #include <iostream>
 
-#include "debug.h"
 #include "args.h"
+#include "debug.h"
 #include "event_handler.h"
+#include "utils/record.h"
 //#include "peer_manager.h"
 #include "env_manager.h"
 
@@ -34,7 +35,8 @@ void EnvManager::Simulate()
     EventHandler evh(&pm, 0.2, 0.5);
     evh.StartRoutine();
 
-    ShowDbgInfo();
+    WriteRecord();
+    //ShowDbgInfo();
     //std::cout << "\n\nFinal Random Seeds:\n";
     //PrintRandSeeds();
 }
