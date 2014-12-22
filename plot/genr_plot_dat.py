@@ -28,10 +28,12 @@ def GetPeerAvgCompleteTime(simu_record):
         total_complete_time += data[2] - data[1]
     num_peer = len(simu_record)
     avg_time = total_complete_time / (num_peer - num_seed)
-    return avg_time
+    #return avg_time
+    return round(avg_time, 2)
 
 def GetAvgSimuTime(all_simu_records):
     total_simu = len(all_simu_records)
+    print(total_simu)
     total_avg_time = 0.000
     print(total_simu)
     for simu_record in all_simu_records:
@@ -63,28 +65,36 @@ def MergeSimuRecord(all_simu_records):
             tmp = []
     return result
 
-
-if __name__ == "__main__":
-    plot_type = sys.argv[1]
-    files = glob.glob(plot_type + "/*")
-
+def ProcessLog(files):
     result = defaultdict(list)
-    variant_base = None
-
-    all_simu_records = []
+    #all_simu_records = []
 
     for f in files:
         with open(f, 'r') as fp:
-            all_simu_records = [ s.strip().split()
-                          for s in fp.readlines() if '#' not in s ]
-            all_simu_records = MergeSimuRecord(all_simu_records)
+            simu_record = [ ElementToFloat(s.strip().split())
+                                 for s in fp.readlines() if '#' not in s ]
 
-            avg_time = GetAvgSimuTime(all_simu_records)
+            " If same have multiple simulations with same combination of arguments "
+            #all_simu_records = [ s.strip().split()
+            #              for s in fp.readlines() if '#' not in s ]
+            #all_simu_records = MergeSimuRecord(all_simu_records)
+
+            #avg_time = GetAvgSimuTime(all_simu_records)
+            avg_time = GetPeerAvgCompleteTime(simu_record)
             f = os.path.basename(f).split('_')
             simu_algo = os.path.splitext(f[2])[0]
             variant_factor = GetVariantFactor(f, plot_type)
             record = (variant_factor, avg_time)
             result[simu_algo].append(record)
+
+    return result
+
+
+if __name__ == "__main__":
+    plot_type = sys.argv[1]
+    files = glob.glob(plot_type + "/*")
+
+    result = ProcessLog(files)
 
     for k in result.keys():
         result[k] = sorted(result[k])
