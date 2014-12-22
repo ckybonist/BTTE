@@ -18,9 +18,9 @@ EnvManager& EnvManager::GetInstance()
 void EnvManager::Init(const std::string filename)
 {
     /* Rand Init */
-    //const int init_seed = 1;
-    //uniformrand::InitRandSeeds(init_seed);
-    uniformrand::InitRandSeeds((unsigned) std::time(0));
+    const int rand_seed = 1;
+    uniformrand::InitRandSeeds(rand_seed);
+    //uniformrand::InitRandSeeds((unsigned) std::time(0));
 
     //std::cout << "Initial Random Seeds: " << init_seed << "\n";
     //PrintRandSeeds();
