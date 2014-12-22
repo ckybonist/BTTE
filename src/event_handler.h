@@ -35,7 +35,8 @@ class EventHandler
 
     void ProcessArrival(Event& ev);
     void ProcessDeparture(Event const& ev);
-    void ProcessEvent(Event& ev, std::ofstream& ofs);
+    //void ProcessEvent(Event& ev, std::ofstream& ofs);
+    void ProcessEvent(Event& ev);
 
     bool ReqTimeout(Event const& ev);   // TODO
     void SendPieceReqs(Event& ev);
