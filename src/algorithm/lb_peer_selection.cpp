@@ -51,13 +51,13 @@ void LoadBalancingRule::SortCountsInfo(const size_t num_candidates)
           sizeof(NBCountsInfo),
           func_comp);
 
-    std::cout << "\nNBC Info (pid, neighbor_counts):\n";
-    for (size_t i = 0; i < num_candidates; i++)
-    {
-        std::cout << "(" << nbc_info_[i].pid
-                  << ",  " << nbc_info_[i].counts << ")\n";
-    }
-    std::cout << std::endl;
+    //std::cout << "\nNBC Info (pid, neighbor_counts):\n";
+    //for (size_t i = 0; i < num_candidates; i++)
+    //{
+    //    std::cout << "(" << nbc_info_[i].pid
+    //              << ",  " << nbc_info_[i].counts << ")\n";
+    //}
+    //std::cout << std::endl;
 }
 
 void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
@@ -100,7 +100,7 @@ NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
 
     AssignNeighbors(neighbors, num_candidates);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 
