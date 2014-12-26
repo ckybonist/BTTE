@@ -16,7 +16,7 @@ float ClusterBasedRule::ComputePGDelayByCluster(const int client_cid,
 {
     const float min_delay = 0.01;
     const float same_cluster_bound = 1.00 / static_cast<float>(g_kNumClusters);
-    const float diff_cluster_bound = 0.01 + same_cid_bound;
+    const float diff_cluster_bound = 0.01 + same_cluster_bound;
     const float max_delay = 1.0;
 
     float pg_delay = 0.0;
