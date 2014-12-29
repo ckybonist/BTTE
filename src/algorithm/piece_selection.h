@@ -20,9 +20,9 @@ typedef IntSet::iterator IntSetIter;
 
 typedef enum class TypePieceSelect
 {
-    BUILTIN,
-    USER_DEFINED_1,
-    USER_DEFINED_2,
+    RANDOM,
+    RAREST_FIRST,
+    USER_DEFINED
 } PieceSelect_T;
 
 class IPieceSelection
