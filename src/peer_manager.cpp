@@ -163,10 +163,10 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 void PeerManager::InitAbstractObj()
 {
     const int TYPE_PEERSELECT = g_btte_args.get_type_peerselect();
-    const int TYPE_PIECESELECT = g_btte_args.get_type_pieceselect();
 
     // 將指定的 peer selection 演算法所屬之衍生類別轉形成基底類別
     const PeerSelect_T type_peer_select = static_cast<PeerSelect_T>(TYPE_PEERSELECT);
+
     switch (type_peer_select)
     {
         case PeerSelect_T::STANDARD:
@@ -190,24 +190,22 @@ void PeerManager::InitAbstractObj()
             break;
     }
 
-    //const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(args_->TYPE_PIECESELECT);
-    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(0);  // rarest_first
+
+    const int TYPE_PIECESELECT = g_btte_args.get_type_pieceselect();
+    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(TYPE_PIECESELECT);  // rarest_first
+
     switch (type_piece_select)
     {
-        case PieceSelect_T::BUILTIN:
-            //obj_pieceselect_ = static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
+        case PieceSelect_T::RANDOM:
+            obj_pieceselect_ = static_cast<IPieceSelection*>(new RandomFirstPiece());
+            break;
+        case PieceSelect_T::RAREST_FIRST:
             obj_pieceselect_ = static_cast<IPieceSelection*>(new RarestFirst());
             break;
-        case PieceSelect_T::USER_DEFINED_1:
+        case PieceSelect_T::USER_DEFINED:
             //obj_pieceselect_ =
-            //    static_cast<IPieceSelect*>(new UserDefined1(*args_));
+                //static_cast<IPieceSelection*>(new UserDefined());
             break;
-
-        case PieceSelect_T::USER_DEFINED_2:
-            //obj_pieceselect_ =
-            //    static_cast<IPieceSelect*>(new UserDefined2(*args_));
-            break;
-
         default:
             ExitError("Error of casting child-class to \
                        interface-class IPeerSelect");
