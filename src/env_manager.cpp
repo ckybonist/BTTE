@@ -17,16 +17,17 @@ EnvManager& EnvManager::GetInstance()
 
 void EnvManager::Init(const std::string filename)
 {
+    /* Init Simulation Args */
+    g_btte_args.InitArgs(filename);
+    PrintSimuArgsInfo();
+
     /* Rand Init */
     //const int rand_seed = 1;
     //uniformrand::InitRandSeeds(rand_seed);
     uniformrand::InitRandSeeds((unsigned) std::time(0));
-
     //std::cout << "Initial Random Seeds: " << init_seed << "\n";
     //PrintRandSeeds();
 
-    /* Simulation Args Init */
-    g_btte_args.InitArgs(filename);
 }
 
 void EnvManager::Simulate(const std::string record_type)
@@ -40,7 +41,7 @@ void EnvManager::Simulate(const std::string record_type)
     evh.StartRoutine();
 
     WriteRecord(record_type);
-    //ShowDbgInfo();
+    //PrintDbgInfo();
     //std::cout << "\n\nFinal Random Seeds:\n";
-    //PrintRandSeeds();
+    //PrintRandSeedsInfo();
 }

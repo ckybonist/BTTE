@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-
 #include "args.h"
 #include "error.h"
 #include "random.h"
@@ -17,19 +16,17 @@ using std::endl;
 namespace
 {
 
-void SimuArgsInfo();
+void PrintTTInfo(std::ofstream& ofs);
 
-void TTInfo(std::ofstream& ofs);
+void PrintPeerInfo(std::ofstream& ofs, const int pid);
 
-void PeerInfo(std::ofstream& ofs, const int pid);
-
-void PieceInfo(std::ofstream& ofs,
+void PrintPieceInfo(std::ofstream& ofs,
                const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter);
 
-void NeighborInfo(std::ofstream& ofs,
+void PrintNeighborInfo(std::ofstream& ofs,
                   const int pid,
                   const size_t NUM_PEERLIST);
 
@@ -57,7 +54,7 @@ void RSC2Str(RSmapStr& rs2str)
 } // anonymous namespace
 
 
-void PrintRandSeeds()
+void PrintRandSeedsInfo()
 {
     RSmapStr rs2str;
     RSC2Str(rs2str);
@@ -73,62 +70,7 @@ void PrintRandSeeds()
     std::cout << "\n\n";
 }
 
-void ShowDbgInfo()
-{
-    const size_t NUM_PIECE = g_btte_args.get_num_piece();
-    const size_t NUM_PEER = g_btte_args.get_num_peer();
-    const size_t NUM_SEED = g_btte_args.get_num_seed();
-    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
-
-    int* piece_own_counter = new int[NUM_PIECE];
-    if (nullptr == piece_own_counter)
-        ExitError("Memory Allocation Fault");
-
-    /* Simulation Arguments Info */
-    SimuArgsInfo();
-
-    std::ofstream ofs;
-    ofs.open("peer_info.txt");
-
-    /* Transmission Time Info */
-    TTInfo(ofs);
-
-    /* Show debug info */
-    ofs.precision(3);
-    ofs << "@ Peer Info:\n\n";
-    for (size_t pid = 0; pid < NUM_PEER; pid++)
-    {
-        PeerInfo(ofs, pid);
-
-        PieceInfo(ofs, pid, NUM_PIECE, NUM_SEED, piece_own_counter);
-
-        if (pid >= NUM_SEED)
-            NeighborInfo(ofs, pid, NUM_PEERLIST);
-
-        Peer const& peer = g_peers.at(pid);
-        const float time_to_complete = peer.get_complete_time() -
-                                                peer.get_join_time();
-        ofs << "\nUsed Time for Getting All Pieces : "
-            << time_to_complete << std::endl;
-
-        ofs << "\n===========================\n\n";
-    }
-
-    //cout << "\nNumber of peers own each piece:\n";
-    //for (int i = 0; (size_t)i < args.NUM_PIECE; ++i)
-    //{
-    //    cout << "Piece #" << i << " : "
-    //         << piece_own_counter[i] << endl;
-    //}
-
-    ofs.close();
-    delete [] piece_own_counter;
-}
-
-namespace
-{
-
-void SimuArgsInfo()
+void PrintSimuArgsInfo()
 {
     cout << "Simulation Arguments:\n";
     cout << "NUM_PEER : " << g_btte_args.get_num_peer() << endl;
@@ -175,7 +117,66 @@ void SimuArgsInfo()
     cout << endl << endl;
 }
 
-void TTInfo(std::ofstream& ofs)
+void PrintDbgInfo()
+{
+    const size_t NUM_PIECE = g_btte_args.get_num_piece();
+    const size_t NUM_PEER = g_btte_args.get_num_peer();
+    const size_t NUM_SEED = g_btte_args.get_num_seed();
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
+
+    int* piece_own_counter = new int[NUM_PIECE];
+    if (nullptr == piece_own_counter)
+        ExitError("Memory Allocation Fault");
+
+    /* Simulation Arguments Info */
+    PrintSimuArgsInfo();
+
+    std::ofstream ofs;
+    ofs.open("peer_info.txt");
+
+    /* Transmission Time Info */
+    PrintTTInfo(ofs);
+
+    /* Show debug info */
+    ofs.precision(3);
+    ofs << "@ Peer Info:\n\n";
+    for (size_t pid = 0; pid < NUM_PEER; pid++)
+    {
+        PrintPeerInfo(ofs, pid);
+
+        PrintPieceInfo(ofs,
+                       pid,
+                       NUM_PIECE,
+                       NUM_SEED,
+                       piece_own_counter);
+
+        if (pid >= NUM_SEED)
+            PrintNeighborInfo(ofs, pid, NUM_PEERLIST);
+
+        Peer const& peer = g_peers.at(pid);
+        const float time_to_complete = peer.get_complete_time() -
+                                                peer.get_join_time();
+        ofs << "\nUsed Time for Getting All Pieces : "
+            << time_to_complete << std::endl;
+
+        ofs << "\n===========================\n\n";
+    }
+
+    //cout << "\nNumber of peers own each piece:\n";
+    //for (int i = 0; (size_t)i < args.NUM_PIECE; ++i)
+    //{
+    //    cout << "Piece #" << i << " : "
+    //         << piece_own_counter[i] << endl;
+    //}
+
+    ofs.close();
+    delete [] piece_own_counter;
+}
+
+namespace
+{
+
+void PrintTTInfo(std::ofstream& ofs)
 {
     ofs << "@ Transmission Time of Piece:\n";
     for (int i = 0; i < g_kNumLevel; i++)
@@ -187,7 +188,7 @@ void TTInfo(std::ofstream& ofs)
     ofs << "\n\n\n";
 }
 
-void PeerInfo(std::ofstream& ofs, const int pid)
+void PrintPeerInfo(std::ofstream& ofs, const int pid)
 {
     ofs << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
     ofs << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
@@ -215,7 +216,7 @@ void PeerInfo(std::ofstream& ofs, const int pid)
     ofs << "Download Bandwidth (bps): " << bandwidth.downlink << endl;
 }
 
-void PieceInfo(std::ofstream& ofs,
+void PrintPieceInfo(std::ofstream& ofs,
                const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
@@ -236,7 +237,7 @@ void PieceInfo(std::ofstream& ofs,
     ofs << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
 }
 
-void NeighborInfo(std::ofstream& ofs,
+void PrintNeighborInfo(std::ofstream& ofs,
                   const int pid,
                   const size_t NUM_PEERLIST)
 {
