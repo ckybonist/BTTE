@@ -32,11 +32,17 @@ set style line 3 lt 1 lc rgb "green" lw 2 pt 5 ps 1.0
 # Plotting
 # note : the 0th column is a pseudo column that translates
 # to the current line number in the data file.
-plot dat_prefix."Standard.dat" using 1:2 with linespoints title "Standard" ls 1,\
-                '' using 1:2:2 with labels center offset 2,1 notitle,\
-     dat_prefix."LoadBalance.dat" using 1:2 with linespoints title "Load Balance" ls 2,\
-                '' using 1:2:2 with labels center offset 2,1 notitle,\
-     dat_prefix."ClusterBased.dat" using 1:2 with linespoints title "Cluster Based" ls 3,\
-                '' using 1:2:2 with labels center offset 2,1 notitle
+if (algo eq "peer_sel")\
+    plot dat_prefix."Standard.dat" using 1:2 with linespoints title "Standard" ls 1,\
+                    '' using 1:2:2 with labels center offset 2,1 notitle,\
+         dat_prefix."LoadBalance.dat" using 1:2 with linespoints title "Load Balance" ls 2,\
+                    '' using 1:2:2 with labels center offset 2,1 notitle,\
+         dat_prefix."ClusterBased.dat" using 1:2 with linespoints title "Cluster Based" ls 3,\
+                    '' using 1:2:2 with labels center offset 2,1 notitle; \
+else if (algo eq "piece_sel")\
+    plot dat_prefix."Random.dat" using 1:2 with linespoints title "Random" ls 1,\
+                    '' using 1:2:2 with labels center offset 2,1 notitle,\
+         dat_prefix."RarestFirst.dat" using 1:2 with linespoints title "Rarest First" ls 2,\
+                    '' using 1:2:2 with labels center offset 2,1 notitle; \
 
 # End of File
