@@ -20,7 +20,8 @@ typedef enum class TypePeerSelect
 {
     STANDARD = 0,
     LOAD_BALANCING,
-    CLUSTER_BASED
+    CLUSTER_BASED,
+    USER_DEFINED
 } PeerSelect_T;
 
 

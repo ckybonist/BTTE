@@ -34,7 +34,7 @@ void Args::InitArgs(const std::string filename)
                       static_cast<int>(PeerSelect_T::STANDARD));
 
     TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
-                       static_cast<int>(PieceSelect_T::BUILTIN));
+                       static_cast<int>(PieceSelect_T::RAREST_FIRST));
 
     //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 
@@ -71,8 +71,8 @@ void Args::CheckArgs()
     }
     else if (TYPE_PEERSELECT < (int)PeerSelect_T::STANDARD ||
              TYPE_PEERSELECT > (int)PeerSelect_T::CLUSTER_BASED ||
-             TYPE_PIECESELECT < (int)PieceSelect_T::BUILTIN ||
-             TYPE_PIECESELECT > (int)PieceSelect_T::USER_DEFINED_2)
+             TYPE_PIECESELECT < (int)PieceSelect_T::RANDOM ||
+             TYPE_PIECESELECT > (int)PieceSelect_T::USER_DEFINED)
     {
         std::cout << "ValueError: Type of Algorithm";
         exit(1);
