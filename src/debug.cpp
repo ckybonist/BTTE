@@ -156,6 +156,22 @@ void SimuArgsInfo()
             break;
     }
     cout << "Peer Selection Type : " << ns_algo;
+
+    switch (g_btte_args.get_type_pieceselect())
+    {
+        case 0:
+            ns_algo = "Random";
+            break;
+        case 1:
+            ns_algo = "Rarest First";
+            break;
+        case 2:
+            ns_algo = "User Defined";
+            break;
+        default:
+            break;
+    }
+    cout << "\nPiece Selection Type : " << ns_algo;
     cout << endl << endl;
 }
 

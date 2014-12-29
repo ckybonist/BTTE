@@ -26,7 +26,7 @@ int main(int argc, const char* argv[])
     {
         ExitError("First argument: path of config file");
     }
-    else if (argc > 2)
+    else if (argc > 3)
     {
         ExitError("Too much arguments.");
     }
@@ -34,15 +34,15 @@ int main(int argc, const char* argv[])
 
     /* -------------- Start Simulation -------------------- */
     EnvManager& env = EnvManager::GetInstance();
+    // argv[1]: config file
+    // argv[2]: record which algorithm
     env.Init(argv[1]);
-    env.Simulate();
+    env.Simulate(argv[2]);
     /* ----------------- End Simulation -------------------- */
 
 
     clock_t end_time = clock();
     double time_taken = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    //std::cout << "Time taken: " << time_taken << " s\n";
-
     TimeCompute(time_taken);
 
     return 0;

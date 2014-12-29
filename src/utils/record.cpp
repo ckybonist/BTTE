@@ -8,25 +8,45 @@
 namespace
 {
 
-std::string GenrFileName()
+std::string GenrFileName(const std::string record_type)
 {
     const int NUM_PEER = g_btte_args.get_num_peer();
     const int NUM_PIECE = g_btte_args.get_num_piece();
 
     std::string ns_algo;
-    switch (g_btte_args.get_type_peerselect())
+    if (record_type == "peer_sel")
     {
-        case 0:
-            ns_algo = "Standard";
-            break;
-        case 1:
-            ns_algo = "LoadBalance";
-            break;
-        case 2:
-            ns_algo = "ClusterBased";
-            break;
-        default:
-            break;
+        switch (g_btte_args.get_type_peerselect())
+        {
+            case 0:
+                ns_algo = "Standard";
+                break;
+            case 1:
+                ns_algo = "LoadBalance";
+                break;
+            case 2:
+                ns_algo = "ClusterBased";
+                break;
+            default:
+                break;
+        }
+    }
+    else if (record_type == "piece_sel")
+    {
+        switch (g_btte_args.get_type_pieceselect())
+        {
+            case 0:
+                ns_algo = "Random";
+                break;
+            case 1:
+                ns_algo = "RarestFirst";
+                break;
+            case 2:
+                ns_algo = "UserDefined";
+                break;
+            default:
+                break;
+        }
     }
 
     std::ostringstream oss;
@@ -42,10 +62,11 @@ std::string GenrFileName()
 
 }
 
-void WriteRecord()
+void WriteRecord(const std::string record_type)
 {
     std::ofstream ofs;
-    ofs.open(GenrFileName(), std::ios_base::app);
+    ofs.open(GenrFileName(record_type),
+             std::ios_base::app);
     //ofs.open(GenrFileName());
 
     // write comment at head line

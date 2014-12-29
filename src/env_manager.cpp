@@ -29,16 +29,17 @@ void EnvManager::Init(const std::string filename)
     g_btte_args.InitArgs(filename);
 }
 
-void EnvManager::Simulate()
+void EnvManager::Simulate(const std::string record_type)
 {
     /* Create Initial Swarm*/
     PeerManager pm = PeerManager();
     pm.CreateSwarm();
 
+    // EventHandler(peer_manager-obj, arrival-rate, departure-rate)
     EventHandler evh(&pm, 0.2, 0.5);
     evh.StartRoutine();
 
-    WriteRecord();
+    WriteRecord(record_type);
     //ShowDbgInfo();
     //std::cout << "\n\nFinal Random Seeds:\n";
     //PrintRandSeeds();

@@ -12,7 +12,7 @@ class EnvManager
 
     void Init(const std::string filename);
 
-    void Simulate();
+    void Simulate(const std::string record_type);
 
   private:
     EnvManager() {};
