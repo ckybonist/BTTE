@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <iomanip>
 #include <time.h>
 
@@ -22,15 +23,12 @@ int main(int argc, const char* argv[])
 {
     clock_t start_time = clock();
 
-    if (argc == 1)
+    if (argc != 3 ||
+        std::strcmp(argv[2], "peer_sel") != 0 &&
+        std::strcmp(argv[2], "piece_sel") != 0)
     {
-        ExitError("First argument: path of config file");
+        ExitError("\n\tUsage: ./BTTE [config] [peer_sel/piece_sel]");
     }
-    else if (argc > 3)
-    {
-        ExitError("Too much arguments.");
-    }
-
 
     /* -------------- Start Simulation -------------------- */
     EnvManager& env = EnvManager::GetInstance();
@@ -39,7 +37,6 @@ int main(int argc, const char* argv[])
     env.Init(argv[1]);
     env.Simulate(argv[2]);
     /* ----------------- End Simulation -------------------- */
-
 
     clock_t end_time = clock();
     double time_taken = (double)(end_time - start_time) / CLOCKS_PER_SEC;
