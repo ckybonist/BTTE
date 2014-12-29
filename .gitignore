@@ -41,9 +41,9 @@ btte.conf.dbg
 doxygen
 
 # Log
-log/
+log/*
 
 # plot data
-plot/output/
-plot/time_piece/
-plot/time_peer/
+plot/output/*
+plot/time_piece/*
+plot/time_peer/*
