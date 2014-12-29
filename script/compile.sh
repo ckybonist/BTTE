@@ -5,8 +5,8 @@ if [ $# -ge 1 ]; then
     BUILD_FLAG=$1
     if [[ "$BUILD_FLAG" != "debug" &&
           "$BUILD_FLAG" != "release" &&
-          "$BUILD_FLAG" != "makeall" ]]; then
-        echo "First Argument: debug, relase, makeall, \"\" "
+          "$BUILD_FLAG" != "all" ]]; then
+        echo "First Argument: debug, relase, all, \"\" "
         exit 1
     fi
 else
@@ -25,7 +25,7 @@ BUILD_DIR="$PROJ_ROOT/build"
 if [ ! -d $BUILD_DIR ]; then
     ./init_project $BUILD_FLAG
 else
-    if [ $BUILD_FLAG == "makeall" ]; then
+    if [ $BUILD_FLAG == "all" ]; then
         cd $BUILD_DIR/debug
         make clean && make
         cd ../release
