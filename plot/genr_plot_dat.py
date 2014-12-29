@@ -102,9 +102,15 @@ if __name__ == "__main__":
 
     outdir = 'output/'
     for simu_algo, record_lst in result.items():
+        tmp = 0
         outfile = outdir + 'time_piece_' + simu_algo + '.dat'
         with open(outfile, 'w') as fp:
             for vf, avg_time in record_lst:  # vf : variant factor
-                fp.write("{0}\t{1}\n".format(vf, avg_time))
+                if tmp is 0:
+                    fp.write("{0}\t{1}\n".format(0, 0))
+                    fp.write("{0}\t{1}\n".format(vf, avg_time))
+                else:
+                    fp.write("{0}\t{1}\n".format(vf, avg_time))
+                tmp += 1
 
 # End of File
