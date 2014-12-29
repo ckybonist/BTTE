@@ -8,7 +8,7 @@ namespace btte_piece_selection
 
 void RandomFirstPiece::RefreshInfo()
 {
-    no_download_pieces_set_.clear();
+    candidates_.clear();
 }
 
 IntSet RandomFirstPiece::GetRandomPieceSet()
@@ -28,12 +28,12 @@ IntSet RandomFirstPiece::GetRandomPieceSet()
 
     for (size_t i = 0; i < NUM_PEERLIST; i++)
     {
-        const size_t num_target = no_download_pieces_set_.size();
+        const size_t num_target = candidates_.size();
         if (num_target == 0) break;
         const int piece_no = SelectRandPiece(num_target,
-                                             no_download_pieces_set_.begin());
+                                             candidates_.begin());
         target_pieces.insert(piece_no);
-        no_download_pieces_set_.erase(piece_no);
+        candidates_.erase(piece_no);
     }
 
     return target_pieces;
@@ -45,7 +45,7 @@ IntSet RandomFirstPiece::StartSelection(const int client_pid)
 
     CheckNeighbors();
 
-    CollectNoDownloadPieces();
+    GetPiecesHaveNotDownloadYet();
 
     IntSet target_pieces = GetRandomPieceSet();
 

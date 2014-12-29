@@ -34,10 +34,10 @@ class IPieceSelection
 
   protected:
     void CheckNeighbors();
-    void CollectNoDownloadPieces();
+    void GetPiecesHaveNotDownloadYet();
     bool HavePiece(const int pid, const int piece_no) const;
 
-    IntSet no_download_pieces_set_;
+    IntSet candidates_;
     int selector_pid_;
 };
 

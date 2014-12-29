@@ -5,10 +5,12 @@ namespace btte_piece_selection
 
 IPieceSelection::IPieceSelection()
 {
+
 }
 
 IPieceSelection::~IPieceSelection()
 {
+
 }
 
 void IPieceSelection::CheckNeighbors()
@@ -22,7 +24,7 @@ void IPieceSelection::CheckNeighbors()
     }
 }
 
-void IPieceSelection::CollectNoDownloadPieces()
+void IPieceSelection::GetPiecesHaveNotDownloadYet()
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
 
@@ -30,7 +32,7 @@ void IPieceSelection::CollectNoDownloadPieces()
     {
         const Peer& selector = g_peers.at(selector_pid_);
         if (!selector.get_nth_piece_info(c))
-            no_download_pieces_set_.insert(c);
+            candidates_.insert(c);
     }
 }
 
