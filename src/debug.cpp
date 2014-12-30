@@ -94,6 +94,9 @@ void PrintSimuArgsInfo()
         case 2:
             ns_algo = "Cluster Based";
             break;
+        case 3:
+            ns_algo = "User Defined";
+            break;
         default:
             break;
     }
