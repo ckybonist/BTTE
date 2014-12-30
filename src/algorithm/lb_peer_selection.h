@@ -8,12 +8,12 @@ namespace btte_peer_selection
 {
 
 
-class LoadBalancingRule : public IPeerSelection
+class LoadBalancing : public IPeerSelection
 {
   public:
-    LoadBalancingRule() : IPeerSelection(),
+    LoadBalancing() : IPeerSelection(),
                       pg_delays_(nullptr) {};
-    ~LoadBalancingRule();
+    ~LoadBalancing();
 
   private:
     struct NBCountsInfo  // neighbor counts info

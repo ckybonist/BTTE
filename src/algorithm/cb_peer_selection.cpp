@@ -5,13 +5,13 @@
 #include "cb_peer_selection.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace btte_peer_selection
 {
 
-float ClusterBasedRule::ComputePGDelayByCluster(const int client_cid,
+float ClusterBased::ComputePGDelayByCluster(const int client_cid,
                                                 const int cand_cid)
 {
     const float min_delay = 0.01;
@@ -36,7 +36,7 @@ float ClusterBasedRule::ComputePGDelayByCluster(const int client_cid,
     return pg_delay;
 }
 
-void ClusterBasedRule::AddNeighborData(NeighborMap& neighbors,
+void ClusterBased::AddNeighborData(NeighborMap& neighbors,
                                        const int pid,
                                        const int client_cid)
 {
@@ -49,7 +49,7 @@ void ClusterBasedRule::AddNeighborData(NeighborMap& neighbors,
 
 }
 
-void ClusterBasedRule::AssignNeighbors(NeighborMap& neighbors,
+void ClusterBased::AssignNeighbors(NeighborMap& neighbors,
                                    const size_t num_candidates,
                                    const int client_cid)
 {
@@ -96,11 +96,11 @@ void ClusterBasedRule::AssignNeighbors(NeighborMap& neighbors,
     }
 }
 
-void ClusterBasedRule::RefreshInfo()
+void ClusterBased::RefreshInfo()
 {
 }
 
-NeighborMap ClusterBasedRule::StartSelection(const int client_pid,
+NeighborMap ClusterBased::StartSelection(const int client_pid,
                                              const IntSet& in_swarm_set)
 {
     g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
