@@ -31,10 +31,10 @@ void Args::InitArgs(const std::string filename)
     NUM_OU = cfg.GetValueOfKey<size_t>("NUM_OU", 1);
 
     TYPE_PEERSELECT = cfg.GetValueOfKey<size_t>("TYPE_PEERSELECT",
-                      static_cast<int>(PeerSelect_T::STANDARD));
+                      static_cast<int>(PeerSelect_t::STANDARD));
 
     TYPE_PIECESELECT = cfg.GetValueOfKey<size_t>("TYPE_PIECESELECT",
-                       static_cast<int>(PieceSelect_T::RAREST_FIRST));
+                       static_cast<int>(PieceSelect_t::RAREST_FIRST));
 
     //ARRIVAL_RATE = cfg.GetValueOfKey<float>("ARRIVAL_RATE", 1);
 
@@ -69,10 +69,10 @@ void Args::CheckArgs()
         std::cout << "ValueError: NUM_PEERLIST (must smaller or equal 50)";
         exit(1);
     }
-    else if (TYPE_PEERSELECT < (int)PeerSelect_T::STANDARD ||
-             TYPE_PEERSELECT > (int)PeerSelect_T::CLUSTER_BASED ||
-             TYPE_PIECESELECT < (int)PieceSelect_T::RANDOM ||
-             TYPE_PIECESELECT > (int)PieceSelect_T::USER_DEFINED)
+    else if (TYPE_PEERSELECT < (int)PeerSelect_t::STANDARD ||
+             TYPE_PEERSELECT > (int)PeerSelect_t::USER_DEFINED ||
+             TYPE_PIECESELECT < (int)PieceSelect_t::RANDOM ||
+             TYPE_PIECESELECT > (int)PieceSelect_t::USER_DEFINED)
     {
         std::cout << "ValueError: Type of Algorithm";
         exit(1);
