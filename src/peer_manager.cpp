@@ -12,11 +12,13 @@
 #include "algorithm/cb_peer_selection.h"
 #include "algorithm/rfp_piece_selection.h"
 #include "algorithm/rf_piece_selection.h"
+#include "../custom/my_peer_selection.h"
+#include "../custom/my_piece_selection.h"
 
 #include "peer_manager.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace
@@ -165,23 +167,29 @@ void PeerManager::InitAbstractObj()
     const int TYPE_PEERSELECT = g_btte_args.get_type_peerselect();
 
     // 將指定的 peer selection 演算法所屬之衍生類別轉形成基底類別
-    const PeerSelect_T type_peer_select = static_cast<PeerSelect_T>(TYPE_PEERSELECT);
+    const PeerSelect_t type_peer_select =
+                       static_cast<PeerSelect_t>(TYPE_PEERSELECT);
 
     switch (type_peer_select)
     {
-        case PeerSelect_T::STANDARD:
+        case PeerSelect_t::STANDARD:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new StandardRule());
+                static_cast<IPeerSelection*>(new Standard());
             break;
 
-        case PeerSelect_T::LOAD_BALANCING:
+        case PeerSelect_t::LOAD_BALANCING:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new LoadBalancingRule());
+                static_cast<IPeerSelection*>(new LoadBalancing());
             break;
 
-        case PeerSelect_T::CLUSTER_BASED:
+        case PeerSelect_t::CLUSTER_BASED:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new ClusterBasedRule());
+                static_cast<IPeerSelection*>(new ClusterBased());
+            break;
+
+        case PeerSelect_t::USER_DEFINED:
+            obj_peerselect_ =
+                static_cast<IPeerSelection*>(new MyPeerSelection());
             break;
 
         default:
@@ -192,20 +200,26 @@ void PeerManager::InitAbstractObj()
 
 
     const int TYPE_PIECESELECT = g_btte_args.get_type_pieceselect();
-    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(TYPE_PIECESELECT);  // rarest_first
+    const PieceSelect_t type_piece_select =
+                        static_cast<PieceSelect_t>(TYPE_PIECESELECT);  // rarest_first
 
     switch (type_piece_select)
     {
-        case PieceSelect_T::RANDOM:
-            obj_pieceselect_ = static_cast<IPieceSelection*>(new RandomFirstPiece());
+        case PieceSelect_t::RANDOM:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new RandomFirstPiece());
             break;
-        case PieceSelect_T::RAREST_FIRST:
-            obj_pieceselect_ = static_cast<IPieceSelection*>(new RarestFirst());
+
+        case PieceSelect_t::RAREST_FIRST:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new RarestFirst());
             break;
-        case PieceSelect_T::USER_DEFINED:
-            //obj_pieceselect_ =
-                //static_cast<IPieceSelection*>(new UserDefined());
+
+        case PieceSelect_t::USER_DEFINED:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new MyPieceSelection());
             break;
+
         default:
             ExitError("Error of casting child-class to \
                        interface-class IPeerSelect");
