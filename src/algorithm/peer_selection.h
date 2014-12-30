@@ -22,7 +22,7 @@ typedef enum class TypePeerSelect
     LOAD_BALANCING,
     CLUSTER_BASED,
     USER_DEFINED
-} PeerSelect_T;
+} PeerSelect_t;
 
 
 class IPeerSelection

@@ -23,7 +23,7 @@ typedef enum class TypePieceSelect
     RANDOM,
     RAREST_FIRST,
     USER_DEFINED
-} PieceSelect_T;
+} PieceSelect_t;
 
 class IPieceSelection
 {
