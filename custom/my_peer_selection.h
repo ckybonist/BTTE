@@ -13,4 +13,5 @@ class MyPeerSelection : public IPeerSelection
     private:
         NeighborMap StartSelection(const int client_pid,
                                    const IntSet& in_swarm_set) override;
+        /* Declare Your Methods */
 };
