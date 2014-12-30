@@ -54,7 +54,7 @@ typedef enum class RandSeedCases
     FREE_4,
 } RSC;
 
-namespace uniformrand
+namespace btte_uniformrand
 {
 
 long long Rand(const RSC rsc);

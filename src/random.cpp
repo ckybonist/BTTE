@@ -27,7 +27,7 @@ long long g_rand_grp[] =
 };
 
 
-namespace uniformrand {
+namespace btte_uniformrand {
 
 const int kInterval = 1000000;
 

@@ -3,7 +3,7 @@
 
 #include <cassert>
 
-using namespace uniformrand;  // for Rand(), Roll()
+using namespace btte_uniformrand;  // for Rand(), Roll()
 
 
 template<typename T>

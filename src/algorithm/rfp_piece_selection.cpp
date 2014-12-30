@@ -1,7 +1,7 @@
 #include "../args.h"
 #include "rfp_piece_selection.h"
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 namespace btte_piece_selection
 {

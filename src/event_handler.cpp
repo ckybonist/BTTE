@@ -11,7 +11,7 @@
 #include "event_handler.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace
