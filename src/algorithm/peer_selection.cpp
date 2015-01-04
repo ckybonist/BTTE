@@ -62,6 +62,25 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     IntSet cand_pid_set = ExcludeSelf(in_swarm_set);
     const size_t num_candidates = cand_pid_set.size();
 
+    for (const int pid : cand_pid_set)
+    {
+        candidates_.push_back(pid);
+    }
+
+    // Shuffle the set of candidates to ensure the selection is random
+    RandomShuffle(candidates_.begin(), candidates_.end());
+
+    return num_candidates;
+}
+
+/*  if candidates_ is oridinary array
+size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
+                                     const RSC rsc)
+{
+    RefreshCandidates();
+
+    // Erase self first, then, shuffle the index and
+    // select other peers which in swarm.
     //int* tmp_arr = new int[num_candidates];
     //if (tmp_arr == nullptr)
     //    ExitError("Memory Allocation Error");
@@ -76,14 +95,8 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     //    ++index;
     //}
 
-    for (const int pid : cand_pid_set)
-    {
-        candidates_.push_back(pid);
-    }
-
     // Shuffle the set of candidates to ensure the selection is random
     //Shuffle<int>(rsc, tmp_arr, num_candidates);
-    RandomShuffle(candidates_.begin(), candidates_.end());
 
     // Copy result
     //candidates_ = new int[num_candidates];
@@ -99,8 +112,9 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     //delete [] tmp_arr;
     //tmp_arr = nullptr;
 
-    return num_candidates;
+    //return num_candidates;
 }
+*/
 
 void IPeerSelection::DebugInfo(NeighborMap const& neighbors,
                                const int client_pid) const
