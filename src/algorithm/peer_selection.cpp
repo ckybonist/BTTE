@@ -1,7 +1,7 @@
 #include "peer_selection.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace btte_peer_selection

@@ -14,7 +14,7 @@ class RandomFirstPiece : public IPieceSelection
 
   private:
     IntSet StartSelection(const int client_pid) override;
-    IntSet GetTargetPieces(const size_t num_target) const;
+    IntSet GetRandomPieceSet();
     void RefreshInfo();
 };
 

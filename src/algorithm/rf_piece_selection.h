@@ -1,7 +1,6 @@
 #ifndef _RF_PIECE_SELECTION_H
 #define _RF_PIECE_SELECTION_H
 
-#include <deque>
 #include "piece_selection.h"
 
 

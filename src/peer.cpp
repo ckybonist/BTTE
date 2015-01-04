@@ -5,6 +5,9 @@
 #include "peer.h"
 
 
+using namespace btte_uniformrand;
+
+
 std::vector<Peer> g_peers;
 bool* g_peers_reg_info = nullptr;
 //Peer *g_peers = nullptr;
@@ -158,7 +161,7 @@ void Peer::InitPieces(const Type type, const int NUM_PIECE, const double main_pr
         case LEECH:
             for (int i = 0; i < NUM_PIECE; i++)
             {
-                double sub_prob = uniformrand::Rand(RSC::PROB_PIECE) / (double)RAND_MAX;
+                double sub_prob = Rand(RSC::PROB_PIECE) / (double)RAND_MAX;
                 pieces[i] = (sub_prob < main_prob);
             }
             break;

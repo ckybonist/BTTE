@@ -6,7 +6,7 @@
 #include "choking.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 typedef std::list<PieceMsg> MsgList;

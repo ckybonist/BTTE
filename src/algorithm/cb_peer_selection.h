@@ -6,11 +6,11 @@
 namespace btte_peer_selection
 {
 
-class ClusterBasedRule : public IPeerSelection
+class ClusterBased : public IPeerSelection
 {
   public:
-    ClusterBasedRule() : IPeerSelection() {};
-    ~ClusterBasedRule() {};
+    ClusterBased() : IPeerSelection() {};
+    ~ClusterBased() {};
 
   private:
     NeighborMap StartSelection(const int client_pid,

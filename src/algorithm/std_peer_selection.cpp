@@ -2,23 +2,23 @@
 #include "std_peer_selection.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace btte_peer_selection
 {
 
-StandardRule::~StandardRule()
+Standard::~Standard()
 {
     //delete [] pg_delays_;
     //pg_delays_ = nullptr;
 }
 
-void StandardRule::RefreshInfo()
+void Standard::RefreshInfo()
 {
 }
 
-void StandardRule::AssignNeighbors(NeighborMap& neighbors,
+void Standard::AssignNeighbors(NeighborMap& neighbors,
                                const size_t num_candidates)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
@@ -39,7 +39,7 @@ void StandardRule::AssignNeighbors(NeighborMap& neighbors,
     }
 }
 
-NeighborMap StandardRule::StartSelection(const int client_pid,
+NeighborMap Standard::StartSelection(const int client_pid,
                                      const IntSet& in_swarm_set)
 {
     g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors

@@ -2,13 +2,9 @@
 
 #include "random.h"
 
-//static const long long kInitSeed = 377003613;
-//long long g_rand_num = k_init_seed;
 
 namespace
 {
-
-const long long kInitSeed = 377003613;
 
 void RandForInternal(const RSC& rsc)
 {
@@ -23,15 +19,15 @@ void RandForInternal(const RSC& rsc)
 
 long long g_rand_grp[] =
 {
-    kInitSeed, kInitSeed, kInitSeed,
-    kInitSeed, kInitSeed, kInitSeed,
-    kInitSeed, kInitSeed, kInitSeed,
-    kInitSeed, kInitSeed, kInitSeed,
-    kInitSeed, kInitSeed, kInitSeed
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0
 };
 
 
-namespace uniformrand {
+namespace btte_uniformrand {
 
 const int kInterval = 1000000;
 
@@ -58,14 +54,18 @@ void Srand(const int iRSC, const int seed)
     }
 }
 
-void InitRandSeeds()
+void InitRandSeeds(long long seed)
 {
-    int seed = kInterval;  // ordinal of seed
+    //int seed = kInterval;  // ordinal of seed
+    for (int seed_id = 0; seed_id < g_kNumRSeeds; seed_id++)
+    {
+        g_rand_grp[seed_id] = seed;
+    }
 
     for (int seed_id = 0; seed_id < g_kNumRSeeds; seed_id++)
     {
         Srand(seed_id, seed);
-        seed += kInterval * (seed_id + 1);
+        seed = seed + kInterval * (seed_id + 1);
     }
 }
 
