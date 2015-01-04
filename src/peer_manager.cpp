@@ -12,11 +12,13 @@
 #include "algorithm/cb_peer_selection.h"
 #include "algorithm/rfp_piece_selection.h"
 #include "algorithm/rf_piece_selection.h"
+#include "../custom/my_peer_selection.h"
+#include "../custom/my_piece_selection.h"
 
 #include "peer_manager.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace
@@ -106,6 +108,22 @@ std::map<int, IntVec> GetPieceOwnersMap(IntSet const& target_pieces, const int c
     return piece_owner_map;
 }
 
+
+/*
+ * 針對每一個 rarest piece，找到 "不重複" 的持有者，封裝成要求訊息，
+ * 最終將每個訊息集合成一個列表列表
+ *
+ * NOTE-1: 不一定能為每個 rarest piece 找到合適的 neighbor 去要求。
+ * NOTE-2: 不重複有兩種意思:
+ *            1. 不跟正在要求(還在處理中的要求)的 neighbor 重複
+ *            2. 要求的 neighbor 是互斥的
+ *
+ * FIXME: 假設某個 piece(A) 被多個 neighbors 擁有，所以會亂數挑一個去要求，
+ *        但有可能挑中的這個 neighbor 是另一個欲要求的 piece(B) 的唯一擁有者。
+ *        也就是，原本它可找到擁有 B 的 neighbor，但因為它也是 A 的持有者，所以
+ *        我們先向它要求 A 的話，這輪就無法要求 B 了。
+ *
+ * * * * * * * * * * * * * */
 MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 {
     Peer const& client = g_peers.at(client_pid);
@@ -113,25 +131,16 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 
     MsgList req_msgs;
     IntSet dest_peers;
-
-    // 針對每一個 piece，找到 "不重複" 的持有者，並封裝成一個要求訊息。
-    // 最終將每個訊息集合成一組訊息列表
-    //
-    // NOTE-1: 不一定每個 rarest piece 找到合適的持有者去要求
-    // NOTE-2: 不重複有兩種意思:
-    //             1. 不跟正在要求的節點重複
-    //             2. 不同 pieces 之間的要求對象是互斥的
     for (const int piece_no : target_pieces)
     {
         IntVec const& owners = piece_owners_map.at(piece_no);
 
         if (owners.size() != 0)
         {
-            // If more than one neighbors have this piece,
+            // If more than one neighbor have this piece,
             // then randomly choose one neighbor to request.
             const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
 
-            // 紀錄
             if (!IsDupDest(dest_peers, dest_pid))
             {
                 const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
@@ -156,25 +165,31 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
 void PeerManager::InitAbstractObj()
 {
     const int TYPE_PEERSELECT = g_btte_args.get_type_peerselect();
-    const int TYPE_PIECESELECT = g_btte_args.get_type_pieceselect();
 
     // 將指定的 peer selection 演算法所屬之衍生類別轉形成基底類別
-    const PeerSelect_T type_peer_select = static_cast<PeerSelect_T>(TYPE_PEERSELECT);
+    const PeerSelect_t type_peer_select =
+                       static_cast<PeerSelect_t>(TYPE_PEERSELECT);
+
     switch (type_peer_select)
     {
-        case PeerSelect_T::STANDARD:
+        case PeerSelect_t::STANDARD:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new StandardRule());
+                static_cast<IPeerSelection*>(new Standard());
             break;
 
-        case PeerSelect_T::LOAD_BALANCING:
+        case PeerSelect_t::LOAD_BALANCING:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new LoadBalancingRule());
+                static_cast<IPeerSelection*>(new LoadBalancing());
             break;
 
-        case PeerSelect_T::CLUSTER_BASED:
+        case PeerSelect_t::CLUSTER_BASED:
             obj_peerselect_ =
-                static_cast<IPeerSelection*>(new ClusterBasedRule());
+                static_cast<IPeerSelection*>(new ClusterBased());
+            break;
+
+        case PeerSelect_t::USER_DEFINED:
+            obj_peerselect_ =
+                static_cast<IPeerSelection*>(new MyPeerSelection());
             break;
 
         default:
@@ -183,22 +198,26 @@ void PeerManager::InitAbstractObj()
             break;
     }
 
-    //const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(args_->TYPE_PIECESELECT);
-    const PieceSelect_T type_piece_select = static_cast<PieceSelect_T>(0);  // rarest_first
+
+    const int TYPE_PIECESELECT = g_btte_args.get_type_pieceselect();
+    const PieceSelect_t type_piece_select =
+                        static_cast<PieceSelect_t>(TYPE_PIECESELECT);  // rarest_first
+
     switch (type_piece_select)
     {
-        case PieceSelect_T::BUILTIN:
-            //obj_pieceselect_ = static_cast<IPieceSelect*>(new RandomFirstPiece(*args_));
-            obj_pieceselect_ = static_cast<IPieceSelection*>(new RarestFirst());
-            break;
-        case PieceSelect_T::USER_DEFINED_1:
-            //obj_pieceselect_ =
-            //    static_cast<IPieceSelect*>(new UserDefined1(*args_));
+        case PieceSelect_t::RANDOM:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new RandomFirstPiece());
             break;
 
-        case PieceSelect_T::USER_DEFINED_2:
-            //obj_pieceselect_ =
-            //    static_cast<IPieceSelect*>(new UserDefined2(*args_));
+        case PieceSelect_t::RAREST_FIRST:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new RarestFirst());
+            break;
+
+        case PieceSelect_t::USER_DEFINED:
+            obj_pieceselect_ =
+                    static_cast<IPieceSelection*>(new MyPieceSelection());
             break;
 
         default:
@@ -427,8 +446,14 @@ void PeerManager::CreateSwarm()
 
 void PeerManager::DeployPeersLevel()
 {
-    int count[g_kNumLevel] = { 0 };
-    int exclude_set[g_kNumLevel] = { 0 };
+    int count[g_kNumLevel];
+    int exclude_set[g_kNumLevel];
+    for (size_t i = 0; i < g_kNumLevel; i++)
+    {
+        count[i] = 0;
+        exclude_set[i] = 0;
+    }
+
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     for (size_t p = 0; p < NUM_PEER; p++)
@@ -454,8 +479,14 @@ void PeerManager::DeployPeersLevel()
 
 void PeerManager::DeployClusterIDs()
 {
-    int count[g_kNumClusters] = { 0 };
-    int exclude_set[g_kNumClusters] = { 0 };
+    int count[g_kNumClusters];
+    int exclude_set[g_kNumClusters];
+    for (size_t i = 0; i < g_kNumClusters; i++)
+    {
+        count[i] = 0;
+        exclude_set[i] = 0;
+    }
+
     const size_t NUM_PEER = g_btte_args.get_num_peer();
 
     // assing a cid to each peer, and don't exceed

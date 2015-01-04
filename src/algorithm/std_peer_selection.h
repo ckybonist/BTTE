@@ -7,12 +7,12 @@
 namespace btte_peer_selection
 {
 
-class StandardRule : public IPeerSelection
+class Standard : public IPeerSelection
 {
   public:
-    StandardRule() : IPeerSelection(),
+    Standard() : IPeerSelection(),
                      pg_delays_(nullptr) {};
-    ~StandardRule();
+    ~Standard();
 
   private:
     NeighborMap StartSelection(const int client_pid,

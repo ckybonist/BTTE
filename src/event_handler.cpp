@@ -11,7 +11,7 @@
 #include "event_handler.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace
@@ -578,7 +578,8 @@ void EventHandler::PeerLeaveEvent(Event& ev)
     pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
-void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
+//void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
+void EventHandler::ProcessEvent(Event& ev)
 {
     // DEMO
     //if (ev.type_bt == Event::PEER_JOIN ||
@@ -587,7 +588,7 @@ void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
     //    EventInfo(ev, current_time_);
     //}
 
-    WriteEventInfo(ofs, ev, current_time_);
+    //WriteEventInfo(ofs, ev, current_time_);  // debug
 
     if (ev.type == Event::Type::ARRIVAL)
     {
@@ -606,9 +607,9 @@ void EventHandler::StartRoutine()
 {
     //const int aborigin = args_.NUM_SEED + args_.NUM_LEECH;
     //const int num_avg_peer = args_.NUM_PEER - aborigin;
-    Event2Str(tbt2str);  // debug
-    std::ofstream ofs;
-    ofs.open("event_log.txt");
+    //Event2Str(tbt2str);  // debug
+    //std::ofstream ofs;
+    //ofs.open("event_log.txt");
 
     PushInitEvent();
 
@@ -618,10 +619,11 @@ void EventHandler::StartRoutine()
 
         event_list_.pop_front();
 
-        ProcessEvent(head, ofs);
+        //ProcessEvent(head, ofs);
+        ProcessEvent(head);
     }
 
-    ofs.close();
+    //ofs.close();
 }
 
 

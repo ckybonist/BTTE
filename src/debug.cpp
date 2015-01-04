@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-
 #include "args.h"
 #include "error.h"
 #include "random.h"
@@ -17,19 +16,17 @@ using std::endl;
 namespace
 {
 
-void SimuArgsInfo();
+void PrintTTInfo(std::ofstream& ofs);
 
-void TTInfo(std::ofstream& ofs);
+void PrintPeerInfo(std::ofstream& ofs, const int pid);
 
-void PeerInfo(std::ofstream& ofs, const int pid);
-
-void PieceInfo(std::ofstream& ofs,
+void PrintPieceInfo(std::ofstream& ofs,
                const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
                int* counter);
 
-void NeighborInfo(std::ofstream& ofs,
+void PrintNeighborInfo(std::ofstream& ofs,
                   const int pid,
                   const size_t NUM_PEERLIST);
 
@@ -57,7 +54,7 @@ void RSC2Str(RSmapStr& rs2str)
 } // anonymous namespace
 
 
-void PrintRandSeeds()
+void PrintRandSeedsInfo()
 {
     RSmapStr rs2str;
     RSC2Str(rs2str);
@@ -73,7 +70,57 @@ void PrintRandSeeds()
     std::cout << "\n\n";
 }
 
-void ShowDbgInfo()
+void PrintSimuArgsInfo()
+{
+    cout << "Simulation Arguments:\n";
+    cout << "NUM_PEER : " << g_btte_args.get_num_peer() << endl;
+    cout << "NUM_SEED : " << g_btte_args.get_num_seed() << endl;
+    cout << "NUM_LEECH : " << g_btte_args.get_num_leech() << endl;
+    cout << "NUM_PEERLIST : " << g_btte_args.get_num_peerlist() << endl;
+    cout << "NUM_PIECE : " << g_btte_args.get_num_piece() << endl;
+
+    cout << "NUM_CHOKING : " << g_btte_args.get_num_choking() << endl;
+    cout << "NUM_OU (Optimistic Unchoking) : " << g_btte_args.get_num_ou() << endl;
+
+    std::string ns_algo = "";
+    switch (g_btte_args.get_type_peerselect())
+    {
+        case 0:
+            ns_algo = "Standard";
+            break;
+        case 1:
+            ns_algo = "Load Balancing";
+            break;
+        case 2:
+            ns_algo = "Cluster Based";
+            break;
+        case 3:
+            ns_algo = "User Defined";
+            break;
+        default:
+            break;
+    }
+    cout << "Peer Selection Type : " << ns_algo;
+
+    switch (g_btte_args.get_type_pieceselect())
+    {
+        case 0:
+            ns_algo = "Random";
+            break;
+        case 1:
+            ns_algo = "Rarest First";
+            break;
+        case 2:
+            ns_algo = "User Defined";
+            break;
+        default:
+            break;
+    }
+    cout << "\nPiece Selection Type : " << ns_algo;
+    cout << endl << endl;
+}
+
+void PrintDbgInfo()
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
     const size_t NUM_PEER = g_btte_args.get_num_peer();
@@ -85,25 +132,29 @@ void ShowDbgInfo()
         ExitError("Memory Allocation Fault");
 
     /* Simulation Arguments Info */
-    SimuArgsInfo();
+    PrintSimuArgsInfo();
 
     std::ofstream ofs;
     ofs.open("peer_info.txt");
 
     /* Transmission Time Info */
-    TTInfo(ofs);
+    PrintTTInfo(ofs);
 
     /* Show debug info */
     ofs.precision(3);
     ofs << "@ Peer Info:\n\n";
     for (size_t pid = 0; pid < NUM_PEER; pid++)
     {
-        PeerInfo(ofs, pid);
+        PrintPeerInfo(ofs, pid);
 
-        PieceInfo(ofs, pid, NUM_PIECE, NUM_SEED, piece_own_counter);
+        PrintPieceInfo(ofs,
+                       pid,
+                       NUM_PIECE,
+                       NUM_SEED,
+                       piece_own_counter);
 
         if (pid >= NUM_SEED)
-            NeighborInfo(ofs, pid, NUM_PEERLIST);
+            PrintNeighborInfo(ofs, pid, NUM_PEERLIST);
 
         Peer const& peer = g_peers.at(pid);
         const float time_to_complete = peer.get_complete_time() -
@@ -128,38 +179,7 @@ void ShowDbgInfo()
 namespace
 {
 
-void SimuArgsInfo()
-{
-    cout << "Simulation Arguments:\n";
-    cout << "NUM_PEER : " << g_btte_args.get_num_peer() << endl;
-    cout << "NUM_SEED : " << g_btte_args.get_num_seed() << endl;
-    cout << "NUM_LEECH : " << g_btte_args.get_num_leech() << endl;
-    cout << "NUM_PEERLIST : " << g_btte_args.get_num_peerlist() << endl;
-    cout << "NUM_PIECE : " << g_btte_args.get_num_piece() << endl;
-
-    cout << "NUM_CHOKING : " << g_btte_args.get_num_choking() << endl;
-    cout << "NUM_OU (Optimistic Unchoking) : " << g_btte_args.get_num_ou() << endl;
-
-    std::string ns_algo = "";
-    switch (g_btte_args.get_type_peerselect())
-    {
-        case 0:
-            ns_algo = "Standard";
-            break;
-        case 1:
-            ns_algo = "Load Balancing";
-            break;
-        case 2:
-            ns_algo = "Cluster Based";
-            break;
-        default:
-            break;
-    }
-    cout << "Peer Selection Type : " << ns_algo;
-    cout << endl << endl;
-}
-
-void TTInfo(std::ofstream& ofs)
+void PrintTTInfo(std::ofstream& ofs)
 {
     ofs << "@ Transmission Time of Piece:\n";
     for (int i = 0; i < g_kNumLevel; i++)
@@ -171,11 +191,13 @@ void TTInfo(std::ofstream& ofs)
     ofs << "\n\n\n";
 }
 
-void PeerInfo(std::ofstream& ofs, const int pid)
+void PrintPeerInfo(std::ofstream& ofs, const int pid)
 {
     ofs << "Peer ID: " << g_peers.at(pid).get_pid() << endl;
     ofs << "Cluster ID: " << g_peers.at(pid).get_cid() << endl;
     ofs << "\nJoin time (not yet): " << g_peers.at(pid).get_join_time() << endl;
+    ofs << "\nFinish time (not yet): " << g_peers.at(pid).get_complete_time() << endl;
+    ofs << "\nDeparture time (not yet): " << g_peers.at(pid).get_leave_time() << endl;
 
     auto peer = g_peers.at(pid);
 
@@ -197,7 +219,7 @@ void PeerInfo(std::ofstream& ofs, const int pid)
     ofs << "Download Bandwidth (bps): " << bandwidth.downlink << endl;
 }
 
-void PieceInfo(std::ofstream& ofs,
+void PrintPieceInfo(std::ofstream& ofs,
                const int pid,
                const size_t NUM_PIECE,
                const size_t NUM_SEED,
@@ -218,7 +240,7 @@ void PieceInfo(std::ofstream& ofs,
     ofs << "    * Empty: " << (NUM_PIECE - piece_count) << endl;
 }
 
-void NeighborInfo(std::ofstream& ofs,
+void PrintNeighborInfo(std::ofstream& ofs,
                   const int pid,
                   const size_t NUM_PEERLIST)
 {

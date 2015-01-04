@@ -2,21 +2,13 @@
 
 # Check arguments
 if [ $# -ge 1 ]; then
-    COMPILE_FLAG=$1
-    if [[ "$COMPILE_FLAG" != "debug" && "$COMPILE_FLAG" != "release" && $COMPILE_FLAG != "all" ]]; then
-        echo "Give me \"debug\" or \"release\" as first argument otherwise empty string"
+    BUILD_FLAG=$1
+    if [[ "$BUILD_FLAG" != "debug" &&
+          "$BUILD_FLAG" != "release" &&
+          "$BUILD_FLAG" != "rebuild" &&
+          "$BUILD_FLAG" != "makeall" ]]; then
+        echo "First Argument: debug, relase, makeall, rebuild \"\" "
         exit 1
-    fi
-
-    if [ $# -eq 2 ]; then
-        CLEAN_FLAG=$2
-        if [ "$CLEAN_FLAG" != "" ]; then
-            if [ "$CLEAN_FLAG" != "clean" ]; then
-                echo "Give me \"clean\" as \
-                      second argument otherwise empty string"
-                exit 1
-            fi
-        fi
     fi
 else
     echo "Wrong number of arguments"
@@ -24,21 +16,24 @@ else
 fi
 
 # Build project
-BUILD_DIR='build'
-if [ ! -d $BUILD_DIR ]; then
-    ./init_project $COMPILE_FLAG
-else
-    if [ $COMPILE_FLAG == "all" ]; then
-        cd $BUILD_DIR/release
-        make clean && make
-        cd ../debug
-        make clean && make
-    else
-        cd $BUILD_DIR/$COMPILE_FLAG
-        if [ "$CLEAN_FLAG" != "" ]; then
-            make clean
-        fi
-        make
-    fi
+PROJ_ROOT=$(readlink -f $(pwd))
+if [ $(basename $PROJ_ROOT) != 'BTTE' ]; then
+    PROJ_ROOT=$(dirname $PROJ_ROOT)
 fi
 
+BUILD_DIR="$PROJ_ROOT/build"
+
+if [ $BUILD_FLAG == "rebuild" ]; then
+    rm -rf $BUILD_DIR
+    mkdir $BUILD_DIR
+    mkdir $BUILD_DIR/debug $BUILD_DIR/release
+    $PROJ_ROOT/script/init_build.sh
+elif [ $BUILD_FLAG == "makeall" ]; then
+    cd $BUILD_DIR/debug
+    make clean && make
+    cd ../release
+    make clean && make
+else
+    cd $BUILD_DIR/$BUILD_FLAG
+    make clean && make
+fi

@@ -1,32 +1,32 @@
 #include "lb_peer_selection.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace btte_peer_selection
 {
 
-LoadBalancingRule::~LoadBalancingRule()
+LoadBalancing::~LoadBalancing()
 {
     //delete [] pg_delays_;
     //delete [] nbc_info_;
 }
 
-void LoadBalancingRule::RefreshInfo()
+void LoadBalancing::RefreshInfo()
 {
     delete [] nbc_info_;
     nbc_info_ = nullptr;
 }
 
-void LoadBalancingRule::AllocNBCInfo(const size_t N)
+void LoadBalancing::AllocNBCInfo(const size_t N)
 {
     nbc_info_ = new NBCountsInfo[N];
     if (nbc_info_ == nullptr)
         ExitError("Memory Allocation Fault!");
 }
 
-void LoadBalancingRule::GatherNeighborCounts(const size_t cand_size)
+void LoadBalancing::GatherNeighborCounts(const size_t cand_size)
 {
     AllocNBCInfo(cand_size);
 
@@ -38,7 +38,7 @@ void LoadBalancingRule::GatherNeighborCounts(const size_t cand_size)
     }
 }
 
-void LoadBalancingRule::SortCountsInfo(const size_t num_candidates)
+void LoadBalancing::SortCountsInfo(const size_t num_candidates)
 {
     auto func_comp = [] (const void* a, const void* b) {
         const NBCountsInfo* pa = (NBCountsInfo*)a;
@@ -51,16 +51,16 @@ void LoadBalancingRule::SortCountsInfo(const size_t num_candidates)
           sizeof(NBCountsInfo),
           func_comp);
 
-    std::cout << "\nNBC Info (pid, neighbor_counts):\n";
-    for (size_t i = 0; i < num_candidates; i++)
-    {
-        std::cout << "(" << nbc_info_[i].pid
-                  << ",  " << nbc_info_[i].counts << ")\n";
-    }
-    std::cout << std::endl;
+    //std::cout << "\nNBC Info (pid, neighbor_counts):\n";
+    //for (size_t i = 0; i < num_candidates; i++)
+    //{
+    //    std::cout << "(" << nbc_info_[i].pid
+    //              << ",  " << nbc_info_[i].counts << ")\n";
+    //}
+    //std::cout << std::endl;
 }
 
-void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
+void LoadBalancing::AssignNeighbors(NeighborMap& neighbors,
                                         const size_t num_candidates)
 {
     const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
@@ -81,7 +81,7 @@ void LoadBalancingRule::AssignNeighbors(NeighborMap& neighbors,
     }
 }
 
-NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
+NeighborMap LoadBalancing::StartSelection(const int client_pid,
                                               const IntSet& in_swarm_set)
 {
     g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
@@ -100,7 +100,7 @@ NeighborMap LoadBalancingRule::StartSelection(const int client_pid,
 
     AssignNeighbors(neighbors, num_candidates);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

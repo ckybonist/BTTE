@@ -3,7 +3,7 @@
 #include "rf_piece_selection.h"
 
 
-using namespace uniformrand;
+using namespace btte_uniformrand;
 
 
 namespace btte_piece_selection
@@ -25,8 +25,8 @@ void RarestFirst::CountNumPeerOwnPiece()
 
     int index = 0;
     std::vector<POC> tmp_vec;
-    IntSetIter begin = no_download_pieces_set_.begin();
-    IntSetIter end = no_download_pieces_set_.end();
+    IntSetIter begin = candidates_.begin();
+    IntSetIter end = candidates_.end();
 
     for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
     {
@@ -108,7 +108,8 @@ IntSet RarestFirst::GetRarestPiecesSet() const
 
                 if (i == last_idx)
                 {
-                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
+                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
+                                                               dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
                 }
@@ -122,7 +123,8 @@ IntSet RarestFirst::GetRarestPiecesSet() const
                 }
                 else if (!dup_count_pieces.empty())
                 {
-                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT, dup_count_pieces);
+                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
+                                                               dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
                 }
@@ -142,7 +144,7 @@ void RarestFirst::RefreshInfo()
 {
     delete [] count_info_;
     count_info_ = nullptr;
-    no_download_pieces_set_.clear();
+    candidates_.clear();
 }
 
 IntSet RarestFirst::StartSelection(const int client_pid)
@@ -151,7 +153,7 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     CheckNeighbors();
 
-    CollectNoDownloadPieces();
+    GetPiecesHaveNotDownloadYet();
 
     CountNumPeerOwnPiece();
 
