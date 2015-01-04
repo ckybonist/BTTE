@@ -45,6 +45,14 @@ class IPeerSelection
     int selector_pid_;
     //int* candidates_;
     std::vector<int> candidates_;
+    struct TmpPeer
+    {
+        TmpPeer(int, int, int);
+        int pid;
+        int cid;
+        int nbcount;
+    };
+    std::vector<TmpPeer> orig_cands_;
 };
 
 }

@@ -1,3 +1,4 @@
+#include <fstream>
 #include "peer_selection.h"
 
 
@@ -27,6 +28,7 @@ void IPeerSelection::RefreshCandidates()
     //candidates_ = nullptr;
     if (!candidates_.empty())
         candidates_.clear();
+    orig_cands_.clear();
 }
 
 Neighbor* IPeerSelection::AllocNeighbors()
@@ -49,6 +51,13 @@ IntSet IPeerSelection::ExcludeSelf(const IntSet& in_swarm_set)
     return cand_pid_set;
 }
 
+IPeerSelection::TmpPeer::TmpPeer(int pid, int cid, int nbcount)
+{
+    this->pid = pid;
+    this->cid = cid;
+    this->nbcount = nbcount;
+}
+
 // return size of candidates
 // NOTE: if sort_cid_flag is true, then put peers that have
 // same cid as selector at the prior of array
@@ -69,6 +78,14 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
 
     // Shuffle the set of candidates to ensure the selection is random
     RandomShuffle(candidates_.begin(), candidates_.end());
+
+    for (int i = 0; i < num_candidates; i++)
+    {
+        const int pid = candidates_[i];
+        const int cid = g_peers.at(pid).get_cid();
+        const int nbcount = g_peers.at(pid).get_neighbor_counts();
+        orig_cands_.push_back(TmpPeer(pid, cid, nbcount));
+    }
 
     return num_candidates;
 }
@@ -119,17 +136,59 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
 void IPeerSelection::DebugInfo(NeighborMap const& neighbors,
                                const int client_pid) const
 {
-    // debug info
-    std::cout << "\nNeighbors of Peer #" << client_pid << std::endl;
-    std::cout << "Info: (pid, cid, neighbor counts, PG delay)\n";
+    std::string prefix = " ";
+    switch (g_btte_args.get_type_peerselect())
+    {
+        case 0:
+            prefix = "std_";
+            break;
+        case 1:
+            prefix = "lb_";
+            break;
+        case 2:
+            prefix = "cb_";
+            break;
+        case 3:
+            prefix = "user_";
+            break;
+        default:
+            ExitError("wrong algo ID");
+            break;
+    }
+
+    std::ofstream ofs;
+    ofs.open(prefix + "peersel_log.txt", std::fstream::app);
+
+    if (g_btte_args.get_type_peerselect() == 2)
+    {
+        ofs << "執行者(" << client_pid << ") 所屬的 cluster : "
+            << g_peers.at(client_pid).get_cid() << std::endl;
+    }
+    // all peers in swarm
+    ofs << "目前在 swarm 裡面的節點：\n";
+    ofs << "<pid>  <cid>  <neighbor counts>\n";
+    for (auto const& it : orig_cands_)
+    {
+        ofs << "(" << it.pid << ",  "
+                   << it.cid << ",  "
+                   << it.nbcount << ")"
+                   << std::endl;
+    }
+
+    // result
+    ofs << "\n執行者(" << client_pid << ") 的 neighbors\n";
+    ofs << "<pid>  <cid>  <neighbor counts>  <propagation delay>\n";
     for (auto& it : neighbors)
     {
-        std::cout << "(" << it.first << ",  "
-                  << g_peers.at(it.first).get_cid() << ",  "
-                  << g_peers.at(it.first).get_neighbor_counts() << ",  "
-                  << it.second.pg_delay << ")" << std::endl;
+        const int pid = it.first;
+        const float pg_delay = it.second.pg_delay;
+        ofs << "(" << pid << ",  "
+                  << g_peers.at(pid).get_cid() << ",  "
+                  << g_peers.at(pid).get_neighbor_counts() << ",  "
+                  << pg_delay << ")" << std::endl;
     }
-    std::cout << std::endl;
+    ofs << std::endl;
+    ofs.close();
 }
 
 }

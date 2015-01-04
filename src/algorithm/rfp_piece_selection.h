@@ -16,6 +16,7 @@ class RandomFirstPiece : public IPieceSelection
     IntSet StartSelection(const int client_pid) override;
     IntSet GetRandomPieceSet();
     void RefreshInfo();
+    void DebugInfo(IntSet const& tmp_cands, IntSet const& result) const;
 };
 
 }

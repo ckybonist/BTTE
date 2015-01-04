@@ -34,7 +34,7 @@ class IPieceSelection
 
   protected:
     void CheckNeighbors();
-    void GetPiecesHaveNotDownloadYet();
+    void SetCandidates();
     bool HavePiece(const int pid, const int piece_no) const;
 
     IntSet candidates_;

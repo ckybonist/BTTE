@@ -20,6 +20,7 @@ class RarestFirst : public IPieceSelection
     bool IsDupDest(const IntSet& dest_peers, const int nid);
     IntSet GetRarestPiecesSet() const;
     void RefreshInfo();
+    void DebugInfo(IntSet const& result) const;
 
     typedef struct PieceOwnersCount
     {
