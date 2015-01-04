@@ -30,10 +30,10 @@ if [ $BUILD_FLAG == "rebuild" ]; then
     $PROJ_ROOT/script/init_build.sh
 elif [ $BUILD_FLAG == "makeall" ]; then
     cd $BUILD_DIR/debug
-    make clean && make
+    make clean && make -j4
     cd ../release
-    make clean && make
+    make clean && make -j4
 else
     cd $BUILD_DIR/$BUILD_FLAG
-    make clean && make
+    make clean && make -j4
 fi
