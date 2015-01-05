@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "../args.h"
 #include "../random.h"
@@ -11,7 +12,6 @@ using namespace btte_uniformrand;
 
 typedef std::list<PieceMsg> MsgList;
 
-// FIXME : Bug, large src_pid number
 namespace
 {
     void OptimisticUnchoke(const MsgList& recv_msgs,
@@ -65,6 +65,7 @@ MsgList Choking(const int client_pid)
 {
     Peer const& client = g_peers.at(client_pid);
     MsgList const& recv_msgs = client.get_recv_msg_buf();
+    MsgList tmp_recv_msgs = recv_msgs;
     MsgList unchoke_list;
 
     // Sort request msgs by upload bandwidth of sender
@@ -72,6 +73,31 @@ MsgList Choking(const int client_pid)
 
     // Do choking
     Unchoke(recv_msgs, unchoke_list, client_pid);
+
+    // DEBUG
+    std::ofstream ofs;
+    ofs.open("choking_log.txt", std::fstream::app);
+    ofs << "接收到的要求 :\n";
+    ofs << "<src>  <piece>  <upload bandwidth of src>\n";
+    for (auto const& msg : tmp_recv_msgs)
+    {
+        ofs << msg.src_pid << ' '
+            << msg.piece_no << ' '
+            << msg.src_up_bw << std::endl;
+    }
+
+    ofs << "\n\n";
+
+    ofs << "Unchoke(同意分享) 的要求：\n";
+    ofs << "<src>  <piece>  <upload bandwidth of src>\n";
+    for (auto const& msg : unchoke_list)
+    {
+        ofs << msg.src_pid << ' '
+            << msg.piece_no << ' '
+            << msg.src_up_bw << std::endl;
+    }
+
+    ofs << "\n--------------------\n";
 
     return unchoke_list;
 }

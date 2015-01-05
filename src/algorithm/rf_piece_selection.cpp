@@ -61,8 +61,7 @@ void RarestFirst::CountNumPeerOwnPiece()
 
 void RarestFirst::SortByPieceCounts()
 {
-    auto cmp = [] (const void* l, const void* r) {
-        const POC* myl = (POC*)l;
+    auto cmp = [] (const void* l, const void* r) { const POC* myl = (POC*)l;
         const POC* myr = (POC*)r;
         return myl->count - myr->count;
     };
@@ -160,13 +159,13 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     SortByPieceCounts();
 
-    IntSet target_pieces = GetRarestPiecesSet();
+    IntSet result = GetRarestPiecesSet();
 
-    DebugInfo(target_pieces);
+    DebugInfo(result);
 
     RefreshInfo();
 
-    return target_pieces;
+    return result;
 }
 
 void RarestFirst::DebugInfo(IntSet const& result) const
@@ -192,18 +191,18 @@ void RarestFirst::DebugInfo(IntSet const& result) const
     ofs.open(prefix + "piecesel_log.txt", std::fstream::app);
 
     // pieces haven't downloaded yet
-    ofs << "執行者("<< selector_pid_ <<  ") 尚未取得的 pieces :\n";
-    ofs << "目標數量：" << num_target_ << std::endl;
+    ofs << "client 尚未取得的 pieces :\n";
     ofs << "<piece no>  <count>\n";
     for (int i = 0; i < num_target_; i++)
     {
-        ofs << count_info_[i].piece_no << ' ' << count_info_[i].count << std::endl;
+        ofs << count_info_[i].piece_no << ' '
+            << count_info_[i].count << std::endl;
     }
 
-    ofs << std::endl << std::endl;
+    ofs << "\n\n";
 
     // piece ready to download
-    ofs << "執行者("<< selector_pid_ <<  ") 準備下載的 pieces :\n";
+    ofs << "client 準備下載的 pieces :\n";
     for (const int no : result) ofs << no << ' ';
 
     ofs << "\n----------------------\n\n\n";

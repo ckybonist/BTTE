@@ -48,53 +48,11 @@ IntSet RandomFirstPiece::StartSelection(const int client_pid)
 
     SetCandidates();
 
-    IntSet tmp_cands = candidates_; // for debug
-
-    IntSet target_pieces = candidates_;
-
-    //IntSet target_pieces = GetRandomPieceSet();
-
-    DebugInfo(tmp_cands, target_pieces);
+    IntSet result = candidates_;
 
     RefreshInfo();
 
-    return target_pieces;
-}
-
-void RandomFirstPiece::DebugInfo(IntSet const& tmp_cands, IntSet const& result) const
-{
-    std::string prefix = " ";
-    switch (g_btte_args.get_type_pieceselect())
-    {
-        case 0:
-            prefix = "rand_";
-            break;
-        case 1:
-            prefix = "rarefst_";
-            break;
-        case 2:
-            prefix = "user_";
-            break;
-        default:
-            ExitError("wrong algo ID");
-            break;
-    }
-
-    std::ofstream ofs;
-    ofs.open(prefix + "piecesel_log.txt", std::fstream::app);
-
-    // pieces haven't downloaded yet
-    ofs << "執行者("<< selector_pid_ <<  ") 還未取得的 pieces :\n";
-    for (const int no : tmp_cands) ofs << no << ' ';
-
-    ofs << std::endl << std::endl;
-
-    // piece ready to download
-    ofs << "執行者("<< selector_pid_ <<  ") 準備下載的 pieces :\n";
-    for (const int no : result) ofs << no << ' ';
-
-    ofs << "\n----------------------\n\n\n";
-    ofs.close();
+    return result;
 }
 
 }
