@@ -118,7 +118,7 @@ NeighborMap ClusterBased::StartSelection(const int client_pid,
     const int client_cid = g_peers.at(client_pid).get_cid();
     AssignNeighbors(neighbors, num_candidates, client_cid);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

@@ -75,6 +75,7 @@ MsgList Choking(const int client_pid)
     Unchoke(recv_msgs, unchoke_list, client_pid);
 
     // DEBUG
+    /*
     std::ofstream ofs;
     ofs.open("choking_log.txt", std::fstream::app);
     ofs << "接收到的要求 :\n";
@@ -98,6 +99,7 @@ MsgList Choking(const int client_pid)
     }
 
     ofs << "\n--------------------\n";
+    */
 
     return unchoke_list;
 }

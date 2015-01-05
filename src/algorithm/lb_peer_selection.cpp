@@ -100,7 +100,7 @@ NeighborMap LoadBalancing::StartSelection(const int client_pid,
 
     AssignNeighbors(neighbors, num_candidates);
 
-    DebugInfo(neighbors, client_pid);
+    //DebugInfo(neighbors, client_pid);
 
     RefreshInfo();
 

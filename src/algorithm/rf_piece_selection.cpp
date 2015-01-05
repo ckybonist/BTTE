@@ -161,7 +161,7 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     IntSet result = GetRarestPiecesSet();
 
-    DebugInfo(result);
+    //DebugInfo(result);
 
     RefreshInfo();
 

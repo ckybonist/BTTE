@@ -366,6 +366,7 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
     req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     // DEBUG
+    /*
     std::ofstream ofs;
     ofs.open("rand_piecesel_log.txt", std::fstream::app);
 
@@ -408,6 +409,7 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
     }
     ofs << "-------------------------------\n\n";
     ofs.close();
+    */
     // DEBUG
 
     return req_msgs;
