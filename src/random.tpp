@@ -99,14 +99,16 @@ void Shuffle(const RSC rsc, T *arr, const size_t N)
 }
 
 template <class RandomIt>
-void RandomShuffle(RandomIt first, RandomIt last)
+//void RandomShuffle(RandomIt first, RandomIt last)
+void RandomShuffle(const RSC rsc, RandomIt first, RandomIt last)
 {
      typename std::iterator_traits<RandomIt>::difference_type i, n;
      n = last - first;
      for (i = n-1; i > 0; --i)
      {
          using std::swap;
-         swap(first[i], first[std::rand() % (i+1)]);
+         //swap(first[i], first[std::rand() % (i+1)]);
+         swap(first[i], first[Rand(rsc) % (i+1)]);
      }
 }
 

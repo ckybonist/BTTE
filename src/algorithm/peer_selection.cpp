@@ -77,7 +77,8 @@ size_t IPeerSelection::SetCandidates(const IntSet& in_swarm_set,
     }
 
     // Shuffle the set of candidates to ensure the selection is random
-    RandomShuffle(candidates_.begin(), candidates_.end());
+    //RandomShuffle(candidates_.begin(), candidates_.end());
+    RandomShuffle(rsc, candidates_.begin(), candidates_.end());
 
     for (int i = 0; i < num_candidates; i++)
     {
