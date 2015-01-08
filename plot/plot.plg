@@ -23,6 +23,7 @@ set xtics 64
 
 ## Range
 set xrange [0:256]
+set yrange [0:]
 
 ## Line
 set style line 1 lt 1 lc rgb "red" lw 2 pt 5  ps 1.0
