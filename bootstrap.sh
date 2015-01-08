@@ -5,7 +5,7 @@
 #    2. new source files added
 
 BUILD_DIR='build'
-SCRIPT_DIR='script'
+SCRIPT_DIR='script/proj'
 
 if [ -d $BUILD_DIR ]; then
     rm -rf $BUILD_DIR
