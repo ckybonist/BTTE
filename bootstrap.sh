@@ -4,7 +4,7 @@
 #    1. init project
 #    2. new source files added
 
-BUILD_DIR='build'
+BUILD_DIR='obj'
 SCRIPT_DIR='script/proj'
 
 if [ -d $BUILD_DIR ]; then

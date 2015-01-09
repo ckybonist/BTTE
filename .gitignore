@@ -7,7 +7,7 @@
 #obj/dbg/*
 
 # CMake build
-build/
+obj/
 
 # Compiled Dynamic libraries
 *.so
