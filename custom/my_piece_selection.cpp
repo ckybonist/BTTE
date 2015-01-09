@@ -15,11 +15,15 @@ IntSet MyPieceSelection::StartSelection(const int client_pid)
 {
     selector_pid_ = client_pid;
 
+    /*
+     * Check selector have neighbors
+     * */
     CheckNeighbors();
 
     /* Collect pieces which have not download yet
-     * into candidates_ */
-    GetPiecesHaveNotDownloadYet();
+     * into candidates_
+     * */
+    SetCandidates();
 
     IntSet target_pieces;
 

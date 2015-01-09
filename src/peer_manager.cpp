@@ -1,3 +1,4 @@
+#include <fstream>
 #include "error.h"
 #include "random.h"
 
@@ -44,7 +45,7 @@ bool IsDupDest(const IntSet& dest_peers,
 
 bool HavePiece(const int pid, const int piece_no)
 {
-    bool have = g_peers.at(pid).get_nth_piece_info(piece_no);
+    const bool have = g_peers.at(pid).get_nth_piece_info(piece_no);
     return have;
 }
 
@@ -365,15 +366,51 @@ MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
     req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
 
     // DEBUG
-    //for (PieceMsg const& msg : req_msgs)
-    //{
-    //    // debug
-    //    std::cout << "\nPiece Reqest Msg:" << std::endl;
-    //    std::cout << "   src: " << msg.src_pid << std::endl;
-    //    std::cout << "   dest: " << msg.dest_pid << std::endl;
-    //    std::cout << "   wanted piece: " << msg.piece_no << std::endl;
-    //    std::cout << "   src upload bandwidth: " << msg.src_up_bw << "\n\n";
-    //}
+    /*
+    std::ofstream ofs;
+    ofs.open("rand_piecesel_log.txt", std::fstream::app);
+
+    ofs << "client 準備要下載的 pieces :\n";
+    for (const int no : target_pieces) ofs << no << ' ';
+    ofs << "\n\n";
+
+    auto const& neighbors = g_peers.at(client_pid).get_neighbors();
+    ofs << "client 的 neighbors :\n";
+    for (auto const& it : neighbors)
+        ofs << it.first << ' ';
+    ofs << "\n\n";
+
+    ofs << "每個 piece 的擁有者(neigbor)：\n";
+    ofs << "<piece>  <owners>\n";
+    for (const int no : target_pieces)
+    {
+        ofs << no << " : ";
+        // list oweners
+        for (auto const& it : neighbors)
+        {
+            if (HavePiece(it.first, no))
+                ofs << it.first << ' ';
+        }
+        ofs << "\n";
+    }
+    ofs << "\n\n";
+
+    ofs << "正在要求的 neighbors :\n";
+    MsgList send_msg_buf = g_peers.at(client_pid).get_send_msg_buf();
+    for (PieceMsg const& msg : send_msg_buf)
+        ofs << msg.dest_pid << ' ';
+    ofs << "\n\n";
+
+    ofs << "對於每個 piece，亂數挑選擁有者，如果此擁有者正在要求則不算：\n";
+    ofs << "<piece>  <owner>\n";
+    for (PieceMsg const& msg : req_msgs)
+    {
+        ofs << msg.piece_no << ' ' << msg.dest_pid << std::endl;
+    }
+    ofs << "-------------------------------\n\n";
+    ofs.close();
+    */
+    // DEBUG
 
     return req_msgs;
 }

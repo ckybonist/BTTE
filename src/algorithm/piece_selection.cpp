@@ -1,3 +1,4 @@
+#include <fstream>
 #include "piece_selection.h"
 
 namespace btte_piece_selection
@@ -24,15 +25,25 @@ void IPieceSelection::CheckNeighbors()
     }
 }
 
-void IPieceSelection::GetPiecesHaveNotDownloadYet()
+void IPieceSelection::SetCandidates()
 {
     const size_t NUM_PIECE = g_btte_args.get_num_piece();
+    auto& neighbors = g_peers.at(selector_pid_).get_neighbors();
 
     for (size_t c = 0; c < NUM_PIECE; c++)
     {
         const Peer& selector = g_peers.at(selector_pid_);
+        bool flag = false;
         if (!selector.get_nth_piece_info(c))
-            candidates_.insert(c);
+        {
+            // checking someone own this piece
+            for (auto const& it : neighbors)
+                if (HavePiece(it.first, c))
+                {
+                    candidates_.insert(c);
+                    break;
+                }
+        }
     }
 }
 

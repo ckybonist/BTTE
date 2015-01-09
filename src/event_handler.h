@@ -17,10 +17,9 @@ class EventHandler
     float get_lambda() { return lambda_; };
     float get_mu() { return mu_; };
 
-
-  private:
     void StartRoutine();  // main routine
 
+  private:
     void MapEventFuncs();
     void MapEventFlow();
 
@@ -98,8 +97,6 @@ class EventHandler
 
     // external
     PeerManager* pm_;
-
-    friend class EnvManager;
 };
 
 #endif // for #ifndef _EVENT_HANDLER_H

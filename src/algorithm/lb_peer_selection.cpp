@@ -82,7 +82,7 @@ void LoadBalancing::AssignNeighbors(NeighborMap& neighbors,
 }
 
 NeighborMap LoadBalancing::StartSelection(const int client_pid,
-                                              const IntSet& in_swarm_set)
+                                          const IntSet& in_swarm_set)
 {
     g_peers.at(client_pid).clear_neighbors();  // clear previous neighbors
 

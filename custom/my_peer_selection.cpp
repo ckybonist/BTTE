@@ -20,7 +20,7 @@ NeighborMap MyPeerSelection::StartSelection(const int client_pid,
 
     /* Collect all peers which in swarm into candidates_*/
     size_t num_candidates = SetCandidates(in_swarm_set,
-                                          RSC::STD_PEERSELECT);
+                                          RSC::FREE_1);
 
     /*
      * Use your algorithm to select possible
