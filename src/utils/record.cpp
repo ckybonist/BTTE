@@ -27,6 +27,8 @@ std::string GenrFileName(const std::string record_type)
             case 2:
                 ns_algo = "ClusterBased";
                 break;
+            case 3:
+                ns_algo = "Custom";
             default:
                 break;
         }
@@ -42,7 +44,7 @@ std::string GenrFileName(const std::string record_type)
                 ns_algo = "RarestFirst";
                 break;
             case 2:
-                ns_algo = "UserDefined";
+                ns_algo = "Custom";
                 break;
             default:
                 break;
