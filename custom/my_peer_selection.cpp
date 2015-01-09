@@ -1,5 +1,3 @@
-#include "../src/pg_delay.h"
-#include "../src/random.h"
 #include "my_peer_selection.h"
 
 

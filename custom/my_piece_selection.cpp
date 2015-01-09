@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "my_piece_selection.h"
 
 
