@@ -1,5 +1,5 @@
 #include <cstdlib>
-
+#include <fstream>
 #include "rf_piece_selection.h"
 
 
@@ -61,8 +61,7 @@ void RarestFirst::CountNumPeerOwnPiece()
 
 void RarestFirst::SortByPieceCounts()
 {
-    auto cmp = [] (const void* l, const void* r) {
-        const POC* myl = (POC*)l;
+    auto cmp = [] (const void* l, const void* r) { const POC* myl = (POC*)l;
         const POC* myr = (POC*)r;
         return myl->count - myr->count;
     };
@@ -79,6 +78,7 @@ IntSet RarestFirst::GetRarestPiecesSet() const
     IntSet target_pieces;
     IntSet dup_count_pieces;
 
+    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
     if (num_target_ == 1)  // only one
     {
         const int no = count_info_[0].piece_no;
@@ -153,17 +153,59 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     CheckNeighbors();
 
-    GetPiecesHaveNotDownloadYet();
+    SetCandidates();
 
     CountNumPeerOwnPiece();
 
     SortByPieceCounts();
 
-    IntSet target_pieces = GetRarestPiecesSet();
+    IntSet result = GetRarestPiecesSet();
+
+    //DebugInfo(result);
 
     RefreshInfo();
 
-    return target_pieces;
+    return result;
 }
 
+void RarestFirst::DebugInfo(IntSet const& result) const
+{
+    std::string prefix = " ";
+    switch (g_btte_args.get_type_pieceselect())
+    {
+        case 0:
+            prefix = "rand_";
+            break;
+        case 1:
+            prefix = "rarefst_";
+            break;
+        case 2:
+            prefix = "user_";
+            break;
+        default:
+            ExitError("wrong algo ID");
+            break;
+    }
+
+    std::ofstream ofs;
+    ofs.open(prefix + "piecesel_log.txt", std::fstream::app);
+
+    // pieces haven't downloaded yet
+    ofs << "client 尚未取得的 pieces :\n";
+    ofs << "<piece no>  <count>\n";
+    for (int i = 0; i < num_target_; i++)
+    {
+        ofs << count_info_[i].piece_no << ' '
+            << count_info_[i].count << std::endl;
+    }
+
+    ofs << "\n\n";
+
+    // piece ready to download
+    ofs << "client 準備下載的 pieces :\n";
+    for (const int no : result) ofs << no << ' ';
+
+    ofs << "\n----------------------\n\n\n";
+    ofs.close();
+}
 }

@@ -1,3 +1,4 @@
+#include <fstream>
 #include "../args.h"
 #include "rfp_piece_selection.h"
 
@@ -45,13 +46,13 @@ IntSet RandomFirstPiece::StartSelection(const int client_pid)
 
     CheckNeighbors();
 
-    GetPiecesHaveNotDownloadYet();
+    SetCandidates();
 
-    IntSet target_pieces = GetRandomPieceSet();
+    IntSet result = candidates_;
 
     RefreshInfo();
 
-    return target_pieces;
+    return result;
 }
 
 }

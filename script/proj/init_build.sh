@@ -13,7 +13,7 @@ if [ ! -f "$PROJ_ROOT/CMakeLists.txt" ]; then
 fi
 
 # generating Unix Makefiles
-BUILD_DIR="$PROJ_ROOT/build"
+BUILD_DIR="$PROJ_ROOT/obj"
 cd $BUILD_DIR
 
 # debug

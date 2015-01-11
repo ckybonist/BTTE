@@ -80,7 +80,7 @@ void Shuffle(const RSC rsc, T* arr, const size_t N);
 
 /* Only work for vector or deque which have iterator */
 template <class RandomIt>
-void RandomShuffle(RandomIt first, RandomIt last);
+void RandomShuffle(const RSC rsc, RandomIt first, RandomIt last);
 
 
 /*
