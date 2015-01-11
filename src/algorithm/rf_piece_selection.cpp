@@ -89,12 +89,12 @@ IntSet RarestFirst::GetRarestPiecesSet() const
         // Check peer-count of each piece iteratively, if appear same-peer-count situation,
         // then randomly choose one.
         // FIXME :  太冗長，應該有更好的處理邏輯
+        const int last_idx = num_target_ - 1;
         for (size_t i = 1; i < num_target_; ++i)
         {
             const int cur_no = count_info_[i].piece_no;
             const int count = count_info_[i].count;
             const int prev_count = count_info_[i - 1].count;
-            const int last_idx = num_target_ - 1;
 
             if (count == prev_count)
             {
@@ -106,6 +106,7 @@ IntSet RarestFirst::GetRarestPiecesSet() const
 
                 dup_count_pieces.insert(cur_no);
 
+                // 已經找到所有相同 owner counts 的 pieces，所以亂數從pieces中選一個
                 if (i == last_idx)
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
@@ -121,18 +122,31 @@ IntSet RarestFirst::GetRarestPiecesSet() const
                     const int prev_no = count_info_[i - 1].piece_no;
                     target_pieces.insert(prev_no);
                 }
-                else if (!dup_count_pieces.empty())
+
+                if (!dup_count_pieces.empty()) // 已找到所有相同 owner counts 的 pieces，所以亂數從pieces中選一個
                 {
                     const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
                                                                dup_count_pieces);
                     target_pieces.insert(rand_no);
                     dup_count_pieces.clear();
+                    if (i == last_idx)
+                        target_pieces.insert(cur_no);
                 }
-                else if (i == last_idx &&
-                         dup_count_pieces.empty())
-                {
-                    target_pieces.insert(cur_no);
-                }
+
+                //else if (!dup_count_pieces.empty()) // 已找到所有相同 owner counts 的 pieces，所以亂數從pieces中選一個
+                //{
+                //    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
+                //                                               dup_count_pieces);
+                //    target_pieces.insert(rand_no);
+                //    dup_count_pieces.clear();
+                //}
+                //else if (i == last_idx &&
+                //         dup_count_pieces.empty())
+                //else if (i == last_idx ||
+                //         dup_count_pieces.empty())
+                //{
+                //    target_pieces.insert(cur_no);
+                //}
             }
         }
     }
@@ -161,7 +175,7 @@ IntSet RarestFirst::StartSelection(const int client_pid)
 
     IntSet result = GetRarestPiecesSet();
 
-    //DebugInfo(result);
+    DebugInfo(result);
 
     RefreshInfo();
 
