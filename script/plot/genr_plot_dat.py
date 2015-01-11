@@ -91,25 +91,31 @@ def TidyUpRawData(files, plot_type, have_diff_rseed_simu = False):
             result[simu_algo].append(record)
     return result
 
-def ProcessRawData(plot_type):
+def ProcessRawData(logdir, plot_type):
     #files = glob.glob("../../log/" + plot_type + "/*")
-    files = glob.glob("../../log/raw/*")
+    files = glob.glob(logdir + 'raw/*')
     result = TidyUpRawData(files, plot_type, have_diff_rseed_simu = True)
     return result
 
 
 if __name__ == "__main__":
+    proj_root = os.getcwd()
+    if (os.path.basename(proj_root) != 'BTTE'):
+        proj_root = re.search('.*BTTE/', proj_root).group(0)
+    else:
+        proj_root += '/'
+
     plot_type = sys.argv[1]  # dir prefix
-    result = ProcessRawData(plot_type)
+    logdir = proj_root + 'log/'
+    result = ProcessRawData(logdir, plot_type)
     variant_factor = plot_type.split('_')[1]  # piece/peer
 
     for k in result.keys():
         result[k] = sorted(result[k])
 
-    outdir = '../../log/'
     for simu_algo, record_lst in result.items():
         #outfile = outdir + 'time_piece_' + simu_algo + '.dat'
-        outfile = outdir + simu_algo + '.dat'
+        outfile = logdir + simu_algo + '.dat'
         with open(outfile, 'w') as fp:
             fp.write("# {0}\ttime\n".format(variant_factor))
             for vf_value, avg_time in record_lst:  # vf : variant factor

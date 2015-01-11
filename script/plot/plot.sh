@@ -2,8 +2,12 @@
 
 PLOT_TYPE=$1  # peer/piece to time
 ALGO_TYPE=$2  # peer/piece selection
-OUTDIR='../../log/'
-RAWLOG_DIR='raw'
+
+#PROJ_ROOT="$(readlink -f $(pwd))/"
+PROJ_ROOT="$(pwd)/"
+if [ $(basename $PROJ_ROOT) != 'BTTE' ]; then
+    PROJ_ROOT=$(echo $PROJ_ROOT | sed -e 's@script/plot@@')
+fi
 
 function printHelpMsg() {
     echo 'Usage : ./plot.sh <plot_type> <algo_type>'
@@ -23,21 +27,16 @@ fi
 
 # Create argument string of gnuplot
 if [ $1 == "time_piece" ]; then
-    #python3 genr_plot_dat.py $PLOT_TYPE
-    #ARGSTR="dat_prefix=${RAWLOG_DIR}; outfile='${OUTPUT}/time_piece.png'; xlabelname='piece'; algo='${ALGO_TYPE}'"
-    ARGSTR="outdir='$OUTDIR'; outfile='time_piece.png'; xlabelname='piece'; algo='$ALGO_TYPE'"
-    #/usr/bin/gnuplot -e $ARGSTR plot.plg
+    ARGSTR="outdir='${PROJ_ROOT}log/'; outfile='time_piece.png'; xlabelname='piece'; algo='$ALGO_TYPE'"
 elif [ $1 == "time_peer" ]; then
-    #python3 genr_plot_dat.py $1
-    #ARGSTR="dat_prefix=${RAWLOG_DIR}; outfile='${OUTPUT}/time_peer.png'; xlabelname='peer'; algo='${ALGO_TYPE}'"
-    ARGSTR="outdir='$OUTDIR'; outfile='time_peer.png'; xlabelname='peer'; algo='$ALGO_TYPE'"
-    #/usr/bin/gnuplot -e $ARGSTR lot.plg
+    ARGSTR="outdir='${PROJ_ROOT}log/'; outfile='time_peer.png'; xlabelname='peer'; algo='$ALGO_TYPE'"
 else
     error
 fi
 
+PLOTDIR="${PROJ_ROOT}script/plot"
 # create csv-like data file
-python3 genr_plot_dat.py $PLOT_TYPE
+python3 $PLOTDIR/genr_plot_dat.py $PLOT_TYPE
 
 # plot graph
-/usr/bin/gnuplot -e "$ARGSTR" graph.plg
+/usr/bin/gnuplot -e "$ARGSTR" $PLOTDIR/graph.plg
