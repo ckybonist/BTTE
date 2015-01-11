@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Collect all source files (*.h | *.cpp)
 set(SRC src)
 set(CUSTOM custom)
-file(GLOB_RECURSE SRC_FILES "${SRC}/*.cpp", "${CUSTOM}/*.cpp")
+file(GLOB_RECURSE SRC_FILES "${SRC}/*.cpp" "${CUSTOM}/*.cpp")
 
 # Set compiler flags
 # project rely on c++11

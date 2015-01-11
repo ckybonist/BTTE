@@ -22,11 +22,13 @@ std::string GenrFileName(const std::string record_type)
                 ns_algo = "Standard";
                 break;
             case 1:
-                ns_algo = "LoadBalance";
+                ns_algo = "LoadBalancing";
                 break;
             case 2:
                 ns_algo = "ClusterBased";
                 break;
+            case 3:
+                ns_algo = "Custom";
             default:
                 break;
         }
@@ -42,7 +44,7 @@ std::string GenrFileName(const std::string record_type)
                 ns_algo = "RarestFirst";
                 break;
             case 2:
-                ns_algo = "UserDefined";
+                ns_algo = "Custom";
                 break;
             default:
                 break;
@@ -50,7 +52,7 @@ std::string GenrFileName(const std::string record_type)
     }
 
     std::ostringstream oss;
-    std::string log_path("../../../log/");
+    std::string log_path("../../../log/raw/");
     oss << log_path
         << NUM_PEER << '_'
         << NUM_PIECE << '_'

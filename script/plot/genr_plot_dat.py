@@ -5,7 +5,6 @@
     This script compute average complete time
     of each simulation. and generate a *.dat file which
     use for gnuplot
-
 """
 
 import re
@@ -41,6 +40,9 @@ def GetAvgSimuTime(all_simu_records):
     return round(avg_avg_time, 2)
 
 def GetVariantFactor(fname, plot_type):
+    """
+        Get variat-factor(number of piece/peer) from filename
+    """
     pattern = re.compile("[0-9]+")
     match = None
     if plot_type == 'time_piece':
@@ -64,13 +66,14 @@ def MergeSimuRecord(all_simu_records):
             tmp = []
     return result
 
-def ProcessLog(files, have_diff_rseed_simu = False):
+def TidyUpRawData(files, plot_type, have_diff_rseed_simu = False):
     result = defaultdict(list)
     all_simu_records = []
 
     for f in files:
         with open(f, 'r') as fp:
-            " If same have multiple simulations with same combination of arguments "
+            " If same have multiple simulations with \
+              same combination of arguments "
             if have_diff_rseed_simu:
                 all_simu_records = [ s.strip().split()
                                      for s in fp.readlines() if '#' not in s ]
@@ -81,36 +84,35 @@ def ProcessLog(files, have_diff_rseed_simu = False):
                                      for s in fp.readlines() if '#' not in s ]
                 avg_time = GetPeerAvgCompleteTime(simu_record)
 
-            f = os.path.basename(f).split('_')
+            f = os.path.basename(f).split('_')  # [1000, 64, "ClusterBased"]
             simu_algo = os.path.splitext(f[2])[0]
             variant_factor = GetVariantFactor(f, plot_type)
             record = (variant_factor, avg_time)
             result[simu_algo].append(record)
+    return result
 
+def ProcessRawData(plot_type):
+    #files = glob.glob("../../log/" + plot_type + "/*")
+    files = glob.glob("../../log/raw/*")
+    result = TidyUpRawData(files, plot_type, have_diff_rseed_simu = True)
     return result
 
 
 if __name__ == "__main__":
-    plot_type = sys.argv[1]
-    files = glob.glob(plot_type + "/*")
-
-    result = ProcessLog(files,
-                        have_diff_rseed_simu = True)
+    plot_type = sys.argv[1]  # dir prefix
+    result = ProcessRawData(plot_type)
+    variant_factor = plot_type.split('_')[1]  # piece/peer
 
     for k in result.keys():
         result[k] = sorted(result[k])
 
-    outdir = 'output/'
+    outdir = '../../log/'
     for simu_algo, record_lst in result.items():
-        tmp = 0
-        outfile = outdir + 'time_piece_' + simu_algo + '.dat'
+        #outfile = outdir + 'time_piece_' + simu_algo + '.dat'
+        outfile = outdir + simu_algo + '.dat'
         with open(outfile, 'w') as fp:
-            for vf, avg_time in record_lst:  # vf : variant factor
-                if tmp is 0:
-                    fp.write("{0}\t{1}\n".format(0, 0))
-                    fp.write("{0}\t{1}\n".format(vf, avg_time))
-                else:
-                    fp.write("{0}\t{1}\n".format(vf, avg_time))
-                tmp += 1
+            fp.write("# {0}\ttime\n".format(variant_factor))
+            for vf_value, avg_time in record_lst:  # vf : variant factor
+                fp.write("{0}\t{1}\n".format(vf_value, avg_time))
 
 # End of File
