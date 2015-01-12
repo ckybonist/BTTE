@@ -248,6 +248,19 @@ void IPieceSelection::Debug(MsgList const& req_msgs, std::vector<int> rf_candida
     }
     ofs << "\n\n";
 
+    ofs << "正在要求的 neighbors :\n";
+    MsgList send_msg_buf = g_peers.at(selector_pid_).get_send_msg_buf();
+    for (PieceMsg const& msg : send_msg_buf)
+    {
+        bool flag = true;
+        for (PieceMsg const& req : req_msgs)
+        {
+            if (req.dest_pid == msg.dest_pid) flag = false;
+        }
+        if (flag) ofs << msg.dest_pid << ' ';
+    }
+    ofs << "\n\n";
+
     ofs << "每個 piece 的擁有者(neigbor)：\n";
     ofs << "<piece>  <owners>\n";
     if (g_btte_args.get_type_pieceselect() == 1)
@@ -279,19 +292,6 @@ void IPieceSelection::Debug(MsgList const& req_msgs, std::vector<int> rf_candida
         }
     }
 
-    ofs << "\n\n";
-
-    ofs << "正在要求的 neighbors :\n";
-    MsgList send_msg_buf = g_peers.at(selector_pid_).get_send_msg_buf();
-    for (PieceMsg const& msg : send_msg_buf)
-    {
-        bool flag = true;
-        for (PieceMsg const& req : req_msgs)
-        {
-            if (req.dest_pid == msg.dest_pid) flag = false;
-        }
-        if (flag) ofs << msg.dest_pid << ' ';
-    }
     ofs << "\n\n";
 
     ofs << "對於每個 piece，亂數挑選擁有者，如果此擁有者正在要求則不算：\n";
