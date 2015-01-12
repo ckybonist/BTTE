@@ -23,7 +23,7 @@ MsgList RandomFirstPiece::StartSelection(const int client_pid)
 
     MsgList req_msgs = GetUndupDestReqMsgs(candidates_, selector_pid_);
 
-    Debug(req_msgs, std::vector<int>());
+    //Debug(req_msgs, std::vector<int>());
 
     RefreshInfo();
 

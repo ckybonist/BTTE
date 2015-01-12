@@ -25,9 +25,9 @@ void EnvManager::Init(const std::string filename)
     PrintSimuArgsInfo();
 
     /* Rand Init */
-    const int rand_seed = 1;
-    InitRandSeeds(rand_seed);
-    //InitRandSeeds((unsigned) std::time(0));
+    //const int rand_seed = 1;
+    //InitRandSeeds(rand_seed);
+    InitRandSeeds((unsigned) std::time(0));
     //std::cout << "Initial Random Seeds: " << init_seed << "\n";
     //PrintRandSeeds();
 
@@ -44,7 +44,7 @@ void EnvManager::Simulate(const std::string record_type)
     evh.StartRoutine();
 
     WriteRecord(record_type);
-    PrintDbgInfo();
+    //PrintDbgInfo();
     //std::cout << "\n\nFinal Random Seeds:\n";
     //PrintRandSeedsInfo();
 }

@@ -121,7 +121,7 @@ MsgList RarestFirst::StartSelection(const int client_pid)
 
     MsgList req_msgs = GetUndupDestReqMsgs(rf_candidates, selector_pid_);
 
-    Debug(req_msgs, rf_candidates);
+    //Debug(req_msgs, rf_candidates);
 
     RefreshInfo();
 
