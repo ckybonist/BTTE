@@ -140,7 +140,7 @@ MsgList GetUndupDestReqMsgs(IntSet const& target_pieces, const int client_pid)
         {
             // If more than one neighbor have this piece,
             // then randomly choose one neighbor to request.
-            const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
+            const int dest_pid = RandChooseElementInContainer(RSC::PIECESELECT, owners);
 
             if (!IsDupDest(dest_peers, dest_pid))
             {
@@ -360,58 +360,12 @@ void PeerManager::AllotNeighbors(const int pid) const
 
 MsgList PeerManager::GenrAllPieceReqs(const int client_pid)
 {
-    IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
+    //IntSet target_pieces = obj_pieceselect_->StartSelection(client_pid);
+    MsgList req_msgs = obj_pieceselect_->StartSelection(client_pid);
 
-    MsgList req_msgs;
-    req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
-
-    // DEBUG
-    /*
-    std::ofstream ofs;
-    ofs.open("rand_piecesel_log.txt", std::fstream::app);
-
-    ofs << "client 準備要下載的 pieces :\n";
-    for (const int no : target_pieces) ofs << no << ' ';
-    ofs << "\n\n";
-
-    auto const& neighbors = g_peers.at(client_pid).get_neighbors();
-    ofs << "client 的 neighbors :\n";
-    for (auto const& it : neighbors)
-        ofs << it.first << ' ';
-    ofs << "\n\n";
-
-    ofs << "每個 piece 的擁有者(neigbor)：\n";
-    ofs << "<piece>  <owners>\n";
-    for (const int no : target_pieces)
-    {
-        ofs << no << " : ";
-        // list oweners
-        for (auto const& it : neighbors)
-        {
-            if (HavePiece(it.first, no))
-                ofs << it.first << ' ';
-        }
-        ofs << "\n";
-    }
-    ofs << "\n\n";
-
-    ofs << "正在要求的 neighbors :\n";
-    MsgList send_msg_buf = g_peers.at(client_pid).get_send_msg_buf();
-    for (PieceMsg const& msg : send_msg_buf)
-        ofs << msg.dest_pid << ' ';
-    ofs << "\n\n";
-
-    ofs << "對於每個 piece，亂數挑選擁有者，如果此擁有者正在要求則不算：\n";
-    ofs << "<piece>  <owner>\n";
-    for (PieceMsg const& msg : req_msgs)
-    {
-        ofs << msg.piece_no << ' ' << msg.dest_pid << std::endl;
-    }
-    ofs << "-------------------------------\n\n";
-    ofs.close();
-    */
-    // DEBUG
-
+    //MsgList req_msgs;
+    //req_msgs = GetUndupDestReqMsgs(target_pieces, client_pid);
+    //
     return req_msgs;
 }
 
@@ -428,7 +382,7 @@ PieceMsg PeerManager::ReGenrPieceReq(const int piece_no, const int client_pid)
     PieceMsg msg;
     if (owners.size() != 0)
     {
-        const int dest_pid = RandChooseElementInContainer(RSC::RF_PIECESELECT, owners);
+        const int dest_pid = RandChooseElementInContainer(RSC::PIECESELECT, owners);
         const float pg_delay = client.get_neighbor_pgdelay(dest_pid);
         const float src_up_bw = client.get_bandwidth().uplink;
         msg = PieceMsg(client_pid, dest_pid, piece_no, pg_delay, src_up_bw);

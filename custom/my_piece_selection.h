@@ -11,6 +11,6 @@ class MyPieceSelection : public IPieceSelection
         ~MyPieceSelection();
 
     private:
-        IntSet StartSelection(const int client_pid) override;
+        MsgList StartSelection(const int client_pid) override;
         /* Declare Your Methods */
 };

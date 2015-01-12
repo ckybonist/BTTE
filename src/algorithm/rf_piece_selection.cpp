@@ -25,10 +25,10 @@ void RarestFirst::CountNumPeerOwnPiece()
 
     int index = 0;
     std::vector<POC> tmp_vec;
-    IntSetIter begin = candidates_.begin();
-    IntSetIter end = candidates_.end();
+    std::vector<int>::iterator begin = candidates_.begin();
+    std::vector<int>::iterator end = candidates_.end();
 
-    for (IntSetIter p_no = begin; p_no != end; p_no++, index++)
+    for (auto p_no = begin; p_no != end; p_no++, index++)
     {
         int counts = 0;
         for (auto& nei : neighbors)
@@ -59,6 +59,27 @@ void RarestFirst::CountNumPeerOwnPiece()
     tmp_vec.clear();
 }
 
+void RarestFirst::ShuffleCountInfo(const RSC rsc, POC *arr, const size_t N)
+{
+    if (arr == nullptr)
+    {
+        ExitError("\nPassing nullptr as an array\n");
+    }
+
+    if (N < 1)
+    {
+        ExitError("\nSize must greater than 1\n");
+    }
+
+    for (std::size_t i = 0; i < N; i++)
+    {
+        std::size_t idx = Roll<int>(rsc, 0, N - 1);
+        POC temp = arr[idx];
+        arr[idx] = arr[i];
+        arr[i] = temp;
+    }
+}
+
 void RarestFirst::SortByPieceCounts()
 {
     auto cmp = [] (const void* l, const void* r) { const POC* myl = (POC*)l;
@@ -73,73 +94,6 @@ void RarestFirst::SortByPieceCounts()
           cmp);
 }
 
-IntSet RarestFirst::GetRarestPiecesSet() const
-{
-    IntSet target_pieces;
-    IntSet dup_count_pieces;
-
-    const size_t NUM_PEERLIST = g_btte_args.get_num_peerlist();
-    if (num_target_ == 1)  // only one
-    {
-        const int no = count_info_[0].piece_no;
-        target_pieces.insert(no);
-    }
-    else
-    {
-        // Check peer-count of each piece iteratively, if appear same-peer-count situation,
-        // then randomly choose one.
-        // FIXME :  太冗長，應該有更好的處理邏輯
-        for (size_t i = 1; i < num_target_; ++i)
-        {
-            const int cur_no = count_info_[i].piece_no;
-            const int count = count_info_[i].count;
-            const int prev_count = count_info_[i - 1].count;
-            const int last_idx = num_target_ - 1;
-
-            if (count == prev_count)
-            {
-                if (dup_count_pieces.empty())
-                {
-                    const int prev_no = count_info_[i - 1].piece_no;
-                    dup_count_pieces.insert(prev_no);
-                }
-
-                dup_count_pieces.insert(cur_no);
-
-                if (i == last_idx)
-                {
-                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
-                                                               dup_count_pieces);
-                    target_pieces.insert(rand_no);
-                    dup_count_pieces.clear();
-                }
-            }
-            else
-            {
-                if (i == 1)
-                {
-                    const int prev_no = count_info_[i - 1].piece_no;
-                    target_pieces.insert(prev_no);
-                }
-                else if (!dup_count_pieces.empty())
-                {
-                    const int rand_no = RandChooseElementInSet(RSC::RF_PIECESELECT,
-                                                               dup_count_pieces);
-                    target_pieces.insert(rand_no);
-                    dup_count_pieces.clear();
-                }
-                else if (i == last_idx &&
-                         dup_count_pieces.empty())
-                {
-                    target_pieces.insert(cur_no);
-                }
-            }
-        }
-    }
-
-    return target_pieces;
-}
-
 void RarestFirst::RefreshInfo()
 {
     delete [] count_info_;
@@ -147,65 +101,31 @@ void RarestFirst::RefreshInfo()
     candidates_.clear();
 }
 
-IntSet RarestFirst::StartSelection(const int client_pid)
+MsgList RarestFirst::StartSelection(const int client_pid)
 {
     selector_pid_ = client_pid;
 
-    CheckNeighbors();
+    CheckNeighborExist();
 
     SetCandidates();
 
     CountNumPeerOwnPiece();
 
+    ShuffleCountInfo(RSC::PIECESELECT, count_info_, num_target_);
+
     SortByPieceCounts();
 
-    IntSet result = GetRarestPiecesSet();
+    std::vector<int> rf_candidates;
+    for(int i = 0; i < num_target_; i++)
+        rf_candidates.push_back(count_info_[i].piece_no);
 
-    //DebugInfo(result);
+    MsgList req_msgs = GetUndupDestReqMsgs(rf_candidates, selector_pid_);
+
+    //Debug(req_msgs, rf_candidates);
 
     RefreshInfo();
 
-    return result;
+    return req_msgs;
 }
 
-void RarestFirst::DebugInfo(IntSet const& result) const
-{
-    std::string prefix = " ";
-    switch (g_btte_args.get_type_pieceselect())
-    {
-        case 0:
-            prefix = "rand_";
-            break;
-        case 1:
-            prefix = "rarefst_";
-            break;
-        case 2:
-            prefix = "user_";
-            break;
-        default:
-            ExitError("wrong algo ID");
-            break;
-    }
-
-    std::ofstream ofs;
-    ofs.open(prefix + "piecesel_log.txt", std::fstream::app);
-
-    // pieces haven't downloaded yet
-    ofs << "client 尚未取得的 pieces :\n";
-    ofs << "<piece no>  <count>\n";
-    for (int i = 0; i < num_target_; i++)
-    {
-        ofs << count_info_[i].piece_no << ' '
-            << count_info_[i].count << std::endl;
-    }
-
-    ofs << "\n\n";
-
-    // piece ready to download
-    ofs << "client 準備下載的 pieces :\n";
-    for (const int no : result) ofs << no << ' ';
-
-    ofs << "\n----------------------\n\n\n";
-    ofs.close();
-}
 }

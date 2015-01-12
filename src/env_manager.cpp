@@ -40,7 +40,7 @@ void EnvManager::Simulate(const std::string record_type)
     pm.CreateSwarm();
 
     // EventHandler(peer_manager-obj, arrival-rate, departure-rate)
-    EventHandler evh(&pm, 0.2, 0.5);
+    EventHandler evh(&pm, 0.2, 0.8);
     evh.StartRoutine();
 
     WriteRecord(record_type);

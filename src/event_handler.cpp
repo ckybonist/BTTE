@@ -30,8 +30,7 @@ TBTmapStr tbt2str;
 }
 
 
-const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth.downlink;
-const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
+const float slowest_bandwidth = static_cast<float>(g_kPieceSize) / g_kPeerLevel[2].bandwidth.downlink; const float EventHandler::kTimeout_ = 2 * slowest_bandwidth;
 
 
 EventHandler::EventHandler(PeerManager* const pm, float lambda, float mu)
@@ -155,9 +154,10 @@ void EventHandler::CheckNonProcessedReqs(Event const& ev)
 
         for (PieceMsg const& msg : recv_msgs)
         {
-            Peer const& peer = g_peers.at(msg.src_pid);
+            Peer& peer = g_peers.at(msg.src_pid);
+            peer.remove_send_msg(msg);  // important !
 
-            if (peer.is_complete()) break;  // 如果要求者已經不需要 pieces
+            if (peer.is_complete()) break;
 
             const float time = ev.time + msg.pg_delay;
 
@@ -479,7 +479,6 @@ void EventHandler::SendPieceReqs(Event& ev)
         {
             Peer& client = g_peers.at(ev.pid);
             Peer& peer = g_peers.at(msg.dest_pid);
-            client.push_send_msg(msg);
             peer.push_recv_msg(msg);
         }
     }
