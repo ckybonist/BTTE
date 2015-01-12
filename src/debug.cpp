@@ -42,8 +42,7 @@ void RSC2Str(RSmapStr& rs2str)
     rs2str[RSC::STD_PEERSELECT] = "Standard Peer Selection";
     rs2str[RSC::LB_PEERSELECT] = "Load Balancing Peer Selection";
     rs2str[RSC::CB_PEERSELECT] = "Cluster-Based Peer Selection";
-    rs2str[RSC::RFP_PIECESELECT] = "Random Piece Selection";
-    rs2str[RSC::RF_PIECESELECT] = "Rarest First Piece Selection";
+    rs2str[RSC::PIECESELECT] = "Piece Selection";
     rs2str[RSC::CHOKING] = "Choking";
     rs2str[RSC::FREE_1] = "FREE";
     rs2str[RSC::FREE_2] = "FREE";

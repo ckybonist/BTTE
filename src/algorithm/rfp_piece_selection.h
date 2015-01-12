@@ -19,8 +19,7 @@ class RandomFirstPiece : public IPieceSelection
     RandomFirstPiece() : IPieceSelection() {};
 
   private:
-    IntSet StartSelection(const int client_pid) override;
-    IntSet GetRandomPieceSet();
+    MsgList StartSelection(const int client_pid) override;
     void RefreshInfo();
 };
 

@@ -35,22 +35,24 @@ class Peer
     void set_pid(const int pid);
     void set_cid(const int cid);
     void to_seed();
-    void download_piece(const int n);
+
     void set_neighbors(NeighborMap const& ns);
+    void remove_neighbor(const int pid);
     void clear_neighbors();
     void set_neighbor_counts(const int c);
     void incr_neighbor_counts(const int n);
+
     void set_join_time(const float t);
     void set_complete_time(const float t);
     void set_leave_time(const float t);
 
+    void download_piece(const int n);
     void push_send_msg(PieceMsg const& msg);
     void remove_send_msg(PieceMsg const& msg);
     void push_recv_msg(PieceMsg const& msg);
     void sort_recv_msg();
     void erase_recv_msg(MsgList::iterator it);
     void pop_recv_msg();
-
     void destroy_pieces();
 
     /* getter */

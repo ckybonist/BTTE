@@ -43,8 +43,7 @@ typedef enum class RandSeedCases
     STD_PEERSELECT,
     CB_PEERSELECT,
     LB_PEERSELECT,
-    RFP_PIECESELECT,
-    RF_PIECESELECT,
+    PIECESELECT,
     CHOKING,
 
     // Free usage below
