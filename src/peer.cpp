@@ -66,6 +66,11 @@ void Peer::set_neighbors(NeighborMap const& ns)
     neighbors = ns;
 }
 
+void Peer::remove_neighbor(const int pid)
+{
+    neighbors.erase(pid);
+}
+
 void Peer::clear_neighbors()                                    { neighbors.clear(); }
 void Peer::push_send_msg(PieceMsg const& msg)                   { send_msg_buf.push_back(msg); }
 void Peer::remove_send_msg(PieceMsg const& msg)

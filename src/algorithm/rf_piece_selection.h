@@ -37,19 +37,20 @@ class RarestFirst : public IPieceSelection
     ~RarestFirst();
 
   private:
-    IntSet StartSelection(const int client_pid) override;
-    void CountNumPeerOwnPiece();
-    void SortByPieceCounts();
-    bool IsDupDest(const IntSet& dest_peers, const int nid);
-    IntSet GetRarestPiecesSet() const;
-    void RefreshInfo();
-    void DebugInfo(IntSet const& result) const;
-
     typedef struct PieceOwnersCount
     {
         int piece_no;
         int count;
     } POC;
+
+    //IntSet StartSelection(const int client_pid) override;
+    MsgList StartSelection(const int client_pid) override;
+    void CountNumPeerOwnPiece();
+    void ShuffleCountInfo(const RSC rsc, POC *arr, const size_t N);
+    void SortByPieceCounts();
+    bool IsDupDest(const IntSet& dest_peers, const int nid);
+    IntSet GetRarestPiecesSet() const;
+    void RefreshInfo();
 
     POC* count_info_;
 
