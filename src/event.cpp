@@ -28,3 +28,5 @@ bool Event::operator<(const Event& e)
 {
     return time < e.time;
 }
+
+int g_event_counter[] = { 0, 0, 0, 0, 0, 0, 0, 0 };

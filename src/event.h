@@ -63,5 +63,7 @@ class Event
     bool is_complete;  // all pieces got
 };
 
+extern int g_event_counter[];
+
 
 #endif // for #ifndef _EVENT_H
