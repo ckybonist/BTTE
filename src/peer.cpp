@@ -12,7 +12,6 @@ std::vector<Peer> g_peers;
 bool* g_peers_reg_info = nullptr;
 //Peer *g_peers = nullptr;
 
-
 Peer::Peer()
 {
     in_swarm = false;
@@ -73,23 +72,29 @@ void Peer::remove_neighbor(const int pid)
 
 void Peer::clear_neighbors()                                    { neighbors.clear(); }
 void Peer::push_send_msg(PieceMsg const& msg)                   { send_msg_buf.push_back(msg); }
-void Peer::remove_send_msg(PieceMsg const& msg)
-{
+void Peer::remove_send_msg(PieceMsg const& msg)                 {
     auto msg_match = [&msg](PieceMsg const& this_msg) {
         bool match = false;
         if (msg.src_pid == this_msg.src_pid &&
             msg.dest_pid == this_msg.dest_pid &&
             msg.piece_no == this_msg.piece_no) { match = true; }
-
         return match;
     };
-
     send_msg_buf.remove_if(msg_match);
 }
 
 void Peer::push_recv_msg(PieceMsg const& msg)                   { recv_msg_buf.push_back(msg); }
 void Peer::sort_recv_msg()                                      { recv_msg_buf.sort(); }
-void Peer::erase_recv_msg(MsgList::iterator it)                 { recv_msg_buf.erase(it); }
+void Peer::remove_recv_msg(PieceMsg const& msg)                 {
+    auto msg_match = [&msg](PieceMsg const& this_msg) {
+        bool match = false;
+        if (msg.src_pid == this_msg.src_pid &&
+            msg.dest_pid == this_msg.dest_pid &&
+            msg.piece_no == this_msg.piece_no) { match = true; }
+        return match;
+    };
+    recv_msg_buf.remove_if(msg_match);
+}
 void Peer::pop_recv_msg()                                       { recv_msg_buf.pop_front(); }
 
 void Peer::destroy_pieces()
@@ -111,6 +116,7 @@ float Peer::get_neighbor_pgdelay(const int nid) const      { return neighbors.at
 float Peer::get_join_time() const                          { return join_time; }
 float Peer::get_complete_time() const                      { return complete_time; }
 float Peer::get_leave_time() const                         { return leave_time; }
+bool Peer::is_seed() const                                 { return type == SEED; }
 bool Peer::check_in_swarm() const                          { return in_swarm; }
 bool Peer::is_complete() const
 {

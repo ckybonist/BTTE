@@ -35,7 +35,6 @@ class Peer
     void set_pid(const int pid);
     void set_cid(const int cid);
     void to_seed();
-
     void set_neighbors(NeighborMap const& ns);
     void remove_neighbor(const int pid);
     void clear_neighbors();
@@ -51,7 +50,7 @@ class Peer
     void remove_send_msg(PieceMsg const& msg);
     void push_recv_msg(PieceMsg const& msg);
     void sort_recv_msg();
-    void erase_recv_msg(MsgList::iterator it);
+    void remove_recv_msg(PieceMsg const& msg);
     void pop_recv_msg();
     void destroy_pieces();
 
@@ -65,6 +64,7 @@ class Peer
     float get_join_time() const;
     float get_complete_time() const;
     float get_leave_time() const;
+    bool is_seed() const;
     bool check_in_swarm() const;
     bool* get_piece_info() const;
     bool get_nth_piece_info(const int n) const;
