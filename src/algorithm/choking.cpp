@@ -18,12 +18,13 @@ namespace
                            MsgList& unchoke_list,
                            const int client_pid)
     {
-        const size_t buf_size = recv_msgs.size();
+        Peer &client = g_peers.at(client_pid);
         PieceMsg msg = RandChooseElementInContainer(RSC::CHOKING, recv_msgs);
+        client.remove_recv_msg(msg);
         unchoke_list.push_back(msg);
     }
 
-    void Unchoke(const MsgList& recv_msgs,
+    void UnChoke(const MsgList& recv_msgs,
                  MsgList& unchoke_list,
                  const int client_pid)
     {
@@ -45,18 +46,20 @@ namespace
 
         for (size_t i = 0; i < counts; i++)
         {
-            PieceMsg msg = recv_msgs.front();
-            unchoke_list.push_back(msg);
-
             Peer& client = g_peers.at(client_pid);
+            PieceMsg msg = recv_msgs.front();
             client.pop_recv_msg();
+            unchoke_list.push_back(msg);
         }
 
         if(do_ou)
         {
-            OptimisticUnchoke(recv_msgs,
-                              unchoke_list,
-                              client_pid);
+            for (int i = 0; i < NUM_OU; i++)
+            {
+                OptimisticUnchoke(recv_msgs,
+                                  unchoke_list,
+                                  client_pid);
+            }
         }
     }
 }
@@ -72,7 +75,7 @@ MsgList Choking(const int client_pid)
     g_peers.at(client_pid).sort_recv_msg();
 
     // Do choking
-    Unchoke(recv_msgs, unchoke_list, client_pid);
+    UnChoke(recv_msgs, unchoke_list, client_pid);
 
     // DEBUG
     /*
