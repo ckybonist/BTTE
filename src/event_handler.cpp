@@ -20,6 +20,7 @@ namespace
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
+void CountEvent();
 void WriteEventInfo(std::ofstream& ofs,
                     Event const& head,
                     float cur_sys_time);
@@ -149,8 +150,8 @@ void EventHandler::CheckNonProcessedReqs(Event const& ev)
     MsgList const& recv_msgs = client.get_recv_msg_buf();
     if (!recv_msgs.empty())
     {
-        std::cout << "Peer #" << ev.pid
-                  << " complete downloading, but still remain requests\n";
+        //std::cout << "Peer #" << ev.pid
+        //          << " complete downloading, but still remain requests\n";
 
         for (PieceMsg const& msg : recv_msgs)
         {
@@ -234,6 +235,7 @@ void EventHandler::EC_5(Event const& ev)
     for (PieceMsg const& msg : ev.uploaded_reqs)
     {
         Peer const& peer = g_peers.at(msg.src_pid);  // sender of request
+
         const float pg_delay = msg.pg_delay;
         const float time = ev.time + pg_delay;
 
@@ -261,15 +263,25 @@ void EventHandler::EC_6(Event const& ev)
 {
     assert(ev.type_bt == Event::PIECE_GET);
 
+    Peer& client = g_peers.at(ev.pid);
     if (ev.is_complete)
     {
-        Event next_ev = Event(Event::Type::ARRIVAL,
-                              Event::COMPLETED,
-                              ++next_event_idx_,
-                              ev.pid,
-                              ev.time);
+        /*
+         *  可能之前要求的 piece 送來的時候,
+         *  client 已經成為 seeder 了。
+         *  因此要避免產生多餘的 Completed 事件
+         * */
+        if (!client.is_seed())
+        {
+            client.to_seed();
+            Event next_ev = Event(Event::Type::ARRIVAL,
+                                  Event::COMPLETED,
+                                  ++next_event_idx_,
+                                  ev.pid,
+                                  ev.time);
 
-        PushArrivalEvent(next_ev);
+            PushArrivalEvent(next_ev);
+        }
     }
     else
     {
@@ -430,6 +442,9 @@ void EventHandler::ProcessArrival(Event& ev)
         current_time_ = ev.time;
         PushDepartureEvent(ev.type_bt, next_event_idx_, ev.pid);
     }
+
+    const int ev_idx = static_cast<int>(ev.type_bt);
+    ++g_event_counter[ev_idx];
 }
 
 void EventHandler::ProcessDeparture(Event const& ev)
@@ -557,9 +572,11 @@ void EventHandler::PieceGetEvent(Event& ev)
 
     if (pm_->CheckAllPiecesGet(ev.pid))
     {
-        client.to_seed();
         ev.is_complete = true;
-        client.set_complete_time(ev.time);
+        if (!client.is_seed())
+        {
+            client.set_complete_time(ev.time);
+        }
     }
 }
 
@@ -567,6 +584,7 @@ void EventHandler::CompletedEvent(Event& ev)
 {
     // After random time, this peer will leave.
     // Now, nothing to do
+    std::cout << "\nPeer #" << ev.pid << " completed !!!";
 }
 
 void EventHandler::PeerLeaveEvent(Event& ev)
@@ -622,6 +640,7 @@ void EventHandler::StartRoutine()
         ProcessEvent(head);
     }
 
+    CountEvent();
     //ofs.close();
 }
 
@@ -629,8 +648,7 @@ void EventHandler::StartRoutine()
 namespace
 {
 
-size_t GetAboriginSize()
-{
+size_t GetAboriginSize() {
     const size_t NUM_SEED = g_btte_args.get_num_seed();
     const size_t NUM_LEECH = g_btte_args.get_num_leech();
     const size_t kAborigin = NUM_SEED + NUM_LEECH;
@@ -649,12 +667,25 @@ void Event2Str(TBTmapStr& tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
+void CountEvent()
+{
+    Event2Str(tbt2str);
+    std::cout << "\n\n";
+    for (int i = 0; i < 8; i++)
+    {
+        std::cout << tbt2str[static_cast<Event::Type4BT>(i)] << " ";
+        std::cout << g_event_counter[i] << std::endl;
+    }
+    std::cout << "\n\n";
+}
+
 void WriteEventInfo(std::ofstream& ofs,
                     Event const& head,
                     float sys_cur_time)
 {
     ofs.precision(5);
 
+    Event2Str(tbt2str);
     if (head.type == Event::Type::ARRIVAL)
     {
         ofs << "\nEvent #" << head.index << " arrival at " << head.time;
