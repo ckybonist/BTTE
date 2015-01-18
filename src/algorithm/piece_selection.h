@@ -30,7 +30,6 @@ class IPieceSelection
   public:
     IPieceSelection();
     virtual ~IPieceSelection();
-    //virtual IntSet StartSelection(const int client_pid) = 0;
     virtual MsgList StartSelection(const int client_pid) = 0;
 
   protected:
@@ -59,7 +58,6 @@ class IPieceSelection
 
     PieceMsg MakeMsg(const int piece_no, const int dest_pid);
 
-    //I2IVecMap GetPieceOwnersMap(IntSet const& target_pieces, const int client_pid);
     std::map<int, IntSet> GetPieceOwnersMap(IntSet const& target_pieces, const int client_pid);
 };
 

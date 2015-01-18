@@ -45,16 +45,16 @@ class RarestFirst : public IPieceSelection
 
     //IntSet StartSelection(const int client_pid) override;
     MsgList StartSelection(const int client_pid) override;
-    void CountNumPeerOwnPiece();
-    void ShuffleCountInfo(const RSC rsc, POC *arr, const size_t N);
+    MsgList GenrMsgs();
+
+    void ProcessCountInfo();
+    void SetCountInfo();
+    int CountNumPeerOwnPiece(const int piece_no);
+    void ShuffleCountInfo(const RSC rsc, POC *arr);
     void SortByPieceCounts();
-    bool IsDupDest(const IntSet& dest_peers, const int nid);
-    IntSet GetRarestPiecesSet() const;
     void RefreshInfo();
 
     POC* count_info_;
-
-    size_t num_target_;
 };
 
 }
