@@ -173,7 +173,6 @@ void EventHandler::CheckNonProcessedReqs(Event const& ev)
     }
 }
 
-
 /* Create Derived Events of Peer-Join Event */
 void EventHandler::EC_1(Event const& ev)
 {
@@ -323,7 +322,6 @@ void EventHandler::EC_8(Event const& ev)
     CheckNonProcessedReqs(ev);
 }
 
-
 void EventHandler::PushInitEvent()
 {
     const size_t NUM_SEED = g_btte_args.get_num_seed();
@@ -409,57 +407,6 @@ void EventHandler::PushPeerJoinEvent(Event const& ev)
             PushArrivalEvent(event);
         }
     }
-}
-
-void EventHandler::ProcessArrival(Event& ev)
-{
-    total_sys_size_ += system_.size();
-
-    /* Timeout 機制 */
-    // 如果 request event 已經 timeout, 直接忽略(跳出函式)
-    //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout)
-    //{
-        // 刪除要求者中 "正在要求中的 peers (on_req_peers)"
-        // 這個紀錄裡面的 接收者ID (ev.pid)
-        // 這樣避免在重新尋找這個 piece 的目標節點時，找不到當前的接收者
-        //g_peers.at(ev.client_pid).erase_on_req_peer(ev.pid);
-        //
-        //return;
-    //}
-
-    system_.push_back(ev);
-
-    // 處理 System 的頭一個 BT 事件
-    // (this->*event_func_map_[ev.type_bt])(ev);  // func ptr version
-    event_func_map_[ev.type_bt](*this, ev);  // std::function version
-
-    // 產生衍生事件
-    PushDerivedEvent(ev);
-
-    // 如果系統中只有一個事件，就產生離開事件
-    if (system_.size() == 1)
-    {
-        current_time_ = ev.time;
-        PushDepartureEvent(ev.type_bt, next_event_idx_, ev.pid);
-    }
-
-    const int ev_idx = static_cast<int>(ev.type_bt);
-    ++g_event_counter[ev_idx];
-}
-
-void EventHandler::ProcessDeparture(Event const& ev)
-{
-    system_.pop_front();
-
-    if (system_.size() != 0)
-    {
-        Event head = system_.front();
-        current_time_ = ev.time;
-        waiting_time_ = waiting_time_ + (current_time_ - head.time);
-        PushDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
-    }
-
-    event_list_.sort();
 }
 
 bool EventHandler::ReqTimeout(Event const& ev)
@@ -595,16 +542,58 @@ void EventHandler::PeerLeaveEvent(Event& ev)
     pm_->UpdatePeerRegStatus(PeerManager::ISF::LEAVE, ev.pid);
 }
 
+void EventHandler::ProcessArrival(Event& ev)
+{
+    total_sys_size_ += system_.size();
+
+    /* Timeout 機制 */
+    // 如果 request event 已經 timeout, 直接忽略(跳出函式)
+    //if (e.type_bt == Event::PIECE_REQ_RECV && e.is_timeout)
+    //{
+        // 刪除要求者中 "正在要求中的 peers (on_req_peers)"
+        // 這個紀錄裡面的 接收者ID (ev.pid)
+        // 這樣避免在重新尋找這個 piece 的目標節點時，找不到當前的接收者
+        //g_peers.at(ev.client_pid).erase_on_req_peer(ev.pid);
+    //}
+
+    system_.push_back(ev);
+
+    // 處理 System 的頭一個 BT 事件
+    // (this->*event_func_map_[ev.type_bt])(ev);  // func ptr version
+    event_func_map_[ev.type_bt](*this, ev);  // std::function version
+
+    // 產生衍生事件
+    PushDerivedEvent(ev);
+
+    // 如果系統中只有一個事件，就產生離開事件
+    if (system_.size() == 1)
+    {
+        current_time_ = ev.time;
+        PushDepartureEvent(ev.type_bt, next_event_idx_, ev.pid);
+    }
+
+    const int ev_idx = static_cast<int>(ev.type_bt);
+    ++g_event_counter[ev_idx];
+}
+
+void EventHandler::ProcessDeparture(Event const& ev)
+{
+    system_.pop_front();
+
+    if (system_.size() != 0)
+    {
+        Event head = system_.front();
+        current_time_ = ev.time;
+        waiting_time_ = waiting_time_ + (current_time_ - head.time);
+        PushDepartureEvent(head.type_bt, ++next_event_idx_, head.pid);
+    }
+
+    event_list_.sort();
+}
+
 //void EventHandler::ProcessEvent(Event& ev, std::ofstream& ofs)
 void EventHandler::ProcessEvent(Event& ev)
 {
-    // DEMO
-    //if (ev.type_bt == Event::PEER_JOIN ||
-    //        ev.type_bt == Event::PEER_LEAVE)
-    //{
-    //    EventInfo(ev, current_time_);
-    //}
-
     //WriteEventInfo(ofs, ev, current_time_);  // debug
 
     if (ev.type == Event::Type::ARRIVAL)
