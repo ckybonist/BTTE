@@ -20,8 +20,8 @@ namespace
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
-void OutputSTATData(const int total_sys_size,
-                    const int total_waiting_time);
+void OutputSTATData(const float total_sys_size,
+                    const float total_waiting_time);
 void WriteEventInfo(std::ofstream& ofs,
                     Event const& head,
                     float cur_sys_time);
@@ -235,8 +235,7 @@ void EventHandler::EC_5(Event const& ev)
     for (PieceMsg const& msg : ev.uploaded_reqs)
     {
         Peer const& peer = g_peers.at(msg.src_pid);  // sender of request
-        const float pg_delay = msg.pg_delay;
-        const float time = ev.time + pg_delay;
+        const float time = ev.time + msg.pg_delay;
 
         Event next_ev = Event(Event::Type::ARRIVAL,
                               Event::PIECE_GET,
@@ -295,8 +294,8 @@ void EventHandler::EC_7(Event const& ev)
 {
     assert(ev.type_bt == Event::COMPLETED);
 
-    const float time_interval = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
-    const float time = ev.time + time_interval;
+    const float interval = ExpRand(lambda_, Rand(RSC::EVENT_TIME));
+    const float time = ev.time + interval;
 
     Event next_ev(Event::Type::ARRIVAL,
                   Event::PEER_LEAVE,
@@ -653,8 +652,8 @@ void Event2Str(TBTmapStr& tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
-void OutputSTATData(const int total_sys_size,
-                    const int total_waiting_time)
+void OutputSTATData(const float total_sys_size,
+                    const float total_waiting_time)
 {
     Event2Str(tbt2str);
     std::cout << "\n\n";
