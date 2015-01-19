@@ -37,7 +37,7 @@ class Event
 
     bool operator<(const Event& e);
 
-    Type type;  // arrival, departure
+    Type type;  // [arrival | departure]
     Type4BT type_bt;
 
     // Base of Event
@@ -45,19 +45,13 @@ class Event
     int pid;
     float time;
 
-    // Propagation delay with associated neighbor.
-    // Use for computing arrival time of event.
-    float pg_delay;
-
     // Piece-related
-    int client_pid;
+    int client_pid;  // timeout mechanism
     std::list<PieceMsg> req_msgs;
-    std::list<PieceMsg> admitted_reqs;    // request being admitted
-    std::list<PieceMsg> uploaded_reqs;  // request-infos that need to upload piece to
+    std::list<PieceMsg> admitted_reqs;
+    std::list<PieceMsg> uploaded_reqs;
     float time_req_send;
 
-    // TRUE, if no target pieces found when
-    // executing Piece Selection
     bool need_new_neighbors;
 
     bool is_complete;  // all pieces got

@@ -20,7 +20,8 @@ namespace
 typedef std::map<Event::Type4BT, std::string> TBTmapStr;  // debug
 
 void Event2Str(TBTmapStr&);
-void CountEvent();
+void OutputSTATData(const int total_sys_size,
+                    const int total_waiting_time);
 void WriteEventInfo(std::ofstream& ofs,
                     Event const& head,
                     float cur_sys_time);
@@ -234,7 +235,6 @@ void EventHandler::EC_5(Event const& ev)
     for (PieceMsg const& msg : ev.uploaded_reqs)
     {
         Peer const& peer = g_peers.at(msg.src_pid);  // sender of request
-
         const float pg_delay = msg.pg_delay;
         const float time = ev.time + pg_delay;
 
@@ -243,12 +243,8 @@ void EventHandler::EC_5(Event const& ev)
                               ++next_event_idx_,
                               msg.src_pid,
                               time);
-
         PushArrivalEvent(next_ev);
     }
-
-
-    Peer const& client = g_peers.at(client_pid);
 
     // Generate Next Admit Events
     if (ev.admitted_reqs.size() != 0)
@@ -413,7 +409,8 @@ bool EventHandler::ReqTimeout(Event const& ev)
 {
     assert(current_time_ > ev.time_req_send);
 
-    // TODO: 紀錄送出要求的時間(time_req_send)(產生要求事件當下的系統時間的 current_time_)，
+    // TODO: 紀錄送出要求的時間(time_req_send)
+    //       (產生要求事件當下的系統時間的 current_time_)，
     //       並且將現在時間(cur_time)減掉 time_req_send
     //       如果大於等於 kTimeout 就視為 Timeout
     bool flag = false;
@@ -450,7 +447,7 @@ void EventHandler::PeerJoinEvent(Event& ev)
 {
     const size_t kAborigin = GetAboriginSize();
 
-    if (ev.pid >= kAborigin)  // 如不是 leecher，就要新增節點資料
+    if (ev.pid >= kAborigin)  // 不是 leecher，就新增節點資料
     {
         pm_->NewPeer(ev.pid);
         g_peers.at(ev.pid).set_join_time(ev.time);
@@ -471,7 +468,7 @@ void EventHandler::PeerListReqRecvEvent(Event& ev)
 
 void EventHandler::PieceReqEvent(Event& ev)
 {
-    // 1. 執行初始的 Piece Selection，並向所有鄰居送出 piece 的要求
+    // 執行 Piece Selection，並向所有鄰居送出 piece 的要求
     Peer const& client = g_peers.at(ev.pid);
 
     if (!client.is_complete())
@@ -629,7 +626,7 @@ void EventHandler::StartRoutine()
         ProcessEvent(head);
     }
 
-    CountEvent();
+    OutputSTATData(total_sys_size_, waiting_time_);
     //ofs.close();
 }
 
@@ -656,7 +653,8 @@ void Event2Str(TBTmapStr& tbt2str)
     tbt2str[Event::PEER_LEAVE] = "Peer-Leave Event";
 }
 
-void CountEvent()
+void OutputSTATData(const int total_sys_size,
+                    const int total_waiting_time)
 {
     Event2Str(tbt2str);
     std::cout << "\n\n";
@@ -665,6 +663,8 @@ void CountEvent()
         std::cout << tbt2str[static_cast<Event::Type4BT>(i)] << " ";
         std::cout << g_event_counter[i] << std::endl;
     }
+    std::cout << "\nTotal Waiting Time: " << total_waiting_time << std::endl;
+    std::cout << "\nTotal System Size: " << total_sys_size << std::endl;
     std::cout << "\n\n";
 }
 
