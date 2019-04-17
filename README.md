@@ -16,6 +16,10 @@ BTTE (BitTorrent Testing Environment)
 - 本專案是在 single thread 和 local machine 上運行，所以利用「亂數」來模擬網路環境
   
 ## 主要模組
+<p align="center">
+  <img src="/images/modules.png?raw=true">
+</p>
+
 - EnvManager(`env_manager.cpp`): 管理整個模擬程式的創建和銷毀
 - EventHandler(`event_handler.cpp`): 掌管事件的產生和結束，並且確保事件之間的依賴性是正確的（某些事件有前後順序之分）
 - PeerManager (`peer_manager.cpp`): 創造 BT 環境和 Peer 資料
@@ -53,7 +57,12 @@ BTTE (BitTorrent Testing Environment)
   - Departure Time: 離開網路的時間點
 
 - Result Chart:
+  - 此圖呈現不同演算法的平均下載時間
   - 橫軸：必須下載的資源數量 (piece) 
   - 縱軸：完成下載所消耗的平均時間（average complete time)
+  
+<p align="center">
+  <img src="/images/result_chart.png?raw=true">
+</p>
   
   
