@@ -5,7 +5,7 @@ BTTE (BitTorrent Testing Environment)
 ## 簡介
 - 這是一個 BitTorrent (BT) 的模擬測試環境，對 BT 有興趣的人可以運行此環境了解其中運行的細節
 - 可以用此環境運行客製化 BT 的演算法，並與原始的通訊協定作比較
-- 此環境實作了最原始的 BitTorrent Protocol：
+- 此環境實作了[最原始的 BitTorrent Protocol](http://bittorrent.org/bittorrentecon.pdf)：
   - Tracker, Peer
   - Piece (packet)
   - Event Handler
@@ -14,6 +14,8 @@ BTTE (BitTorrent Testing Environment)
   - Cluster Based
   - Load Balancing
 - 本專案是在 single thread 和 local machine 上運行，所以利用「亂數」來模擬網路環境
+- 本專案的文件[連結](https://drive.google.com/open?id=1fwoZJP2ln-4Wf4zJ53H3-MDaFTxFFw_j)
+
 
 ## 安裝及使用
 ### 前置需求:
