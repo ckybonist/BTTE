@@ -14,6 +14,50 @@ BTTE (BitTorrent Testing Environment)
   - Cluster Based
   - Load Balancing
 - 本專案是在 single thread 和 local machine 上運行，所以利用「亂數」來模擬網路環境
+
+## 安裝及使用
+### 前置需求:
+  - g++
+  - cmake
+  - python3.x
+  - gnuplot (for result chart)
+  - git (optional)
+  
+### 安裝:
+  1. `git clone https://github.com/ckybonist/BTTE`
+  
+  2. `./bootstrap.sh`
+  
+  3. `./build.sh [options]`, option includes:
+  - debug: Debug build
+  - release: Release build
+  - makeall: Build both debug and release
+  - rebuild: Remove and create new `obj/` directory, then execute `makeall` 
+    (it's necessary when you add new files in `src/`) 
+      
+      
+### 使用:
+  1. Enter to program path: `cd [obj/release/bin | obj/debug/bin]`
+  
+  2. Run: `./BTTE btte.conf [peer_sel | piece_sel]`
+  - `btte.conf`: Parameters of the testing environment
+  - `peer_sel and piece_sel`: 
+  This option tells the program that which types of algorithm (Peer Selection or Piece Selection) results should be collected. E.g. If peer_sel is given, then the output filenames will be the three Peer Selection algorithms (i.e. Standard.log, LoadBalacing.log and ClusterBased.log) respectivly.
+    
+  3. Generate result chart: `./script/plot/plot.sh [plot_type] [algo_type]`
+  - plot_type: time_peer or time_piece (time vs. peer or time vs. piece)
+  - algo_type: peer_sel, piece_sel
+  - chart path: `plot/output/*.png`
+    
+    
+  4. Implment your custom algorithms:
+  - `cd custom/`
+  -  For peer selection: edit `my_peer_selection.cpp`
+  - For piece selection: edit `my_piece_selection.cpp`
+  - All newly added files should be placed in `custom/`
+  - Rebuild: `./script/build.sh rebuild`
+
+
   
 ## 主要模組
 <p align="center">
